@@ -13,6 +13,7 @@ from playwright.async_api import async_playwright
 OUT = sys.argv[1]
 BASE = sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8765"
 HUMAN = len(sys.argv) > 3 and sys.argv[3] == "human"
+EDITION = sys.argv[4] if len(sys.argv) > 4 else "tb"
 NAMES = (["Sam"] if HUMAN else []) + ["Hana", "Ivo", "Jess", "Kofi", "Lena"]
 
 
@@ -36,6 +37,9 @@ async def main():
         if HUMAN:
             await host.click('[data-act="pref"][data-k="mode"][data-v="human"]')
             await host.wait_for_timeout(300)
+        await host.wait_for_selector(f'[data-act="pref"][data-k="edition"][data-v="{EDITION}"]')
+        await host.click(f'[data-act="pref"][data-k="edition"][data-v="{EDITION}"]')
+        await host.wait_for_timeout(300)
         for pg, n in zip(pages[1:], NAMES[1:]):
             await pg.fill("#name", n)
             await pg.fill("#code", code)
@@ -79,6 +83,12 @@ async def main():
                     if "/2 chosen" in await pg.inner_text(".night"):
                         await picks.nth(1).click()
                     await pg.click('[data-act="submit"]')
+                elif await pg.locator('[data-act="submitchar"]').count():
+                    await pg.screenshot(path=f"{OUT}/04b_night_character.png")
+                    await pg.click('[data-act="submitchar"]')
+                elif await pg.locator('[data-act="submitpc"]').count():
+                    await pg.screenshot(path=f"{OUT}/04c_night_player_character.png")
+                    await pg.click('[data-act="submitpc"]')
                 elif await pg.locator('[data-act="decoy"]').count():
                     await pg.locator('[data-act="decoy"]').nth(0).click()
                 elif await pg.locator('[data-act="ack"]').count():
@@ -100,6 +110,13 @@ async def main():
         await pages[2].screenshot(path=f"{OUT}/06_day_me.png", full_page=True)
         await pages[2].click('[data-act="tab"][data-v="town"]')
         await pages[2].screenshot(path=f"{OUT}/07_day_town.png", full_page=True)
+        act = pages[2].locator('[data-act="dayact"]')
+        if await act.count():
+            await act.first.click()
+            await pages[2].wait_for_timeout(500)
+            await pages[2].click('[data-act="tab"][data-v="log"]')
+            print("day action logged:", (await pages[2].inner_text(".log li")).replace("\n", " ")[:120])
+            await pages[2].click('[data-act="tab"][data-v="town"]')
         await host.click('[data-act="tab"][data-v="host"]')
         await host.click('[data-act="advance"]')
         await host.wait_for_timeout(500)

@@ -1,0 +1,774 @@
+{
+ "fetched": "2026-09-25",
+ "characters": {
+  "grandmother": {
+   "name": "Grandmother",
+   "ability": "You start knowing a good player & their character. If the Demon kills them, you die too.",
+   "flavour": "",
+   "summary": [
+    "The Grandmother knows who their grandchild is, but if they are killed by the Demon, the Grandmother dies too.",
+    "During the first night, the Grandmother learns their Grandchild—a good player who is a Townsfolk or Outsider. The Grandchild does not learn that they have a Grandmother.",
+    "If the Demon kills the Grandchild, the Grandmother dies too. If the Grandchild dies by any other means—such as execution, or another type of death at night—the Grandmother does not also die."
+   ],
+   "how_to_run": [
+    "When preparing the first night, choose a Grandchild by marking any good character with the GRANDCHILD reminder.",
+    "During the first night, wake the Grandmother and show them the character token marked GRANDCHILD, then point at the Grandchild player, then put the Grandmother to sleep.",
+    "If the Demon kills the Grandchild, the Grandmother dies - mark them with the DEAD reminder."
+   ],
+   "examples": [
+    "During the first night, the Grandmother wakes and learns that Julian, their Grandchild, is the Professor. Three nights later, Julian is killed by the Demon, so the Grandmother dies too.",
+    "The Grandmother knows that Lewis, their Grandchild, is the Gambler. Lewis gambles and dies because of it. The Grandmother remains alive.",
+    "The Grandmother knows that Sarah, their Grandchild, is the Tinker. Sarah is killed by the Demon, but the Grandmother is drunk because of the Sailor, so the Grandmother remains alive."
+   ],
+   "tips": [
+    "Protect your beloved grandchild! They are almost certainly good, and that is a certainty that is rare and precious in Bad Moon Rising. Also, if they're killed by the Demon, you will die too - extra motivation!",
+    "Talk to your grandchild, feed them cookies, and get them to trust you! Unlike similar characters like the Washerwoman, your information is so absolute since you only learn one player and their identity - there's no benefit to getting them to admit who they are first unless you sincerely doubt your sobriety. When you get a chance, reveal that you know their character and how, and you will have a lot of trust from the get go.",
+    "Don't reveal the identity of your grandchild to anyone! If the evil team know how you are connected, they'll absolutely want to kill them and score your death as a free bonus. Keep them secret to keep them safe.",
+    "Reveal your identity and your grandchild early to a couple of players. This has a couple of bonuses - if these people are trustworthy, they will know to trust you and your grandchild in turn. However, if you and your grandchild suddenly die, you can look at these players with great suspicion - it's possible that one of them is actually the Demon! (If you suspect you're talking to evil players, you don't have to tell them who your real grandchild is...)",
+    "There are many ways to build trust with the good team using your information!",
+    "* Encourage protective characters to cover your grandchild. If you know the identity of an Innkeeper, or your grandchild is close to a Tea Lady, try getting things set up so that your grandchild can be covered at night, keeping both of you safe.",
+    "* Similarly, you can warn away players like the Sailor and the Exorcist, who will be making your grandchild drunk OR just wasting their ability on someone you know for certain is good.",
+    "* Finally, you can encourage the Gambler and the Chambermaid to use their abilities on you or your grandchild, expanding the circle of trust when your information lines up!",
+    "If you and your grandchild are the only ones to die at night, you probably died because of your ability. If you suspect this is the case, make sure to let the good team know, as otherwise two deaths at night is an early indicator that the deadly Shabaloth or Po is lurking, when in fact the Zombuul or Pukka are still very viable options.",
+    "Don't talk to your grandchild right away. Whispering together, especially in the early days of the game, will attract both good and evil attention, and a Demon may just pick you two off on suspicion that you're Grandmother and grandchild.",
+    "Reveal to the group that you are the Grandmother, but without saying which player your grandchild is. For example, you can simply say \"I am the Grandmother, I know there is an Exorcist in the Town\", or something similar. This lets the group know that you are a Townsfolk character, and also lets them know to expect an Exorcist to reveal themselves at some stage"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Grandmother"
+  },
+  "sailor": {
+   "name": "Sailor",
+   "ability": "Each night, choose an alive player: either you or they are drunk until dusk. You can't die.",
+   "flavour": "",
+   "summary": [
+    "The Sailor is either drunk or getting somebody else drunk. While the Sailor is sober, they can't die.",
+    "Each night, the Sailor chooses a player, who will probably get drunk.",
+    "If they choose themself, they lose their “cannot die” ability until they become sober.",
+    "If the Sailor chooses a dead player accidentally, the Storyteller prompts them to choose again.",
+    "If the Sailor chooses another player, the Storyteller chooses which player is drunk. If they choose a Townsfolk, the Storyteller will usually make the Townsfolk drunk, but if an Outsider, a Minion, or the Demon is chosen, then the Storyteller will usually make the Sailor the drunk one.",
+    "While sober, the Sailor cannot die, even if they have not yet woken at night to go drinking."
+   ],
+   "how_to_run": [
+    "Each night, wake the Sailor. They point at any player. Put the Sailor to sleep. Either the Sailor or this chosen player becomes drunk—mark them with the DRUNK reminder.",
+    "If the sober Sailor would die, the Sailor remains alive. If the sober Sailor is executed, declare that this player is executed but remains alive. (Do not say why.)"
+   ],
+   "examples": [
+    "The Sailor chooses the Exorcist, and the Storyteller decides that the Exorcist is drunk. That night, the Sailor is attacked by the Shabaloth. The Sailor remains alive. The next day, the Sailor is executed but remains alive.",
+    "During the day, the Gossip made a public statement they thought was false, but was actually true. That night, the Gossip ability kills a player. The Sailor has made themself drunk, and the Storyteller decides that the Sailor dies.",
+    "The Sailor chooses the Mastermind, but the Storyteller decides that the Sailor is drunk. The next day, the Sailor asks to be executed to “prove they are the Sailor,” but dies because they're drunk."
+   ],
+   "tips": [
+    "If you chose a Townsfolk at night, you are probably sober. If you chose an Outsider, Minion, or Demon, you are probably drunk. The Sailor's ability to stay alive is extremely powerful, and the Storyteller will usually take every opportunity to make the good team pay for that by making Townsfolk drunk wherever possible, and by making you drunk whenever you choose a non-Townsfolk.",
+    "Pick players that you'd like to see drunk, such as players that you suspect of being evil, or Townsfolk that are currently less useful than others. A drunk Grandmother or Fool is probably going to be less harmful than a drunk Exorcist or Courtier.",
+    "Maximize your survivability by going out of your way to make other players drunk. If you keep choosing Townsfolk, particularly powerful Townsfolk, you can survive until the final day much more easily than other players.",
+    "Tell players who you have chosen at night so they know they might be drunk. This is crucial. For example, a drunk Innkeeper will need to know that it is possible that their ability didn't work the night when there were no deaths, or the drunk Chambermaid will need to know that their information might be false.",
+    "Communicate with other players to find good candidates to make drunk. You won't want to be hitting the bars with any old Tom, Dick, or Harry... you're the distinguished sort. If you can find out which players are which characters, you'll be able to work as a team better. Drunker, but better.",
+    "You can prove that you are the Sailor by deliberately getting executed. If you are sober, you won't die. From this point on, if the group is convinced that you are indeed the Sailor and not simply protected by the Devil's Advocate, then you should be able to stay alive until the final day, which gives the good team a drastically increased chance of finding the Demon. After all... they know it's not you."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Sailor"
+  },
+  "chambermaid": {
+   "name": "Chambermaid",
+   "ability": "Each night, choose 2 alive players (not yourself): you learn how many woke tonight due to their ability.",
+   "flavour": "",
+   "summary": [
+    "The Chambermaid learns who woke up at night.",
+    "Each night, the Chambermaid chooses two players and learns if they woke tonight. They must choose alive players, and may not choose themself. This does not detect which of those players woke, only how many.",
+    "This ability only detects characters who woke in order to use their ability. It does not detect characters who woke for any other reason—such as if the Storyteller woke a Minion to let them know who the Demon is, woke the Demon to give them their starting Demon info, woke a player due to the ability of a different character, or woke someone accidentally.",
+    "If the character woke on a previous night but not this night, they are not detected by the Chambermaid.",
+    "Players that woke tonight due to their ability but are drunk or poisoned still count as having woke tonight.",
+    "If the Chambermaid chooses a dead player accidentally, the Storyteller prompts them to choose again."
+   ],
+   "how_to_run": [
+    "Each night, wake the Chambermaid. They point at any two alive players except themself. Show the Chambermaid fingers (0, 1, or 2) equaling the number of chosen characters who woke tonight. Put the Chambermaid to sleep.",
+    "Do not wake the Chambermaid if there are not two players alive to be chosen (due to the Mastermind, Zombuul, etc.)."
+   ],
+   "examples": [
+    "The Chambermaid chooses the Exorcist and the Innkeeper, and learns a \"2.\" The next night, the Exorcist chooses the Shabaloth, which will wake the Shabaloth. Later, Chambermaid chooses the Shabaloth and the Fool. Since the Shabaloth only woke due to the Exorcist ability, the Chambermaid learns a \"0\".",
+    "It is the second night. The Chambermaid chooses the Grandmother and the evil Goon, and learns a \"2.\" Only the Goon will wake tonight, but the Chambermaid is drunk.",
+    "It is the first night. The Chambermaid chooses the Assassin and the Moonchild, and learns a \"0\" because the Assassin does not wake to use their ability on the first night. The next night, they choose the Assassin and the Gossip. The Assassin woke but did not use their ability. The Gossip ability is used, but the Gossip does not wake to use it. The Chambermaid learns a \"1\"."
+   ],
+   "tips": [
+    "Your ability does not outright detect evil players - it detects players who are lying about their character ability. This can catch out players who are good AND evil, since many good players have a reason to be dishonest about their character... at least initially. If you catch someone out in a lie, see what they have to say for themselves. Good players will usually come clean about their real character, while evil players will have to choose between picking a second bluff to match your information or doubling down on their claim.",
+    "Pick players to verify their claims. If someone is claiming to be the Gambler, they'll wake up every night - check them and see if they're being honest. As another example, someone claiming to be a Courtier will only wake up each night until they've used their ability - if they're claiming to have used their ability, you can check to see if that's true by seeing if they wake up the next night!",
+    "Early in the game, you can tell players what you know about them before they have revealed their character. This helps them to trust you.",
+    "Pick the same players a couple of nights in a row. Some characters don't act consistently every night. For example, an Assassin claiming to be an Innkeeper could wake up one night when you check them, appearing to be legitimate. However once they have killed, they do not wake up again, meaning that checking them for a second night will give them away as being dishonest.",
+    "Find a player with an ability that doesn't act at night (like the Fool or Minstrel - if you trust this player, you can use them as base for checking a single person thoroughly. Since the Fool or Minstrel will always give you a 0, you know that any read of 1 must be coming from the other player that you select. This method is slower and garners you less information about the entire town overall in favor of getting a narrow and accurate focus on one player.",
+    "Pick as many players as you can, casting a wide net and getting a good amount of information on the entire town. Death can come at any time in Bad Moon Rising, and broad information will give you a lot of options to work with when comparing to other players and their information/claims."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Chambermaid"
+  },
+  "exorcist": {
+   "name": "Exorcist",
+   "ability": "Each night*, choose a player (different to last night): the Demon, if chosen, learns who you are then doesn't wake tonight.",
+   "flavour": "",
+   "summary": [
+    "The Exorcist prevents the Demon from waking to attack.",
+    "Each night, the Exorcist chooses a player. If they choose a player who is not the Demon, the Demon may still attack. If they choose the Demon, the Demon does not wake tonight, so does not choose players to attack tonight. The Demon learns that they cannot attack and who the Exorcist is.",
+    "Any other Demon abilities still function—such as the Zombuul staying alive if killed, the Pukka killing a player they attacked on a previous night, or the Shabaloth regurgitating a player.",
+    "The Exorcist may not choose the same player two nights in a row."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Exorcist. They point at any player. Mark the chosen player’s character token with the CHOSEN reminder. Put the Exorcist to sleep.",
+    "If the Exorcist chose the Demon, wake the Demon. Show them the THIS CHARACTER SELECTED YOU info token and the Exorcist token, then point at the Exorcist player. Put the Demon to sleep. Later tonight, do not wake the Demon.",
+    "A Demon chosen by the Exorcist will not wake to use their Demon ability, but will still wake if they need to due to other characters’ abilities. This may be relevant if using the Exorcist with characters from other editions."
+   ],
+   "examples": [
+    "The Exorcist chooses the Shabaloth. The Shabaloth does not kill tonight. At dawn, the Storyteller declares that nobody died that night.",
+    "The Exorcist chooses the Pukka. The Pukka does not wake to attack tonight, but a player still dies because of the Pukka’s attack during the previous night.",
+    "The Po chooses to attack no one. The next night, the Exorcist chooses the Po. The Po does not wake to act tonight. The next night, the Exorcist chooses the Assassin. The Assassin can still attack tonight, and the Po chooses three players to attack, because the Po's last choice was no one."
+   ],
+   "tips": [
+    "If you choose a player at night, and there are no deaths that night, you may have found the Demon! Either tell the group publicly who you are and who you have chosen the following day, so that the group can know what you know, or wait for a night or two and choose the same player again, just to be sure. Sometimes, no deaths can occur at night for other reasons, but if you choose the same player multiple times, and each time there is no death at night, you can be fairly certain that you have found the Demon.",
+    "If a player dies at night, choose a different player on all following nights. You have probably chosen a non-Demon player, so you don't need to choose them again unless you suspect the player died at night for another reason (such as an assassin or gossip killing).",
+    "As the game progresses, talk to the group and investigate which characters are in play, and how they are acting. There are many reasons that deaths may occur at night, even if you removed the Demon's ability to kill. There are also many reasons that no death occurred at night, even if you chose a non-Demon player. The Po hid in an alley and didn't act, the Gambler accidentally killed themselves in a particularly high stakes poker game, the Gossip let a juicy secret slip and it led to a death, the Tinker blew themselves up, the Tea Lady's special blend gave an Outsider the fortitude to survive the night, the Innkeeper kept the Demon's victim safe in the Inn, the Fool avoided the Godfather's hit squad etc.",
+    "As the Exorcist, you are often weak in the early game, but gain power exponentially as the game progresses - because not only do you learn which players are not the Demon, there are fewer and fewer players alive to choose from. It is usually best to not reveal that you are the Exorcist until after a few days have passed and you have some solid information. If you reveal too early, and you haven't found the Demon yet, you can safely assume that you are the Demon's number one target. Either stay silent, or bluff as a character that the Demon does not want to kill, such as the Sailor, Fool or Goon.",
+    "If you suspect that a Zombuul is in-play, feel free to pick dead players. If there was no death during the day, and you exorcise a dead player that night, no death almost certainly means that you have found a Zombuul.",
+    "Once you have successfully chosen the Demon, the Demon will know who you are. From this point onward, look for who is trying to kill you. The Demon and their Minions will be doing everything that they can to get you executed, because if you die at night immediately after you have found the Demon, the Demon has revealed who they are.",
+    "Each day, if you have come out publicly as the Exorcist, you can effectively convince the group to find out 2 players that are not the Demon. If 2 players in particular are suspicious, you can execute one and promise to exorcise the other."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Exorcist"
+  },
+  "innkeeper": {
+   "name": "Innkeeper",
+   "ability": "Each night*, choose 2 players: they can't die tonight, but 1 is drunk until dusk.",
+   "flavour": "",
+   "summary": [
+    "The Innkeeper protects people from death at night, but somebody gets drunk in the process.",
+    "The Innkeeper, like the Monk, makes players safe from being killed by the Demon. They are also safe from death caused by Outsiders, Minions, Townsfolk, and Travellers.",
+    "The Innkeeper only protects players at night, not the day.",
+    "One of the two players that the Innkeeper chooses becomes drunk for tonight and the next day. This player may be good or evil, but will almost always be good, depending how your game is going. An Innkeeper that chooses themself might become drunk, which means they have no ability and may die tonight—and the other player they chose to protect isn’t safe either."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Innkeeper. They point at any two players. Put the Innkeeper to sleep. Mark the two chosen players with SAFE reminders. One of the chosen players becomes drunk—mark them with the DRUNK reminder. The players marked SAFE cannot die tonight.",
+    "At dawn, remove the SAFE reminders.",
+    "At dusk, remove the DRUNK reminder."
+   ],
+   "examples": [
+    "The Innkeeper protects the Fool and the Chambermaid. The Storyteller chooses that the Fool becomes drunk. Tomorrow, when the Fool is executed, they die, even though they hadn’t used their ability yet.",
+    "The Innkeeper protects the Assassin and the Po. The Storyteller chooses that the Assassin becomes drunk. Later that night, the Assassin uses their ability, but nothing happens.",
+    "The Innkeeper protects themself and the Pacifist. The Storyteller chooses that the Innkeeper becomes drunk. The Pacifist is attacked by the Demon tonight and dies."
+   ],
+   "tips": [
+    "Your ability is powerful and when used effectively you can stall the evil team and keep your fellow good team safe. The price of your ability is steep, however - anyone protected by you becomes unreliable as they may be drunk for the night that they survive. Coordinating with your fellow good players to find ideal targets to protect is absolutely vital - some characters (such as the Pacifist and the Exorcist) become stronger the longer they survive, and you can enable that.",
+    "Be mindful of the drunkenness your ability causes! Don't protect people who need to receive reliable information or use their ability with any sort of guarantee that night. If you know for example that a Courtier is about to use their ability, you protecting them may cause them to become drunk and waste their powerful ability!",
+    "Protect different people than who you publicly claim to be protecting. If the evil team believes what you are saying, they will not want to waste time targeting players who can't be killed. Meanwhile, you secretly protect other players that are potential victims, hopefully blocking the evil team from a necessary kill.",
+    "It can seem like a good idea to protect yourself using your ability, but this is generally not recommended - it is likely that the Storyteller will choose to make you drunk by your own ability, completely negating your protection and making both you and the other player vulnerable.",
+    "If you think you know at least 2 evil players, select them both! Guarding them from death isn't ideal, but it does mean that one of them will be drunk that night. If you manage to get your hands on the Demon or a potent Minion like the Assassin or the Devil's Advocate, you're cutting off evil abilities at source! If you miss, though, you can almost guarantee that whichever player is good will be drunk."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Innkeeper"
+  },
+  "gambler": {
+   "name": "Gambler",
+   "ability": "Each night*, choose a player & guess their character: if you guess wrong, you die.",
+   "flavour": "",
+   "summary": [
+    "The Gambler can guess who is who... but pays the ultimate price if they guess wrong.",
+    "Each night except the first, the Gambler chooses a player and guesses their character by pointing to its icon on the character sheet. If the guess is correct, nothing happens. If the guess is incorrect, the Gambler dies.",
+    "The Gambler does not learn from the Storyteller whether their guess is correct or incorrect.",
+    "The Gambler may choose any player, dead or alive, even themself."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Gambler. They point at any player, then point at any character icon on their character sheet. Put the Gambler to sleep. If the chosen player is a different character from the chosen character icon, the Gambler dies—mark them with the DEAD reminder."
+   ],
+   "examples": [
+    "The Gambler points to the Minstrel player, then to the Minstrel icon. This guess is correct, so the Gambler remains alive, but is killed by the Demon tonight anyway.",
+    "The Devil's Advocate is bluffing as the Pacifist. That night, the Gambler points to the Devil's Advocate player, then to the Pacifist icon. This guess is wrong, so the Gambler dies."
+   ],
+   "tips": [
+    "The Gambler is a high risk, high reward character. You get reliable information that can't be easily tainted, but you put your life on the line to do it. What a thrill!",
+    "Probably one of the strongest uses of your ability is to confirm other good players. Backing up the claims of a couple of players and their characters will go a long way to building trust, and there's really no bad option to confirm: knowing for certain that a Pacifist is in play can be just as useful as knowing that a Chambermaid is who they say they are.",
+    "Choose the good players you most want to know about. The nature of your ability means that you're not the most likely to survive until final day, so try to maximize your chances of getting useful information before your luck runs out. This can mean taking a gamble on trusting one player for the sake of confirming a powerful role like the Exorcist or Courtier, giving the good team an ace in the hole at a critical moment later.",
+    "There's a difference between taking a well reasoned gamble and throwing caution to the wind entirely and leaving it all up to Lady Luck. Using your ability to try and guess evil characters can be like this. Even if you have very strong suspicions that someone is evil, you still have to guess if they are a Minion or a Demon, and then you have four options in each category! The odds are not really in your favor. With that said...get it right, and you've hit the jackpot.",
+    "Deliberately die to prove you are the Gambler. This can seem counter-intuitive, but if you have a few nights of confirming players and you want to dispel any suspicions of your reliability, predict your own death (preferably in private to someone you trust), and then that night, choose wrong. Dying in this way makes it very likely you are who you claim, and can be trusted.",
+    "If you don't have any idea who to guess, you can guess yourself. Since you know for certain you are the Gambler, your ability will definitely not kill you that night, guaranteeing that you aren't responsible for your death. This is also useful if you suspect that you may be targeted by a wily Demon or Assassin in the night - if you choose yourself and still die, there's no ambiguity about the fact that you were targeted!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Gambler"
+  },
+  "gossip": {
+   "name": "Gossip",
+   "ability": "Each day, you may make a public statement. Tonight, if it was true, a player dies.",
+   "flavour": "",
+   "summary": [
+    "The Gossip deliberately speaks lies, in the hope of uncovering the truth.",
+    "Each day, the Gossip may make a public statement. If this statement is true, the Storyteller kills a player that night. If it is false, then no players die due to the Gossip.",
+    "Mumbled words, whispers, statements the Storyteller doesn’t know are true or false, or statements that someone cannot hear don’t count. Like the Slayer’s ability, the Storyteller and every player must be able to hear and understand the Gossip and be aware that the Gossip is using their ability in order for the Storyteller to judge what happens next.",
+    "If the Gossip made a true statement during the day while drunk or poisoned, but is sober and healthy when their ability triggers that night, the Storyteller still kills a player."
+   ],
+   "how_to_run": [
+    "Each day, if the Gossip makes a definite, true public statement, put the Gossip’s DEAD reminder in the center of the left side of the Grimoire as a reminder to yourself to place it tonight.",
+    "Each night except the first, if the Gossip made a definite, true public statement today, you choose any player. The chosen player dies—mark them with the DEAD reminder.",
+    "When choosing a player to die due to the Gossip ability, we recommend that you choose a character that will actually die, not one protected from death by an ability (like the Fool or Tea Lady). The Gossip gains knowledge when their statement caused a death. This is more helpful to the good team, and more fun for everyone."
+   ],
+   "examples": [
+    "During the day, the Gossip says, \"I am the Gossip. My public statement is: The Demon is wearing a hat.\" The Demon is not wearing a hat. That night, nobody dies due to the Gossip’s ability.",
+    "The Gossip neighbours a good Traveller and the Pacifist. During the day, the drunk Gossip says, \"Both my neighbours are good.\" At dusk, the drunk Gossip becomes sober. That night, the Chambermaid dies.",
+    "During the day, the Gossip makes a true statement. That night, the Gossip is killed by the Demon. They lose their ability, so their statement does not kill anyone tonight."
+   ],
+   "tips": [
+    "Get over your fear of death! A lot of Gossips will be tentative about using their ability, since they're worried about causing a death accidentally. While it's true you should be cautious with any ability that could cause death, the potential gain in information more than makes up for the risk. Use your ability every day!",
+    "Similar to the Artist in Sects & Violets, you are an extremely flexible and versatile information gatherer. Since you can make literally any statement you like about anything, you can cover gaps in the good team, back up other players' information, or ask that one question that everyone desperately wants to know but have no way to find out! Take full advantage of this and the good team will be thanking you.",
+    "Be precise with your statements! A vague statement that could be true OR false (e.g. \"The demon made someone look evil yesterday.\") won't be helpful to you when you're trying to figure out if someone died as a result of your ability. Instead, aim for binary statements that are definitely true or false (e.g., \"The demon nominated yesterday.\")",
+    "Deliberately say statements that you believe are false. This reduces the risk that you will kill a player, but still allow you to gain information. If nobody dies (or at least, you don't think anyone died because of you), then you can reverse your statement to get the truth! For example, if you say \"The Chambermaid is not in play\" because you believe another player is the Chambermaid and no deaths occur, you can trust their claim!",
+    "Deliberately say true statements! This can be advantageous for two reasons. One, if someone dies because of you, it'll be hard to deny you're the Gossip (providing you can trace that death back to you and not one of the many other causes). This will be less effective in a game with a multi-kill demon like the Shabaloth or Po. Two, if someone dies as a result of your ability, then you can be very confident that the statement was true (deliberately saying false statements does not account for your ability malfunctioning, so if you suspect that could be the case, this is the way to confirm it!)",
+    "Be wary of the game state and time what kind of statements you say. If it's late enough in the game, an extra death at night could be all the evil team needs to squeeze out a victory. As the amount of living players runs low, try to avoid saying anything that could cause an extra death, just to be on the safe side.",
+    "Not sure what sort of statements you can make? Here's some examples!",
+    "* \"The demon is a Zombuul.\"",
+    "* \"Steven is evil.\"",
+    "* \"Two evil players are sitting next to each other.\"",
+    "* \"The Assassin has used their ability.\"",
+    "* \"Marianna is the Courtier.\"",
+    "* \"Both of my neighbours are good.\""
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Gossip"
+  },
+  "courtier": {
+   "name": "Courtier",
+   "ability": "Once per game, at night, choose a character: they are drunk for 3 nights & 3 days.",
+   "flavour": "",
+   "summary": [
+    "The Courtier gets a character drunk, without knowing which player it is.",
+    "Once per game, the Courtier chooses a character to be drunk for three nights and three days, starting immediately.",
+    "The Courtier does not learn if they were successful or not, so they might choose a character that is not in play.",
+    "The Courtier chooses a character, not a player. The Courtier player may need to be reminded of this. Evil players bluffing as the Courtier may also need to be reminded.",
+    "If the drunk or poisoned Courtier chooses a character, that character is not drunk, even if the Courtier later becomes sober and healthy. If the Courtier made a character drunk, but the Courtier becomes drunk or poisoned, the player they made drunk becomes sober again. If the Courtier becomes sober and healthy again before the three nights and three days have ended, that player becomes drunk yet again."
+   ],
+   "how_to_run": [
+    "Each night, wake the Courtier. They either shake their head no or point at any character icon on their character sheet. Put the Courtier to sleep.",
+    "If the Courtier chose a character icon and that character is in play, the player of the chosen character becomes drunk for three nights and three days. Tonight, mark them with the Courtier’s DRUNK 1 reminder. The next night, replace the DRUNK 1 reminder with the DRUNK 2 reminder. The next night, replace the DRUNK 2 reminder with the DRUNK 3 reminder. At dusk on the next night, remove the DRUNK 3 reminder, and the Courtier loses their ability—mark them with the NO ABILITY reminder and remove their night token from the night sheet.",
+    "After the Courtier chooses a character to make drunk, do not wake the Courtier for the rest of the game.",
+    "In other editions, there can be multiple copies of the same character in play. The Courtier only makes one of them drunk."
+   ],
+   "examples": [
+    "For four nights, the Courtier wakes but does not use their ability. During the fifth night, they make the Shabaloth drunk. For the next three nights, the Shabaloth acts but cannot kill anybody.",
+    "The Courtier uses their ability while drunk. Nothing happens, but they are not woken again.",
+    "The Courtier makes the Mastermind drunk. The Po is executed while the Mastermind still lives. The game ends and good wins."
+   ],
+   "tips": [
+    "The Courtier is unique in that you choose a character, not a player. This means you select an actual role, and if they exist in your game they will be drunk. This is different from the Poisoner, who chooses a player to be poisoned regardless of who they are. Thanks to this, you have some different strategies available to you!",
+    "You can only use your ability once in the entire game, so time it well! The later you make your choice, the more information you will have about the game's state and what characters are in play and causing mayhem. On the other hand, the evil team will be keen to target you as soon as they possibly can, so using your ability early can ensure you get it off and learn something before you die. It's up to you to judge the landscape of your particular game and make your choice!",
+    "Obviously one of the strongest uses of your ability is to target the demon - if you can block the demon by getting them drunk, then the good team will have three nights of reprieve and the evil team will be at a severe disadvantage. The biggest tell for which demon is in play is the number of deaths each night - spot a pattern there, and you can pick out a deadly Shabaloth or cunning Po before they unleash their devastating attacks.",
+    "Another powerful strategy you have available to you is to get Minions drunk. A drunk Assassin or Godfather won't be able to unleash unexpected deaths on the town, though getting the timing right can be very tricky - only aim for these if you're really sure it's going to help the good team out. A drunk Devil's Advocate or Mastermind is a little more insidious, since the evil team often rely on their abilities to save them in a pinch, and the drunkenness will not be obvious right away. An evil team who thinks they have a Mastermind in their back pocket may be okay with letting their demon die, when in fact they're about to lose the game!",
+    "In most cases, getting good players drunk is probably not the best use of your ability, but there are some cases where it can be viable. For example, a drunk Tinker can no longer die randomly, a drunk Grandmother will not die alongside her grandchild, and a drunk Moonchild who dies will not cause an extra good player's death.",
+    "If you suspect that someone may not be who they claim to be, you can choose the character they're claiming and see if their story changes. For example, if a Chambermaid continues to come out with 'true' information after you've had a few too many drinks with that character, or an Exorcist continues to 'block' the demon after they're supposed to be hammered? (Note: if you're wrong and you make the actual Chambermaid or Exorcist drunk, you may gain some suspicion and ire for undermining the good team! It's a risky play with a big payoff.)",
+    "If you're just not sure who to make drunk and you're rapidly running out of days, a valid option is to simply choose the most deadly character on the script. Whether or not they are in play, you can now be completely confident that they are not impacting your game at all, allowing the good team to rule them out of any reasoning. (Who is the most deadly character in Bad Moon Rising, you ask? Well, that's up to you! ;) )"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Courtier"
+  },
+  "professor": {
+   "name": "Professor",
+   "ability": "Once per game, at night*, choose a dead player: if they are a Townsfolk, they are resurrected.",
+   "flavour": "",
+   "summary": [
+    "The Professor can bring someone back from the dead.",
+    "Once per game, the Professor can choose a dead player. If that player is a Townsfolk, they are resurrected, becoming alive again.",
+    "If the Professor chooses an Outsider, Minion, or Demon, then nothing happens, and the Professor’s ability is gone.",
+    "The resurrected player regains their ability, even a “once per game” ability they used already.",
+    "Resurrected Townsfolk may or may not get to act on the night of their resurrection, depending on whether they would act before or after the Professor. If they had a “first night only” or “you start knowing” ability, they immediately wake to use it again, as soon as the Professor goes to sleep."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Professor. The Professor either shakes their head no or points to a dead player. Put the Professor to sleep.",
+    "If the Professor chose a dead Townsfolk, the chosen player becomes alive again—mark them with the Professor’s ALIVE reminder and remove their shroud. (They wake later tonight if they normally would. If they wake on the first night only, they wake now to use their ability.) At dawn, after declaring which players died, declare which player is alive again. (Do not say why.) The Professor loses their ability—mark them with the NO ABILITY reminder and remove their night token from the night sheet."
+   ],
+   "examples": [
+    "The Professor chooses a dead player who is claiming to be the Tea Lady. The player is actually the Lunatic. Nobody is resurrected.",
+    "The Professor resurrects the Grandmother, who learns a good player’s character. At dawn, all players learn the Grandmother player is alive, but not that the player is the Grandmother.",
+    "The drunk Professor chooses to resurrect the Minstrel. Unbeknownst to the Professor, the Minstrel was regurgitated by the Shabaloth and is now alive. The Storyteller shakes their head no, because the Professor must choose a dead player. The Professor chooses the dead Fool instead. Nothing happens because the Professor is drunk, and the Professor cannot use their ability again."
+   ],
+   "tips": [
+    "Use your ability as early as you possibly can! Evil players will really not want to keep you around, so getting your ability to trigger as soon as possible will give you an edge. Additionally, it is more likely that players who die early in the game will be good Townsfolk, since they are in the majority and evil will be protecting each other.",
+    "Use your ability as late in the game as you dare! While risky, you can't underestimate how disruptive the resurrection of a confirmed Townsfolk at the end of the game can be for the evil team. The good team will be able to rally around both you and your revived Townsfolk, and the evil team will have a lot less options for disguising themselves as the game has worn on.",
+    "Remember that if your ability fails, the dead player is either evil or an Outsider. Don't jump to conclusions right away - you could've targeted a confused Zombuul or Lunatic!",
+    "Resurrect players who died at night, rather than players who were executed. It's not as sure a thing as in other editions, but players who die at night were probably targeted by the demon, and are therefore most likely good.",
+    "Resurrect executed players if you believe the town has made a mistake! If your ability works, you have absolved an innocent townsfolk. If it doesn't, well, you can be very sure that they were right to execute them the first time. (Bonus strategy: Reveal yourself to a player you believe to be good, and ask them to be deliberately executed so you can bring them back, proving both of you. Especially effective early in the game!)",
+    "Successfully resurrect a townsfolk, and you are going to be one of the more trustworthy good players in the game. While you won't be totally free of suspicion (the Shabaloth is always a concern), you and your revived Townsfolk will know you can trust each other 100%, and most other players will want to join your circle! Use this to your advantage to rally the good team in the face of evil.",
+    "When picking who to resurrect, consider telling the player ahead of time what you intend to do. Not only does this lend credibility to the fact that you aren't the Shabaloth (since the Storyteller chooses who is regurgitated), but it also means the player can warn you off if they are an outsider who is bluffing as a townsfolk for whatever reason. Additionally, if the player agrees to go along with this plan and doesn't come back, you can be much more confident that they are evil, since they had the chance to stop you and didn't!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Professor"
+  },
+  "minstrel": {
+   "name": "Minstrel",
+   "ability": "When a Minion dies by execution, all other players (except Travellers) are drunk until dusk tomorrow.",
+   "flavour": "",
+   "summary": [
+    "The Minstrel makes everybody drunk if a Minion dies.",
+    "If a Minion is executed and dies, all players (except the Minstrel) become drunk immediately and stay drunk all through the night and all the following day. Townsfolk, Outsiders, Minions, and even Demons become drunk, but not Travellers. This doesn’t happen if a Minion died at night.",
+    "If a dead Minion is executed, the Minstrel ability does not trigger—a dead character cannot die again! If a Minion is executed but does not die, the Minstrel’s ability does not trigger. If the Minstrel is drunk or poisoned when a Minion dies by execution, the Minstrel ability does not trigger."
+   ],
+   "how_to_run": [
+    "During the day, if a Minion dies by execution, all other players except Travellers become drunk—put the Minstrel’s EVERYONE IS DRUNK reminder in the center of the left side of the Grimoire.",
+    "At dusk tomorrow, all players made drunk by the Minstrel become sober—remove the EVERYONE IS DRUNK reminder."
+   ],
+   "examples": [
+    "During the first day, the Pacifist dies. That night, players act as normal, because the Pacifist is not a Minion. During the second day, the executes the Godfather. That night, everyone is drunk, including the Demon, so nobody dies. During the third day, a Minion who is protected by the Devil's Advocate is executed and dies, because the Devil's Advocate is drunk. Again, since a Minion died during the day, the Minstrel makes everyone drunk.",
+    "The Assassin is executed, so the Minstrel makes everyone drunk. The next day, the Godfather is executed, so the Minstrel makes everyone drunk again. The Demon could not kill on either night. The next day, the evil Mastermind is exiled, so that night everyone becomes sober again, because the Minstrel ability doesn't trigger from a Traveller being exiled.",
+    "During the day, the Assassin dies, so the Minstrel makes everyone drunk. The following day, the Zombuul is executed and dies for the first time. Good wins, because the Zombuul is drunk and so has no ability."
+   ],
+   "tips": [
+    "At first glance, the Minstrel does not seem that powerful, but in actuality you gain some of the most reliable information in the game. After any day with an execution, you know with confidence that if anyone dies at night, the recent executee is not a Minion. Since an executed Demon typically ends the game (Zombuul and Mastermind aside), you can in fact be reasonably confident that they are actually good!",
+    "If the town does successfully execute a Minion, the Minstrel ability will activate, and nobody will die that night. This does not mean that a night without death is any guarantee that your ability was the cause though. In Bad Moon Rising, there are as many reasons people don't die as there are reasons they do (e.g. Exorcist, Innkeeper, Po charging up)! To be sure your ability is the cause and the recent executee should be condemned, do some sleuthing - since you affect all abilities in the game, you should be able to find evidence that other abilities did not work as expected. As an example, characters like the Chambermaid or Gambler could get odd results. Additionally, nobody will be safe from execution (e.g. Pacifist, Devil's Advocate), and characters like the Tinker will not randomly die that day.",
+    "Gun for executions! The more executions, the better chance you have of getting a minion. Good players may be reluctant to execute anyone who isn't a demon suspect as the death count can be unexpected and heavy in Bad Moon Rising, but it is worth it to remove powerful Minions like the Assassin or Mastermind from play before they can do too much damage. Combined with the one night reprieve your ability grants on successful execution, your ability should be plenty of incentive to be more aggressive than usual!",
+    "Demons may be less likely to target you since they underestimate your power! Unless Minions are getting executed left and right, the Minstrel is likely to survive a little longer than other townsfolk without protections, simply because a Demon is going to be much more worried about an Exorcist or a Tea Lady surviving for another night. Take full advantage of this blind spot - hopefully by the time the evil team realizes what a danger you are, a Minion or two has fallen!",
+    "If your evil team is a little more savvy, they may be keen to target you earlier, especially if the good team is zeroing in on some of the Minions. Keeping your identity under your hat for a few days can allow you to spring an unpleasant surprise on these clever sorts, since they won't know that you've blocked them from acting and exposed a demon until nobody gets to act. Your unexpected death can also be an indicator that you were hot on the trail of a minion that the evil team really didn't want confirmed as such."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Minstrel"
+  },
+  "tealady": {
+   "name": "Tea Lady",
+   "ability": "If both your alive neighbors are good, they can't die.",
+   "flavour": "",
+   "summary": [
+    "The Tea Lady protects her neighbours from death... as long as they are good.",
+    "If both alive neighbours of the Tea Lady are currently good, those neighbours cannot die. The Demon cannot kill them, nor the Godfather, nor the Gossip. If they are executed, they do not die. The only exception is the Assassin, who can kill someone protected from death.",
+    "The Tea Lady’s alive neighbours are the two alive players closest to the Tea Lady—one clockwise and one counterclockwise. Skip past any dead neighbours.",
+    "However, if either alive neighbours is evil, or both are, then the Tea Lady does not protect her alive neighbours . If an evil player dies and the Tea Lady is now neighbouring two good players, then neither can die."
+   ],
+   "how_to_run": [
+    "If both alive neighbours of the Tea Lady are good, mark those neighbours’ character tokens with the Tea Lady’s CANNOT DIE reminders. If either alive neighbour of the Tea Lady is evil, remove these reminders. Update these reminders immediately based on this condition throughout the entire game (such as if a player’s alignment changes).",
+    "If a player marked CANNOT DIE would die, they remain alive. If a player marked CANNOT DIE is executed, declare that the marked player is executed but remains alive. (Do not say why.)"
+   ],
+   "examples": [
+    "The Tea Lady starts the game neighbouring the Mastermind and the good Goon. The Mastermind is executed and dies. Now, the Tea Lady's alive neighbours are the good Goon and the Courtier. The Demon attacks the Courtier, but the Courtier remains alive. Later, the Goon turns evil, and the Demon attacks the Courtier again. This time, the Courtier dies.",
+    "The Tea Lady's alive neighbours are a good and a good . The is exiled but remains alive."
+   ],
+   "tips": [
+    "The Tea Lady is a powerful protector, but is vulnerable themselves. Deciding when and who you should reveal to will decide the strategies that you implement for each game moving forward. Revealing right away can help you coordinate executions on your neighbours early (best case scenario: confirming two good players), but will expose you to the evil team. Staying quiet or playing cautiously can make it harder to confirm information, but you will survive longer and could trick the demon into targeting your protected neighbours, wasting a precious kill. There's no right or wrong way to play - judge for yourself which strategy will play out best for the game you are in!",
+    "Execute your neighbours! If both your neighbours are good, they cannot die. The quickest and easiest way to test this is to execute - if they don't die, there's a good chance that it was your ability that saved them. Avoid characters who have immunity to execution normally (e.g. Sailor, Fool) as they will muddy the waters. You should also be cautious of the Devil's Advocate, who could mistakenly trick you into believing that an evil neighbour is actually good by timing their ability with your execution. Finally, be aware of the Pacifist - while they're alive, the storyteller may choose to spare any good executees, which is indistinguishable from your ability activating.",
+    "You can also choose not to be proactive at all - instead, reveal nothing and wait to see how it plays out! This gives you the security of the demon not knowing who you are for certain, which can grant advantages to you based on the composition of your neighbours. If you have two good neighbours for example, the demon might attack them at night in their ignorance. For any other scenario, you must have at least one evil neighbour, which you will know for sure if any of your neighbours die, and can then choose to reveal once you have a suspect in mind. (Particularly potent versus characters like the Zombuul, who might choose to 'die' early, not realizing that you are their neighbour and they should not be able to!)",
+    "Build trust with your neighbours. Even before they have been confirmed as good, you should be encouraging them to work with you - after all, if they can prove that they're both good, then you can trust that your ability will be active and protecting them. In smaller games where executions are more precious, this can be critical in helping you rally the good team without necessarily having to spend time killing your neighbours to prove they are good.",
+    "Whatever strategy you use, you can switch it up every time a neighbour dies, particularly if you believe that neighbour was the evil one. Your ability extends around to the closest living players, so every time you lose a player, you gain a player, and this time you may actually have two good neighbours! Beware though - as the game goes on, the chances of you acquiring an evil neighbour will get higher and higher. In the final days, you probably should assume that someone near you is evil unless you have strong evidence to the contrary."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Tea_Lady"
+  },
+  "pacifist": {
+   "name": "Pacifist",
+   "ability": "Executed good players might not die.",
+   "flavour": "",
+   "summary": [
+    "The Pacifist prevents good players from dying by execution.",
+    "When a good player is executed, the Storyteller chooses whether they die or live.",
+    "As always, when abilities like this function in obvious ways, the group is not told why something has happened, only what has happened. The group learns that an execution succeeded, but that the executed player did not die—that is all.",
+    "If a player is executed and remains alive, that still counts as the execution for today. No other nominations may happen."
+   ],
+   "how_to_run": [
+    "If a good character is executed, declare either that they die or they remain alive. (Do not say why.) Then, begin the night phase. (Whether the player lived or died, this was the one execution for the day.)",
+    "Triggering the Pacifist ability once per game is usually about right. You can trigger it more if you feel it is appropriate. On rare occasions, to make the Pacifist look suspicious, you can never trigger it."
+   ],
+   "examples": [
+    "The Innkeeper is executed, but remains alive because of the Pacifist.",
+    "The Pacifist is in play. Good is winning. Even after 7 days, and 5 good players executed, the Pacifist ability has not saved anybody.",
+    "The Pacifist is in play. Evil is winning. The Lunatic is executed, but remains alive. The next day, the Professor is executed and dies, because the Pacifist is drunk. The next day, a good is exiled and dies, because the Pacifist saves people from execution, not exile. The next day, the Pacifist is executed but remains alive because of the Pacifist."
+   ],
+   "tips": [
+    "Don't come out! Your ability keeps good players safe (at the Storyteller's discretion), and the evil team will want to remove you from play as soon as possible. Bluff as something undesirable to kill, like a Fool or a Goon, and hold that line until you have very good reason to reveal who you are.",
+    "You should always come out eventually, but how you choose to do so is up to you. For example, you may know a player you trust 100% is good, and reveal to them early and secretly. If your ability saves someone later, they will know immediately it was you. If you don't have someone you trust that much, then simply play carefully until you die, or until it's late enough in the game that people need to know who you are anyway.",
+    "Your ability is more potent in the late game, so survive as long as you can. The Storyteller is simply more likely to save a good player at a critical juncture as the game comes to a climax than they are to rescue someone from the town's blood thirst on the first day. Simply put, the longer you live, the better chance you will have of saving someone, so take whatever action you feel is necessary to make that happen.... within reason.",
+    "Wait for your ability to trigger before making any sort of reveal. Seeing someone be saved from execution unexpectedly will prime the good team to believe you are in play anyway, whereas revealing early and then seeing your ability activate may lean them towards believing some shenanigans are at play.",
+    "There are lots of reasons people may not die, so don't immediately assume it was you. Jumping the gun and coming out when in reality, a Sailor, Fool or Tea Lady's neighbour has just been saved from execution will paint a big target on your back, particularly if it is still early in the game.",
+    "The Devil's Advocate is your worst enemy - capable of mimicking your ability and protecting their evil cohorts on top of that. Thanks to how similar your abilities are, the Pacifist is a popular bluff for this devious minion - tread carefully if you think one is in play, and in general try to avoid giving the good team a reason to succumb to the paranoia that you're trying to trick them."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Pacifist"
+  },
+  "fool": {
+   "name": "Fool",
+   "ability": "The 1st time you die, you don't.",
+   "flavour": "",
+   "summary": [
+    "The Fool escapes death... once.",
+    "The first time the Fool dies for any reason, the Fool remains alive. They don’t learn that their ability saved their life.",
+    "If another character’s ability protects the Fool from death, the Fool does not use their ability. Only the time that the Fool would actually for realsy bona fide be dead does the Fool’s ability trigger."
+   ],
+   "how_to_run": [
+    "If the Fool would die, they remain alive. (But they die if they are drunk or poisoned.) If the Fool was executed, declare that the player was executed but remains alive. (Do not say why.)",
+    "Either way, the Fool loses their ability—mark them with the NO ABILITY reminder."
+   ],
+   "examples": [
+    "On the first day, the Fool is executed but remains alive. On the fourth day, the Fool is executed again. This time, they die.",
+    "The Demon attacks the Fool, who remains alive. Nobody dies that night. The next day, the Fool is executed by the , and dies.",
+    "The Demon attacks the Fool, who is protected by the Tea Lady. The Fool remains alive and keeps their ability. Later, after the Tea Lady has died, the Demon attacks the Fool, who is now protected by the Innkeeper. The Fool remains alive and keeps their ability. Later, after the Innkeeper has died, the Demon attacks the Fool, who remains alive again but uses their ability, so next time they will die."
+   ],
+   "tips": [
+    "The Fool is one of a few characters that can breathe a little easy in Bad Moon Rising, as their ability spares them (at least once) from the pile up of deaths. This doesn't mean that you should rest on your laurels, however - a proactive Fool can drive the evil team mad with bluffs, protecting their good teammates, and wasting a precious demon kill with their power. Who will get the last laugh? That's up to you!",
+    "Your ability keeps you safe from death... once. You can lean on this to guarantee your long term survival throughout the game, but another option is to get the demon to target you deliberately with bluffs. Claim to be an Exorcist or a Courtier, and inexperienced demons may just take aim at you in a panic, wasting their kill for that night. This is also an effective strategy against a Po or Shabaloth, both demons who win by slaughtering the town as quickly as possible. If they choose you, that's both you and another good player who may have died standing the next day!",
+    "Your ability is more useful if it triggers at night, blocking a demon's kill or other reckless deaths. Just because you are safe from execution doesn't mean that you should be rushing to the gallows!",
+    "If you are really coming under suspicion from the good team, you can prove yourself by being executed. Since you will fail to die, this is a pretty decent indicator you are who you claim you are. This is effectively giving up your night protection to give the good team peace of mind, and is not definitive proof (savvy players will point out that a well-timed Devil's Advocate's action achieves the same effect), but your willingness to sacrifice yourself may sway the hearts of the town... and hopefully get an overzealous Exorcist or Chambermaid off your back.",
+    "Try to deduce when you have been targeted at night by tracking the patterns of deaths. For example, if you have seen two deaths every night for the entire game, and then suddenly there's one death instead... it's possible that a Shabaloth tried to munch you and you got away by the seat of your pants. Knowing when you might be vulnerable allows you to adjust your strategies to become more or less of a target as feels necessary.",
+    "If you have the trust of a good player who would really prefer not to die at night, you can take over claiming to be their character. For example, a Pacifist might want people to know they're in play, but not expose themselves to the demon... so you can claim on their behalf instead! If the demon hits you, the Pacifist lives for another day!",
+    "If you die early or unexpectedly, you should be on the lookout for an Assassin or Pukka. The Assassin will be able to bypass your protection and kill you, while the Pukka poisons you, causing it to simply malfunction. Both of these are deadly characters, and knowing they are in play early can be a huge boon for the good team, even if it came at the expense of your death. (Note: You should also rule out that you were targeted by a Sailor, which is less deadly to the good team, but still could be why you died when you thought your protection was still active).",
+    "You can still be protected by other means - the Tea Lady, Innkeeper, Pacifist and even Devil's Advocate can also spare you from death. If you get lucky and gain any extra protection on top of your own power, take advantage! Taunt the evil team a bit! What could go wrong?"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Fool"
+  },
+  "tinker": {
+   "name": "Tinker",
+   "ability": "You might die at any time.",
+   "flavour": "",
+   "summary": [
+    "The Tinker can die at any time, for no reason.",
+    "The Storyteller may kill the Tinker at any time.",
+    "The Tinker cannot die from their ability while protected from death, as normal."
+   ],
+   "how_to_run": [
+    "At any time, you may decide that the Tinker dies. If this is during the day, immediately declare that the Tinker has died. If this is during the night, mark the Tinker with the DEAD reminder and wait until dawn to declare which players died during the night. (Do not say how.)",
+    "While you may kill the Tinker out of the blue during the day, it is most interesting if the Tinker dies at night, because the players will be wondering whether the Tinker died due to their ability or for some other reason.",
+    "You can choose to never kill the Tinker. This makes the Tinker look really suspicious.",
+    "We recommend that you never kill the Tinker when it would end the game. Players should win or lose by their own efforts, not Storyteller fiat."
+   ],
+   "examples": [
+    "During the night, the Tinker dies, even though the Demon attacked a different player.",
+    "The Tea Lady sits next to the Tinker and another good player, protecting the Tinker from death. The Tinker cannot die from their ability.",
+    "The Tinker is attacked by the Demon. The Tinker does not die because they are protected by the Innkeeper. Later that night, the Innkeeper dies, so the Storyteller chooses to kill the Tinker too."
+   ],
+   "tips": [
+    "The Storyteller holds your life in their hands and can snuff it out in an instant! Do not underestimate the petty tyranny that this power trip creates - don't give them a reason to kill you at a terribly inopportune time for the good team!",
+    "Reveal you're the Tinker after you die, particularly if you die at night. While you can be targeted by the demon (or a wily Assassin), the Storyteller can kill you at any time, and may have knocked you off at night to bolster the evil team. For example, if the demon has been blocked by the Exorcist, you might die instead to create the impression of the demon still acting. If the Exorcist player knows this, they can decide to block the same player again, as opposed to writing them off as not the demon. Your death can also create the impression of different demons - for example, your extra death could point to the existence of a Shabaloth, when the demon is in fact a Pukka.",
+    "Rarely, you will drop dead publicly - an unfortunate accident witnessed by all of the townsfolk. While this unexpected death might seem like a bummer, consider this upside - as a ghost, the whole town knows that you must be the Tinker, and therefore are good and can be trusted! Nobody else can die publicly during the day outside of an execution. Take advantage of this knowledge to get chatting to those who remain, and aid the town after death.",
+    "The Storyteller is always striving to create a balanced game where both good and evil have an equal chance of winning. This means that even though your death will usually seem random, it's probably serving some greater cosmic purpose. This also means that it is information if they choose not to kill you, especially as the town whittles down to three players remaining. If you remain standing close to the end of the game, start to think about why the Storyteller couldn't risk killing you off. Are you among the few good players left alive? (Or are they just screwing with you because they know you expect to die?)",
+    "Seriously though, be nice to the Storyteller. Most Storytellers will accept firstborns in exchange for leniency."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Tinker"
+  },
+  "moonchild": {
+   "name": "Moonchild",
+   "ability": "When you learn that you died, publicly choose 1 alive player. Tonight, if it was a good player, they die.",
+   "flavour": "",
+   "summary": [
+    "The Moonchild curses someone upon death, killing them too.",
+    "The Moonchild must choose a player within a minute or two of learning that they are dead, whether by an execution or at dawn when the Storyteller declares who died at night. The Moonchild can take their time and get advice from the group before making this decision.",
+    "If the Moonchild chooses a good player, that player dies tonight. If they choose an evil player, nothing happens.",
+    "As always, play along if an evil player is bluffing as the Moonchild and pretends to use their ability.",
+    "It is not the Storyteller’s responsibility to prompt the Moonchild to choose a player. The Moonchild must do this shortly after they learn that they are dead. Deliberately not doing so is considered cheating.",
+    "If the Moonchild is sober and healthy at night but was drunk or poisoned when they chose a player today, that player dies. If the Moonchild is drunk or poisoned at night but was sober and healthy when they chose a player today, that player doesn’t die.",
+    "The Moonchild kills the Goon if the Goon was good when the Moonchild chose them, regardless of the Goon’s alignment at night."
+   ],
+   "how_to_run": [
+    "When you declare that the Moonchild’s player has died, the Moonchild chooses any alive player. If the chosen player is good, mark their character token with the DEAD reminder. Tonight, the player marked with the Moonchild’s DEAD reminder dies.",
+    "If the Moonchild doesn’t realize that they must choose a player when they die, privately remind them. New players may not understand how their character works."
+   ],
+   "examples": [
+    "The Pukka kills the Moonchild. The next morning, the Moonchild chooses a player, who is the Exorcist. That night, the Exorcist dies.",
+    "The Pacifist is in play. The Moonchild is executed but remains alive. The Moonchild does not choose a player, because the Moonchild did not die.",
+    "The Shabaloth eats the Moonchild. The Moonchild chooses the Assassin, who remains alive. The Shabaloth regurgitates the Moonchild. A few nights later, the Shabaloth eats the Moonchild again. This time, the Moonchild chooses the Gossip, who dies."
+   ],
+   "tips": [
+    "Try to avoid dying if you can! Even though you're an Outsider, you are still a good player, and in Bad Moon Rising you don't always have a lot of good players to spare. This is especially true for you, since the extra player who dies thanks to your ability must be good, meaning you can't even hope to take someone evil out with you. Bluffing as something difficult to kill (like the Fool or Goon) to avoid the demon's attention is a good option, especially if you quietly reveal to good players your real ability so they don't turn around and execute you. Alternatively, you can just not admit anything to anyone until you absolutely must, keeping yourself safe that way!",
+    "DO die. This isn't always the best move (and should really only be attempted early in the game), but your ability is a pretty strong confirmation that a player is good. If they die, you can be confident they are telling the truth, which in turn means that you can trust their information. It's best to coordinate who you're going to choose before your death - some good players will be more comfortable with an early death compared to others. Asking for the town to execute you for the sake of gaining information is also a good way to build trust if you are dealing with suspicion - most evil players will not volunteer to die. A Zombuul or Devil's Advocate may throw a spanner in your works though!",
+    "On death, choose someone you think is good to inflict with your deadly curse. There's a couple of great reasons for this! Firstly, should they die: you know you can trust that they are good, and that any information they have is probably reliable. Secondly, if your ability activates and this person dies, it is likely that you are telling the truth. While the evil team can simulate your ability activating via the help of the Demon or Assassin, they will often just accept the free extra kill that you provided, leading to an unusual number of deaths. If the good team believes you, they can believe the person you killed, and from there start to piece information together to ferret out the evil team lurking among them!",
+    "On death, choose someone you suspect is evil. There's a couple of great reasons for this! Firstly, if you believe that the following night is going to see a lot of death (e.g., a Po has charged up), then the extra kill from your ability might be the one that pushes the game firmly in evil's favor. Secondly, should that player not die? You can now be reasonably confident that they are evil. The confirmation is not as drastic as confirming someone as good, but if you believe you are sober, then regard that player with a lot of suspicion moving forward - there's usually more than one clue that someone isn't who they claim to be.",
+    "When choosing the player you intend to pick, be aware that characters that \"cannot die\" or are protected at night will not die as a result of your ability. This includes characters like the Sailor and Fool, and players in the company of a Tea Lady or an Innkeeper. Try to have a good idea of who is who before you die, so you can choose around these character. Or, if you want to avoid an extra death, you can deliberately choose one of them, keeping the death toll from rising too dramatically.",
+    "If the Godfather is in play, they will get the chance to kill the same night that you die and curse someone. If you suspect a Godfather, be aware of this extra kill and plan your choice accordingly. Also be aware that they could choose to trick you into believing you killed a good player, but in fact it was an evil minion thrown under the bus to sow chaos and confusion in the afterlife!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Moonchild"
+  },
+  "goon": {
+   "name": "Goon",
+   "ability": "Each night, the 1st player to choose you with their ability is drunk until dusk. You become their alignment.",
+   "flavour": "",
+   "summary": [
+    "The Goon is immune to other characters at night, but keeps changing allegiances.",
+    "Each night, the first time a player wakes to use their ability and chooses the Goon, that player becomes drunk immediately. Their ability does not work tonight, nor the next day.",
+    "Later on the same night, if another player wakes to use their ability and chooses the Goon, their ability works as normal.",
+    "The Goon cannot make a player drunk unless the player chose the Goon. The Storyteller choosing the Goon due to an ability, such as the Grandmother’s, doesn’t count.",
+    "As soon as the Goon makes a player drunk, the Goon changes alignment to match theirs. The Goon still changes alignment, and makes the player drunk, if the player choosing the Goon was already drunk or poisoned.",
+    "If chosen by the Assassin, the Goon dies but still turns evil."
+   ],
+   "how_to_run": [
+    "At night, if a player chooses to use their ability on the Goon and nobody is marked with the Goon’s DRUNK reminder, this player immediately becomes drunk—mark them with the DRUNK reminder. Finish resolving this player’s ability and put them to sleep. If this player’s alignment is different from the Goon’s alignment, rotate the Goon’s character token—right side up for good, upside-down for evil—to match this player’s alignment, then wake the Goon, give them a thumbs-up or a thumbs-down (indicating their new alignment), then put the Goon to sleep.",
+    "The next dusk, the player that the Goon made drunk becomes sober—remove the Goon’s DRUNK reminder."
+   ],
+   "examples": [
+    "The Courtier chooses the Goon. The Goon turns good, and the Courtier becomes drunk.",
+    "The Shabaloth attacks the Goon, then the Gossip. Since the Shabaloth became drunk as soon as they chose the Goon, neither player dies tonight, and the Goon turns evil. The next night, the Shabaloth attacks the Gambler then the Goon. The Gambler dies, then the Shabaloth becomes drunk again. The Goon is still alive and still evil.",
+    "The Chambermaid chooses the Goon and the Minstrel, and learns a \"1\" because the Chambermaid is drunk.",
+    "The Tea Lady neighbours the good Goon and the Tinker. The Tinker is executed, but does not die. The next day, the Goon is evil. The Tinker is executed again and dies."
+   ],
+   "tips": [
+    "The Goon is in an interesting position compared to other players, as you can never be quite sure what team you'll be playing for until the very end. It is to your advantage to sit quietly, bluff as something else, and see how the game unfolds - your alignment switches will give you a ton of info, and you'll be in a good position to aid your team near the end of the game... no matter what side you're on.",
+    "Alternatively, and especially if you turn evil early - just come out! Letting both teams know you're in play can get them to fight for your allegiance, which is always entertaining. This also has the effect of letting players on both sides know that targeting you is a bad option... if that's something you'd like to get across. Note that this can be risky if you have a bloodthirsty town keen for executions - they could simply kill you for the crime of maybe being evil. You can try to stay their hand though - point out that once you're dead, your alignment is locked in since you will lose your ability, but if they let you live? Well, they can always turn you good again!",
+    "It is unlikely that you will die at night. Thanks to your powerful ability, other character's abilities will malfunction before they even get close - this is true even of the Pukka, who malfunctions before they can poison you. (Beware the Assassin though, who trumps you - the evil team can remove you if you annoy them too much!)",
+    "As you approach the end of the game, the alignment you currently are is probably the team you will be winning or losing with. If you are good, this means it is time to help - reveal who you are and give out your information! If your alignment switched on certain nights, that can be indications of when abilities failed, and can expose evil players using your silence as a safe space to bluff in. Once you do this, you'll really want to get the demon ASAP - the evil team could flip you if there's another night or two, and if that's the case you could very well hand the good team what they need to win and then not get to enjoy it.",
+    "If you are evil near the end of the game, it is time to sow some chaos (if you haven't been already!). While you have the option of revealing as the Goon and claiming to be good, this is not remotely your only option - you can bluff as anything you like to create confusion, or even just to keep up the facade that you are good when you are in fact a secret fourth evil vote. Trying to find the other evil players may be a good idea at this point too, so you can be sure you're coordinating with the right bunch of dastardly ne'er-do-wells."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Goon"
+  },
+  "lunatic": {
+   "name": "Lunatic",
+   "ability": "You think you are a Demon, but you are not. The Demon knows who you are & who you choose at night.",
+   "flavour": "",
+   "summary": [
+    "The Lunatic thinks that they are the Demon.",
+    "Much like the Drunk, the Lunatic does not know their real character or real alignment. They are woken each night to attack as if they were the Demon that is in play, but their choices have no effect because they have no Demon ability.",
+    "The Lunatic wakes during the first night to learn three bluffs and the appropriate number of Minions, but this information may be wrong.",
+    "The real Demon knows which players the Lunatic chose to attack each night."
+   ],
+   "how_to_run": [
+    "While setting up the game, put the Lunatic and Demon tokens in the bag. Once all tokens have been returned to you, swap the positions of the Lunatic and Demon tokens in the Grimoire.",
+    "During the first night, wake the Lunatic and act as if they are the Demon. Show them the THESE ARE YOUR MINIONS info token and point to a number of players equaling the number of Minions in play. (These can be any players, whether or not they are Minions.) Show any three good character tokens as bluffs. (These can even be characters that are in play.)",
+    "During the first night, wake the Demon. Show them the YOU ARE info token, then their Demon token. (This tells them they are the real Demon.) Show them the THIS PLAYER IS info token, then the Lunatic token, then point at the Lunatic player.",
+    "Each night, before the Demon wakes to attack, wake the Lunatic to act as if they were that Demon. Put a CHOSEN reminder on each player they chose, then put them to sleep. Wake the real Demon, point at the Lunatic, show the Lunatic token to the real Demon, and point at the players that the Lunatic chose. Then the Demon acts as normal.",
+    "You can make the Lunatic think they are a different Demon than the in-play Demon by instead putting two Demon tokens in the bag, then replacing one of them with the Lunatic token once they are in the Grimoire."
+   ],
+   "examples": [
+    "The Lunatic, thinking they are the Shabaloth, wakes each night to choose two players. The chosen players do not die.",
+    "The Lunatic, thinking they are the Zombuul, does not wake often at night. The real Zombuul, who is pretending to be the Lunatic's Minion, often attacks the same players the Lunatic chooses, to keep up the illusion that the Lunatic is the Demon."
+   ],
+   "tips": [
+    "Drawing a demon token is always an exciting experience: you will be fighting the good team, killing them off at night, and lying to their faces by day! You are a dangerous scourge on the town, threatening to rip them all to shreds!! .... Well, either that, or you're the Lunatic.",
+    "The Lunatic is a unique outsider, tricking a good player into believing they are playing for evil, only to find that reality does not match up with that belief. Fortunately, these breaks in your evil narrative will be what helps you determine if you are truly evil or not! In nearly all cases, it's best to assume you are legitimate, and only actually begin to doubt if you encounter something that doesn't make sense. For example:",
+    "* The players you kill don't die, but others do. You're a Shabaloth, but for some reason only 1 out of 2 of your kills are happening every night. You're the Zombuul, but there was an execution and a kill last night. While the real demon can see and try to mimic your choices to kill, the demons in Bad Moon Rising are colorful and varied - pay close attention to why kills succeed or fail. Is a wily Innkeeper getting the better of you, or does the real demon not care for your delusions?",
+    "* Talk to your 'minions'. Like a real demon, you will be told players who are evil along with you. If they are real minions, they will know you are the demon. If you are a Lunatic, however... they could be anyone! Townsfolk, other Outsiders, the real demon's minions... Keep an eye on your evil team and see how they behave. If they are backing you up and working with you, you probably have nothing to fear. If they are giving you odd looks, fighting against you, or even outright tell you that they're not your minion, well... that might be an indication everything isn't on the level.",
+    "* Like a real demon, you will also receive three characters that are not in play. If you are the Lunatic, these can be anything, and often will include characters that are actually in play - a hint to your true nature. If you know there's no Tea Lady in play, and then across the room a Tea Lady proves themselves (by executing one of their neighbours), it might be time to doubt your evil identity.",
+    "* This one seems obvious, but should you die and the game continue, that's a huge indication that you were probably not the demon haunting this town. Of course, keep in mind that if you are the Zombuul, you get one extra life, and the Mastermind forces the game to continue for one more day in the event of your death. So maybe don't jump to conclusions right away depending on how the game is looking.",
+    "If you have come to the conclusion that you are the Lunatic, don't despair - all that means is that your true objective has been revealed, and it's time to fight for the good team. You may have spent the first half of the game believing you were a bloodthirsty demon, but that doesn't mean you can't be a productive member of society now, lending your vote and voice to fighting the true evil lurking in this town.",
+    "Don't come out right away once you figure it out - not only will the good team tend towards being suspicious and may just execute you anyway, but there's a lot you can do if the evil team thinks you're under the thrall of your own lunacy still. For example, the demon knows who you choose to kill each night - if they believe you believe, then you may be able to point towards players you suspect are actually evil. If the demon has been faithfully following you until that night and suddenly swerves, you may have hit pay-dirt. Evil pay-dirt.",
+    "If you think that you are the Lunatic, tell the group this as soon as possible. The sooner that you stop accidentally playing for the evil team, and start playing for the good team, the sooner you can put all your information together. When the good team believes that you are the Lunatic, the correct number of Outsiders can be determined, and any false information that you have given up until this point can be reversed."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Lunatic"
+  },
+  "godfather": {
+   "name": "Godfather",
+   "ability": "You start knowing which Outsiders are in play. If 1 died today, choose a player tonight: they die. [-1 or +1 Outsider]",
+   "flavour": "Normally, it's just business. But when you insult my daughter, you insult me. And when you insult me, you insult my family. You really should be more careful - it would be a shame if you had an unfortunate accident.",
+   "summary": [
+    "The Godfather takes revenge when the town kills Outsiders.",
+    "Whenever an Outsider is executed and dies, the Godfather chooses one player to die that night.",
+    "The Godfather only kills if an Outsider dies during the day. Outsiders that die at night don’t count.",
+    "If the Godfather is in play, this adds or removes one Outsider from play.",
+    "At the start of the game, the Godfather learns which Outsiders are in play.",
+    "If two Outsiders died today, the Godfather still only kills one player tonight."
+   ],
+   "how_to_run": [
+    "While setting up the game, before putting the character tokens in the bag, either remove one Townsfolk and add one Outsider or remove one Outsider and add one Townsfolk.",
+    "During the first night, wake the Godfather. Show them the character tokens of all Outsiders in play. Put the Godfather to sleep.",
+    "If an Outsider dies during the day, mark them with the DIED TODAY reminder. That night, wake the Godfather. They point at any player. Put the Godfather to sleep. The chosen player dies—mark them with the DEAD reminder."
+   ],
+   "examples": [
+    "The Godfather learns that the Lunatic and the Moonchild are in play, so the Godfather bluffs as the Tinker. During the third day, the Lunatic dies by execution. That night, the Demon kills the Minstrel, and the Godfather kills the Pacifist.",
+    "The Tinker is executed but remains alive, because they were protected by the Devil's Advocate. The Godfather does not act that night. The next day, the Tinker dies due to their own ability. That night, the Demon kills a player, and the Godfather kills themself to appear like a good player."
+   ],
+   "tips": [
+    "The Godfather either adds or removes an Outsider from the normal game setup at the Storyteller's discretion. You can then kill these innocent good players for an extra kill at night... but only if you can convince the town to do your dirty work for you! Your ability is subtle, but powerful when abused in the right ways.",
+    "You start knowing which Outsiders are in play, which can help you and your evil team have an idea of what to expect. If you know there's a Lunatic for example, you can expect them not to come out for a while, and can bluff as an extra Outsider yourself. Alternatively if there is a Goon, you may want to seek them out and make an allegiance, turning them evil to join you instead of just getting them killed. This is reliable, powerful information - use it however best helps your team.",
+    "If there's one less outsider than expected, you can fill this gap with a bluff - while players will suspect you in the event of there being more or less outsiders than expected, they tend to overlook entirely if there are exactly as many outsiders as there's supposed to be. (This can also make it an exceptional bluff for your demon!)",
+    "If there's one more outsider in play than expected, it's probably best to try and convince the town that there isn't a Godfather in play, and that one of the outsiders is bluffing and secretly evil. This not only keeps up the ambiguity of the minion in play (meaning the terrifying Mastermind continues to be a possibility), but if they believe you, they might even start executing, giving you a free extra kill!",
+    "Get them Outsiders executed by any means necessary! Not only are you killing a good player and activating characters like the Moonchild, but you will get an extra kill that night. If you manage to time this well, your evil team can unleash a devastating counter-attack on the good team with your unexpected aid!",
+    "Coordinate with the demon when you have the chance to kill to maximize the amount of players that die. It can be a bummer to get a kill and then totally miss because the demon was going to kill them anyway. Plus, the more players who are dead in a single night, the more likely the good team are to just totally panic.",
+    "When you have a chance to kill, you can deliberately choose a dead player to mask your extra kill, hiding the fact that you are in play. This can be very useful if you are trying to push the narrative that no Godfather is in play - the good team typically stop killing Outsiders once they realize you're around, and this method keeps the shade firmly on them. Delaying gratification for a more deadly late game kill can be very satisfying!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Godfather"
+  },
+  "devilsadvocate": {
+   "name": "Devil's Advocate",
+   "ability": "Each night, choose a living player (different to last night): if executed tomorrow, they don't die.",
+   "flavour": "My client, should the objection be overruled, pleads innocent by virtue of the prosecution's non-observance of statute 27.B - incorrect or misleading conjugation of a verb. The fact that nine of the jury died last night is simply prima facie, which is, as Wills vs Thule set precedent for, further reason to acquit.",
+   "summary": [
+    "The Devil's Advocate saves players from execution.",
+    "Each night, the Devil’s Advocate chooses a player to protect from death by execution. The next day, if that player is executed, the execution succeeds but the player remains alive.",
+    "The Devil’s Advocate cannot choose the same player two nights in a row, whether or not that player was saved from execution today, and they cannot choose a Zombuul that registers as dead."
+   ],
+   "how_to_run": [
+    "Each night, wake the Devil’s Advocate. They point at any player. Put the Devil’s Advocate to sleep. Mark the chosen player with the SURVIVES EXECUTION reminder.",
+    "If a player marked SURVIVES EXECUTION is executed, declare that the player was executed but remains alive. (Do not say why.)"
+   ],
+   "examples": [
+    "At night, the Devil's Advocate protects themself. The next day, the Devil's Advocate is executed but remains alive.",
+    "The Devil's Advocate protects the Zombuul. The Zombuul is executed but remains alive, so their life token is not flipped. The next day, the Zombuul is executed again and registers as dead.",
+    "The Devil's Advocate protects the Grandmother. The Grandmother is executed but remains alive. Later, the Devil's Advocate protects the Tinker. The Tinker is executed, but the Storyteller kills the Tinker anyway, due to the Tinker ability. Later, the Devil's Advocate protects the Moonchild, and the forces the execution to succeed&mdash;the execution succeeds, but the Moonchild remains alive."
+   ],
+   "tips": [
+    "The Devil's Advocate interferes with due process, keeping nominated players alive even if their execution succeeds. As you can imagine, a clever player with a good sense of timing can use this ability to undermine the good team's strongest ability to hunt down the demon!",
+    "Protect your demon - if you believe they are due for execution! Since your protection can't work on the same player twice in a row, timing the days you pick the demon is pretty important - if you leave them high and dry on a day when the town is getting bloodthirsty, that could cost you and the evil team the game! Pay close attention to the good team, their information, and where their suspicion is leading.",
+    "If you survive to the final day, set yourself up to be protecting your demon. (Beware the Minstrel or the Innkeeper being alive at this point though - they may be able to execute you and then interrupt the demon's ability that way, thus overturning you at the last possible moment.)",
+    "Protect yourself and the other minions. Even though the demon should really be your top priority, the more evil players alive, the better! This is especially true if you have a Mastermind, who only benefits if they survive when all else fails, or even just an Assassin who hasn't gotten to stab anyone yet. Just like with the demon, pay attention to who the good team is suspicious of, and try to time who you grant immunity to with their targets.",
+    "Protect good players that you think will be executed - this has the advantage of making those players look incredibly suspicious, especially if the good team already knows (or suspects) you are in play. While other effects could save a good player from their execution, a well timed save coupled with a whisper campaign or just old-fashioned good team paranoia will see them turn on the poor schmuck.",
+    "You can use your ability to recreate the behaviour of good character abilities that protect from execution - for example, the Tea Lady, Sailor or Pacifist. Out of all of these, the Pacifist is the easiest claim since its activation is random, and so the good team cannot try to 'test' you by executing the same player twice in a row - but if you think you can get away with it, your bluff will look extra solid!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Devil's_Advocate"
+  },
+  "assassin": {
+   "name": "Assassin",
+   "ability": "Once per game, at night*, choose a player: they die, even if for some reason they could not.",
+   "flavour": "...",
+   "summary": [
+    "The Assassin kills who the Demon cannot.",
+    "Once per game at night, the Assassin can kill a player. This player dies, even if they are protected from death in any way, such as from an ability.",
+    "The Assassin ability is affected by drunkenness and poisoning, as normal.",
+    "If the Assassin attacks the Goon, the Goon dies and turns evil."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Assassin. They either shake their head no or point at any player. Put the Assassin to sleep.",
+    "If the Assassin chose a player, that player dies— mark them with the DEAD reminder. This cannot be prevented in any way (except if the Assassin doesn’t have their ability, such as if they’re drunk or poisoned). The Assassin loses their ability—mark them with the NO ABILITY reminder and remove their night token from the night sheet. (The Assassin won’t wake again.)"
+   ],
+   "examples": [
+    "For the first three nights the Assassin wakes, but chooses not to act. During the fourth night, they choose to kill the Fool. Even though the Fool still has their ability, the Fool dies and stays dead.",
+    "The Tea Lady neighbours two good players. The Assassin chooses to kill one of the Tea Lady’s neighbours, who dies even though they were protected by the Tea Lady.",
+    "The Minstrel is in play. The Mastermind dies by execution. That night, the Assassin chooses to kill the Moonchild, but they do not die, because the Assassin is drunk due to the Minstrel.",
+    "The Assassin, who was drunk due to the Courtier, chooses to kill the Goon. The Assassin has no ability, so the Goon remains alive but turns evil."
+   ],
+   "tips": [
+    "Few minions hold the power you have. Absolute control over life and death. No protection will keep players safe from your machinations (unless you get drunk - don't do that). Enjoy the terror you wield over the good team, and strike into their heart at the worst possible moment!",
+    "Kill players that your demon cannot get to. Is that Exorcist blocking your demon from acting? Not anymore. Is that Pacifist under the protection of a Innkeeper? Child's play. A smug Sailor causing you problems? Make this night their last. Nothing stops your blade, so you might as well take full advantage and go after the players that think they are untouchable.",
+    "Kill to confuse death count and mask the type of demon that is in play. If the players suspect a Zombuul, you can kill on a night the demon cannot, which will confuse things (especially since your ability can mimic the kill of a venomous Pukka). Another useful example is to cover for a charging Po - the good team won't see the extra deaths coming, making it extra devastating when unleashed.",
+    "Coordinate with your demon on who they would like you to kill. This is especially true of hungry demons like the Shabaloth and the Po who can kill multiple times per night, but it's nearly always worth discussing to avoid doubling up with them. Your extra kill is powerful, and it'll be a real bummer to 'lose' it because you and the demon both went after the same target.",
+    "If you don't know who to kill, or if you feel like being particularly tricky, you can kill yourself (or kill a fellow evil player) at night to make that evil player look like a good player. Since it is rare for an evil player to die at night, the good team will usually assume that any player that dies at night is good, trusting that player's information and basing their future strategy on that assumption. This is particularly damaging if you can undercut a good player's ability in the process. For example, if you know that an Innkeeper is protecting you at night, and you kill yourself, not only will you look good in the morning, but the Innkeeper will look like they are lying about protecting you."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Assassin"
+  },
+  "mastermind": {
+   "name": "Mastermind",
+   "ability": "If the Demon dies by execution (ending the game), play for 1 more day. If a player is then executed, their team loses.",
+   "flavour": "The tentacles of that monster are nailed to the doors of the church. Mothers and children are dancing in the street. Excellent. Everything is proceeding exactly as I have planned.",
+   "summary": [
+    "The Mastermind can still win after the Demon is dead.",
+    "If the Demon dies by execution, the game continues. The players do not learn that the Demon died. The following day, if a good player is executed—whether or not they die from it—then evil wins. If an evil player is executed or nobody is executed, then the good team wins.",
+    "A dead Demon does not get to attack. They lose their ability, as normal. During this extra night and day, other characters’ abilities function as normal.",
+    "If the Demon dies and just two players are left alive, the game still continues for another day—evil does not win from two players being alive, and good did not win by killing the Demon. The Mastermind ability says “play for one more day,” and abilities override standard game rules."
+   ],
+   "how_to_run": [
+    "If the Demon is executed and dies, and the game would end, continue playing the game. (Add a shroud as normal. Do not say that the Demon has died.)",
+    "Tomorrow, if a good player is executed, declare that the game ends and evil wins, but if an evil player or no player is executed, declare that the game ends and good wins."
+   ],
+   "examples": [
+    "The Shabaloth dies. The next day, the Professor is executed and dies. Evil wins.",
+    "The Po dies. The next day, the Godfather is executed, but remains alive because they were protected by the Devil's Advocate. However, since an evil player was executed, good wins.",
+    "The Zombuul is executed and appears to die. The Mastermind’s ability does not trigger yet, because the Zombuul's execution did not make the game end. When the Zombuul is executed a second time and dies for real, the Mastermind’s ability triggers, and the game continues for one more day.",
+    "There are three players alive. The Demon dies. The following day, with just two players alive, good decides not to execute. When night falls, just two players are left alive but the Demon is dead, so good wins."
+   ],
+   "tips": [
+    "The Mastermind is a minion that continues the sinister intentions of the demon even after their death, giving the evil team a second chance at victory. You play the ultimate long game, striving to outlive even your own team... all while never announcing your presence at all.",
+    "Stay alive, pretty much at all costs - your ability is the evil team's backup plan and last ditch resort, and it won't activate if you're dead in the dirt. Coordinate with your demon for a strong bluff and ingratiate yourself with the good team - good options for you are roles that don't act at night (so you don't attract the suspicion of a Chambermaid) and who the good team would want to protect, like the Pacifist, Tea Lady or Minstrel.",
+    "As a Mastermind, you know that timing is everything. The good team knows you might be lurking about, and if they're confident they've killed the demon, all they have to do to tank your plans is not execute. To outwit them, get the demon executed at a time when the good team doesn't suspect that you are in play. In general, this means the execution should happen earlier in the game (most demons will survive past a few days), or if they believe the player they're executing is not the demon. Bad Moon Rising is the only edition where your demon can die on day 1 and that can be a good thing!",
+    "Encourage your town to embrace executions! While most good teams won't need any extra help to kill indiscriminately, making sure that they're executing aggressively every day will have them primed to keep executing once the demon is dead and gone. You don't want them chickening out of your last chance at victory! Remind them that executions gain information (testing the claims of a Sailor or Tea Lady, looking for the presence of a Devil's Advocate), and that depending on the demon, the good team really can't afford to waste any chances to get their hands on evil players anyway. This is all true, which makes you look even more good and trustworthy!",
+    "Convince the good team there's a different minion in play to yourself. Bluff as an outsider to simulate the presence of a Godfather. Blame an unusual death count on the presence of an Assassin (as opposed to a Gambler, Gossip or Tinker activating). If a player is executed, but does not die? Surely that must be evidence of a Devil's Advocate! If the good team wholeheartedly believes that they know which minions are in play and it does not include you, then they will feel much more comfortable going for that final execution, especially if you've coordinated with your demon using some of the other tips on this list!",
+    "Lull the good team into false sense of security by convincing the Demon (and other Minions) to occasionally avoid killing at night time. Once there has been a night (or two) with no kills, and the good team has learnt that they can safely execute after such a night, they will be much more likely to execute after a night with no kills due to the Demon having been executed.",
+    "If the Demon dies by execution, do whatever you can to engineer a player death that night. Tell the Assassin to use their ability. Convince the Gambler to guess your character. Influence the Gossip into making a true statement. Beg the Storyteller to kill the Tinker. If the players believe that the death at night is caused by a Demon, they will be much more likely to execute again tomorrow."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Mastermind"
+  },
+  "zombuul": {
+   "name": "Zombuul",
+   "ability": "Each night*, if no-one died today, choose a player: they die. The 1st time you die, you live but register as dead.",
+   "flavour": "",
+   "summary": [
+    "The Zombuul secretly remains alive while in the grave.",
+    "When the Zombuul would die for any reason, they actually don’t die, but the Storyteller acts as if they died. The second time the Zombuul dies, they die for real and good wins.",
+    "The seemingly dead Zombuul counts as a dead player in almost every way. The player’s life token on the Town Square flips to indicate their death. The next time they vote, they lose their vote token. They cannot nominate, they may vote with the Voudon, they’re not an alive neighbor for the Tea Lady, and so on. The only differences are that the game continues, the Zombuul still attacks, and the game continues if just two other players are alive.",
+    "The Zombuul only wakes at night to attack if nobody died that day. If a dead player is executed, the player can’t die again, so the Zombuul would still wake.",
+    "If a drunk or poisoned Zombuul dies, good wins. If a “dead” Zombuul becomes drunk or poisoned, do not announce that the player is alive."
+   ],
+   "how_to_run": [
+    "The first time the Zombuul would die, they remain alive. Declare that they died, but do not add a shroud to the Zombuul. (Flip the life token on the Town Square, as normal.) From now on, the",
+    "Zombuul registers as dead.",
+    "Each day, if a player dies, mark them with the DIED TODAY reminder. (If the Zombuul “dies” by execution, they register as dead, so mark the Zombuul with the DIED TODAY reminder.)",
+    "Each night except the first, if any player is marked DIED TODAY, do not wake the Zombuul.",
+    "Each night except the first, if no player is marked DIED TODAY, wake the Zombuul. They point at any player. Put the Zombuul to sleep. The chosen player dies—mark them with the DEAD reminder."
+   ],
+   "examples": [
+    "The Zombuul is executed and appears to die. They cannot attack tonight. A few days later, only two players appear alive on the Town Square. The good team is fairly certain that one of the dead players is the Zombuul, and the game continues until one more player dies.",
+    "Nobody died today. That night, the Zombuul attacks. The next day, the Tinker dies. That night, the Zombuul does not wake."
+   ],
+   "tips": [
+    "The sinister Zombuul is the deadliest Demon in Bad Moon Rising for its stealth and survivability. The Shabaloth and Po may kill many and the Pukka may strike with their poison, but they are all disappointingly fragile when the town eventually uncovers them. Not so for you - you're hard to find and harder to kill, and your patience is legendary; you're content to lie among the dead and listen peacefully as the town tears themselves apart looking for a Demon among the living, not ever suspecting that one of the rotting corpses in the graveyard still draws breath. The good team should pray you're not the Demon they're facing, because then no player is safe; the dead and the living alike are all equally and terrifyingly suspect.",
+    "You only have the ability to kill at night if nobody has died during the day. This can be difficult, since even though players are dying, it is primarily the good team that is killing them, meaning that a troublesome Exorcist or Courtier hovering around may continue to survive when you badly need them gone. One way to work around this limitation is to speak up for no executions, but the good team may find that suspicious and start questioning your allegiance if you push for that too often. A more reasonable strategy is to encourage executions that you don't think will cause death - for example, a Sailor claim, or the neighbours of a Tea Lady. This gives the good team information, but will also grant you your precious kill... providing the Tinker doesn't drop dead in the middle of the day, anyway. You could also (probably only once) argue for a Mastermind, leveraging the good team's paranoia about whether or not they killed the Demon to have them hold off for a night rather than risking losing the game.",
+    "Kill yourself, and hide in plain sight as a dead player! This can be especially effective if the good team thinks a different Demon is in play, since they will ignore the dead as suspects and focus on the living. Even if they do suspect you, choosing to die at the right moment can throw them off your trail - for example, get yourself executed early to \"test\" your Sailor immunity, and blame a Pukka for your death. Alternatively and more simply, you can just choose yourself and die at night - players who die at night tend to be good and considered trustworthy. Finally, you can coordinate with your Godfather to take you out at an opportune time, making it look like there isn't a Zombuul in play and that you are an innocent victim of circumstance. Then, you can use your death as a platform to spread misinformation and confuse the good team... or simply sit back and watch the game unfold.",
+    "Rather than dying early, you can instead decide to be a sophisticated undead who lives among the people and lives as long as possible! Surviving this way has several advantages - for one, you can keep bluffing and giving out new information, helping mislead the good team. You're guaranteed to survive death at least once, so you have a backup in the event that suspicion turns on you. Finally, if the good team starts to suspect that you are the Demon in play, you can direct their suspicions to the dead - if they spend an execution or two on your victims, that's an execution or two they can't use on you!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Zombuul"
+  },
+  "pukka": {
+   "name": "Pukka",
+   "ability": "Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.",
+   "flavour": "",
+   "summary": [
+    "The Pukka poisons its victims, who die at a later time.",
+    "When the Pukka attacks, their victim is poisoned immediately. The next night, just after the Pukka attacks again, that player dies.",
+    "Unlike other Demons, the Pukka acts during the first night.",
+    "The Exorcist prevents the Pukka from waking to poison a player. The Innkeeper prevents the Pukka from killing a poisoned player, then that player is no longer poisoned.",
+    "If the Pukka is drunk and chooses a player, that player does not become poisoned, so does not die the following night.",
+    "If the Pukka was sober when they chose a player the previous night, but is drunk at night, that player does not die. But when the Pukka sobers up, the poison resumes and kills the player at night."
+   ],
+   "how_to_run": [
+    "Each night, wake the Pukka. They point at any player. Put the Pukka to sleep. The chosen player is poisoned—mark them with a POISONED reminder.",
+    "Each night except the first, the other player marked POISONED dies—mark them with a DEAD reminder, then remove their POISONED reminder.",
+    "Players that the Pukka kills are still poisoned at their time of death. If you are using characters from other editions, you may need to keep the POISONED reminder by the DEAD reminder until their death ability is resolved. For example, if the Pukka kills the Sage, the Sage may get false information due to being poisoned by the Pukka."
+   ],
+   "examples": [
+    "The Pukka poisons the Chambermaid. The Chambermaid gets false information. The next night, the Chambermaid dies.",
+    "The Pukka poisons the Fool. The next day, the Fool is executed and dies because they have no ability. The next night, nobody dies and the Pukka poisons the Gossip. The next night, the Pukka is drunk and tries to poison the Tinker, but does not. The next night, the Gossip dies because the Pukka is sober.",
+    "The Pukka poisons the Pacifist. The next night, the Exorcist chooses the Pukka to not wake tonight. The Pacifist dies, but the Pukka does not wake to attack tonight.",
+    "The Moonchild is executed, dies, and chooses the Courtier. That night, the Pukka chooses the Moonchild. The Courtier does not die because the Moonchild is poisoned."
+   ],
+   "tips": [
+    "The devious Pukka is the deadliest demon in Bad Moon Rising for its viciousness and cruelty. All the other demons give the town the courtesy of a single night; the Pukka has no such patience, sowing chaos into the town from the first night, selecting their first victim before the townsfolk even get a chance to act. The Zombuul may be a little hardier than you, and the Shabaloth and Po may kill more effectively, but they are vulnerable to the most deadly weapon the good team wields: information. Not only do you kill but you neutralize your victims, forcing them to spend their last days in delirium, their information confused and the danger they once posed reduced to nothing. The good team always hopes you are not in play, lest they have to spend the whole game doubting all of the information that would normally lead them right to your door.",
+    "Factor in who you want to poison as well as who you want to kill. An aggressive and talkative Chambermaid who doesn't realize their last day of information is wrong can do a lot of legwork for you beyond the grave. If you get very lucky, you could catch an Exorcist or Courtier out before they catch you, or you can expose an Innkeeper's patrons to your Godfather or a Moonchild curse with a little bit of a good timing. You are the only evil player in Bad Moon Rising who has the ability to befuddle your target's information, so why not take full advantage?",
+    "Target players who you don't think are going to be executed the next day. If the good team executes your poisoned victim, then there'll be no death that night from you... which wily good players might use to detect that you are in play. A badly timed execution will leave you scrambling to play catch up for the rest of the game!",
+    "Target players who the good team suspects are bluffing being immune to execution, like the Sailor, or a Tea Lady and her neighbour. Even with the lack of death the following night, it will look like they faked their ability using a Devil's Advocate, and can even lead the good team to believe they are in fact a Zombuul. (And any day the good team spends executing dead players is a good day for you!)",
+    "Your poison cannot be blocked by anything but the wily Goon, but characters can still be protected from death at night by characters like the Tea Lady or Innkeeper. You have nothing to fear from a Fool or a Sailor, but choose carefully nonetheless - it won't do to miss a kill, especially since you're competing with the Shabaloth or Po. Reliable and methodical should be your goal.",
+    "Try to mask the fact that there is a Pukka in play for as long as possible. Once the good team know you are in play, they can start backtracking your poisoned information, undoing all your hard work! While it might seem like bluffing a Zombuul would be the obvious choice, in can in fact be easier to mimic a Po or even a Shabaloth with the help of an Assassin or a Godfather... or just some risk taking townsfolk. For example, if you know a Gossip statement will produce a death that night, that can be the time to have your minions act, creating multiple deaths that mimic a charged up Po attack. While they may track you down eventually, the goal is that by the time they do... it's too late for them to stop you."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Pukka"
+  },
+  "shabaloth": {
+   "name": "Shabaloth",
+   "ability": "Each night*, choose 2 players: they die. A dead player you chose last night might be regurgitated.",
+   "flavour": "",
+   "summary": [
+    "The Shabaloth eats two players per night, but may vomit one of them back up the following night.",
+    "Unlike most Demons, the Shabaloth attacks twice per night. The night after the attack, the Storyteller may decide that one of the players attacked by the Shabaloth comes back to life.",
+    "This can be an alive player that was killed, or a dead player that was attacked.",
+    "The regurgitated player regains their ability, even a “once per game” ability already used. If they had a “first night only” or “start knowing” ability, they may use it again."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Shabaloth. They point at any two players, one at a time. Put the Shabaloth to sleep. In the order chosen, each chosen player dies—mark them with DEAD reminders.",
+    "Each later night, just before waking the Shabaloth, you can choose one character marked with the Shabaloth’s DEAD reminder, and the chosen player becomes alive again—replace the DEAD reminder with the Shabaloth’s ALIVE reminder, and remove their shroud. They wake later tonight if they normally would. If they wake on the first night only, they wake now to use their ability. At dawn, after declaring which players died, declare which player is alive again. (Do not say why.)",
+    "Since the Shabaloth cannot regurgitate themself—they have no ability when dead—it is best to only rarely make the Shabaloth regurgitate. Once per game, maybe twice, is usually sufficient."
+   ],
+   "examples": [
+    "The Shabaloth attacks the Gossip, then the Gambler. The Gossip dies, but the Gambler, who was protected by the Innkeeper, remains alive.",
+    "The Shabaloth attacks the alive Courtier and the dead Exorcist. The Courtier dies. The next night, the Storyteller decides that the Exorcist becomes alive again. The Exorcist doesn't act tonight--they normally act before the Shabaloth.",
+    "The Shabaloth attacks the Tea Lady’s neighbour, then the Tea Lady. The Tea Lady’s neighbour, who is protected by the Tea Lady, doesn’t die, but then the Tea Lady dies."
+   ],
+   "tips": [
+    "The mighty Shabaloth is the deadliest Demon in Bad Moon Rising for its brutality and consistency. Neither the Pukka or Zombuul can match your multiple kills a night on their own, and while the Po can edge you out in numbers on a single night, you take back the crown thanks to their need to charge. The good team can and should rightfully panic when they suspect you are in play; only the accidental regurgitation of one of your victims will give them anything to counter you!",
+    "Kill aggressively, and don't give good team a chance to catch their breath. You are not the most... nuanced of Demons, but to be fair, nobody has ever pretended you are. Smash your way through the town like Godzilla on a good day, gobbling up any character claims who can't block you. The Chambermaid can't detect your bluff is phony if you've eaten them. With some clever picks and an ear to the ground about which players are protected at night, you can end this game in half the time of any other Demon.",
+    "Alternatively, you may want play a more low-key game. You might be a hideous, ever-hungry monster, but that doesn't mean you aren't capable of a little strategy. Deliberately choosing to hide your second kill can create some confusion about which Demon is in play - the good team will always be paranoid about which Demon is in play if they can't confirm it with any certainty, since relaxing for a moment is exactly when the Po can abruptly strike. This can be helpful for you since the strategies to handle the other Demons are very different to the strategies for dealing with you, and the poor good team will be caught flat-footed once you reveal yourself! It can also help you avoid the debilitating drunkenness of a Courtier (who will be on the lookout for any reliable tell of what Demon is in play)... until you can find them and eat them, anyway.",
+    "Did the mean old town execute your Minion? Just for the crime of worshiping an ever-hungry Demon who wants to devour them all? How cruel! How unfair! Luckily for them, you are a unique Demon among your brethren, as your saliva has healing properties. Eat up your Minion's corpse at night to try and get them brought back to life. You will be subject to the whims of the Storyteller... but maybe they'll take pity on you and give you back your beloved Minion, especially if the evil team is struggling. This has the added bonus of making your Minion look really good, since typically you only regurgitate good players.",
+    "Sometimes your acid re-flux will get the better of you (or the Storyteller will decide you're doing too well), and you'll vomit up a good player, restoring them to life unexpectedly. This can cause a number of issues for you - for one, unless you whip out an incredibly convincing Professor bluff, this will confirm that you are in play, which may be a problem depending on your strategy. More pressing is the fact that the reborn player will most likely be considered good, and other players will trust and believe them without much issue. The best way to counter this is pretty much just to kill them again immediately, preferably before they get a chance to use their ability to learn any new information about anything.",
+    "Bluff well, and do what you can to spread false information. It will probably become obvious fairly quickly that a Shabaloth is in-play, and whilst the Zombuul or Pukka disrupt the good team's information by their character ability alone, you have no such luxury.",
+    "If the good team doesn't know that you're in play, you can win by convincing the good team not to execute when there are just 4 players alive, killing 2 players that night and reducing the number of living players down to 2 unexpectedly. If you have an Assassin who hasn't used their ability but is still alive, or a foolish Gossip or Gambler who can be convinced to use their ability that night, you can even get this surprise win when there are 5 or 6 players left alive."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Shabaloth"
+  },
+  "po": {
+   "name": "Po",
+   "ability": "Each night*, you may choose a player: they die. If your last choice was no-one, choose 3 players tonight.",
+   "flavour": "",
+   "summary": [
+    "The Po can choose to attack nobody at night, but goes on a rampage the following night.",
+    "The Po attacks one player per night, like many other Demons. However, if the Po chooses to attack nobody, then they may attack three players the following night.",
+    "If the Po was drunk or poisoned when they chose nobody last night, they still choose three players tonight.",
+    "A Po must choose three players when prompted to do so. They cannot choose no one again.",
+    "The Po only gets three attacks if they chose nobody. The Po does not get three attacks if they chose to attack someone the previous night, but that player did not die.",
+    "The Po doesn’t act on the first night, but this night does not count as a night where the Po “chose no one.”",
+    "If the Exorcist selects the Po, the Po does not act, but this night does not count as a night where the Po “chose no one.” However, if the Po chose no one the night before the Exorcist chose the Po, the Po chooses three players the night after the Exorcist chose the Po, because their last choice was no one."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Po. They either shake their head no or point at any player. Put the Po to sleep. If they shook their head no, mark the Po with the 3 ATTACKS reminder. If they chose a player, that player dies—mark them with a DEAD reminder.",
+    "If the Po wakes to act while marked 3 ATTACKS, they point at any three players, one at a time. In the order chosen, each chosen player dies—mark them with DEAD reminders. Remove the 3 ATTACKS reminder."
+   ],
+   "examples": [
+    "On the second night, the Po attacks one player. On the third night, the Po chooses to attack nobody. On the fourth night, the Po attacks three players.",
+    "The Po chooses to attack nobody, but is drunk. The next night, the Po is poisoned. They choose three players, but none of them die. The following night, the Po is sober and healthy and attacks a player, who dies.",
+    "The Po attacks the Moonchild, then the Goon, then the Grandmother. Only the Moonchild dies, because the Po became drunk when they attacked the Goon."
+   ],
+   "tips": [
+    "The boisterous Po is the deadliest demon in Bad Moon Rising for its patience and ferocity. No other demon can hope to unleash as much devastation in a single night as you are capable of. Unlike the brutal Shabaloth, none of your victims are coming back from the dead unexpectedly. Unlike the Zombuul and the Pukka, you only wait if you choose it. The good team should tremble in fear at the mere thought that you are in play, knowing that at any time, you will unleash hell and leave the town torn asunder.",
+    "Playing the Po is all about choosing how you want to kill. You have a few more options available to you than your average demon, and utilizing them well will be key for your victory.",
+    "* Kill once per night, ignoring the charge ability entirely in favor of consistency. One advantage of this is it eliminates the 'charge' night of no deaths that is your most obvious tell, and makes you almost indistinguishable from a Zombuul or Pukka... at least initially. The good team wasting resources trying to detect a dead demon or doubting their own information is great for you! The obvious disadvantage is that you kill much less, which gives the good team a little longer to see through your deception and track you down.",
+    "* Don't hold back - charge and kill consistently. By utilizing your charge ability every single night, you basically get to 'kill two, kill one free' - meaning that you get one more kill than normal across the two nights. If the good team is dead, they won't be able to detect a dang thing! The downside to this method is that it will be pretty obvious that you are in play - you get the most kills in a single night of any character, and the good team will pick up on that. This can back you unexpectedly into a corner, as characters like the Courtier may wine and dine you, making you drunk, or the Gossip can start getting very specific in the statements that they make.",
+    "* Finally, mix and match! Both methods above are viable depending on the game, but it pays to be flexible - kill once per night for a while, wait until you have three targets earmarked who you know will die, and then unleash your charged kill. Or unleash a charged kill early... but bluff as a Gossip to mask the extra kill, and then kill normally for the rest of the game. By mixing and matching your charged kill and regular kill, you can adapt to the situation as it unfolds - maybe the good team is wily and has a lot of information, and hiding your demon identity is crucial. Or maybe they're scattered, and you should finish them off before they have a chance to unite. Either way, you are versatile, so you might as well take full advantage of it. The downside to this method is that timing is everything - you have to plan your moves in advance, which means that if you didn't charge a kill on a night you really need more than one person dead, you could end up in hot water.",
+    "Co-ordinate with the Assassin and the Godfather (and even the good players!) to mask the nights you don't kill. If a death occurs on the night where you are preparing for a triple kill, the good players will usually believe the death was due to the Demon attacking, and this false information will lead them astray about which demon is in play, and may even make them believe good players are lying when they are not. For example, if you don't kill one night (because you are preparing for a triple kill the following night), but that night, a player dies due to the Gossip having made a true public statement during the day, the good team may believe that the Gossip's statement was false, since they believe that the death was due to the Demon attacking and not the Gossip. Tricky."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Po"
+  }
+ }
+}

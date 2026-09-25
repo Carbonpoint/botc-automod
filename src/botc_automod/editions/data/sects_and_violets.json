@@ -1,0 +1,814 @@
+{
+ "fetched": "2026-09-25",
+ "characters": {
+  "clockmaker": {
+   "name": "Clockmaker",
+   "ability": "You start knowing how many steps from the Demon to its nearest Minion.",
+   "flavour": "",
+   "summary": [
+    "The Clockmaker learns the distance from the Demon to their nearest Minion.",
+    "The Clockmaker only learns this on the first night.",
+    "The distance is the number of seated players, starting from the player next to the Demon and ending at the nearest Minion, either clockwise or counterclockwise."
+   ],
+   "how_to_run": [
+    "During the first night, wake the Clockmaker. Show fingers (1, 2, etc.) equaling the distance in players from the Demon to the nearest Minion, starting with the player neighboring the Demon closer to that Minion. Put the Clockmaker to sleep."
+   ],
+   "examples": [
+    "The Fang Gu is sitting next to the Pit-Hag. During the first night, the Clockmaker learns a \"1\".",
+    "Clockwise from the No Dashii sits the Dreamer, the Snake Charmer, then the Evil Twin. Counterclockwise from the No Dashii sits the Mutant, the Sweetheart, the Philosopher, the Sage, then the Witch. Because the Witch is five steps away from the Demon, and the Evil Twin is three steps away from the Demon, the Clockmaker learns a \"3\" during the first night.",
+    "The Fang Gu neighbours two Travellers, one good and one evil. Neighboring one of these Travellers is a Cerenovus. During the first night, the Clockmaker learns a \"2\", because evil Travellers are not Minions."
+   ],
+   "tips": [
+    "You don't have to give your information out immediately; wait a couple of days so that you can observe the other players and see if you uncover anything suspicious while the evil team thinks the pressure is off.",
+    "Your information is most valuable if you can identify a Minion. Figure out which player is a Minion, and you can pin down some very likely Demon suspects. You should try to coordinate with other good players in the game to uncover this information. Many players detect players of an evil alignment (like the Oracle and the Seamstress), while others detect the Demons and Minions directly (like the Flowergirl, Town Crier, or even the Snake Charmer).",
+    "If you get a very large number (> 3), then the Minions are probably sitting close together and away from their Demon. Similarly, if you get a very small number ("
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Clockmaker"
+  },
+  "dreamer": {
+   "name": "Dreamer",
+   "ability": "Each night, choose a player (not yourself or Travellers): you learn 1 good & 1 evil character, 1 of which is correct.",
+   "flavour": "",
+   "summary": [
+    "The Dreamer learns players' characters, but is not sure if their information is entirely correct.",
+    "Each night, the Dreamer chooses a player and learns two characters—one that the player is, and one that the player isn’t.",
+    "The false character token depends on the chosen player’s true character type. If the Dreamer chooses a player who is a Townsfolk or Outsider, the false character token is any Minion or Demon. If they choose a player who is a Minion or Demon, the false character token is a Townsfolk or Outsider.",
+    "The Dreamer may not choose themself, and may not choose a Traveller."
+   ],
+   "how_to_run": [
+    "Each night, wake the Dreamer. They point at any player. If the chosen player’s character is a Townsfolk or Outsider, show their character token and any Minion or Demon token to the Dreamer. If the chosen player’s character is a Minion or Demon, show their character token and any Townsfolk or Outsider token to the Dreamer. Then, put the Dreamer to sleep.",
+    "If the Dreamer chooses an evil player, you can help the evil team if you show the Dreamer the good character that this evil player is bluffing as, or if you show a more secretive character such as the Snake Charmer, Sage, Mutant, or Klutz."
+   ],
+   "examples": [
+    "The Dreamer chooses a player who is the Mutant. The Dreamer learns that this player is either the Mutant or the Cerenovus.",
+    "The Dreamer chooses a player who was the Philosopher but gained the Flowergirl ability earlier that night. The Dreamer learns that this player is either the Philosopher or the Vigormortis.",
+    "Today, both the Evil Twin and the Artist claimed to be the Artist. That night, the Dreamer chooses the player who is the Evil Twin. If the Storyteller wanted to help the good team, they could show the Evil Twin and the Sweetheart. But the Storyteller decides to help evil, so they show the Evil Twin and the Artist to the Dreamer.",
+    "The Dreamer chooses a player who is the Vortox. The Dreamer's information must be false because the Vortox is in play, so the Dreamer learns that this player is either the Oracle or the No Dashii."
+   ],
+   "tips": [
+    "Every time you choose a player, you learn a potential evil character that they could be. Pay close attention to these, because they give you a surprising amount of information even if they are wrong. For example, any player who registers as a Minion cannot be a Demon, so you can exclude them from your list of potential suspects.",
+    "Your ability is a fantastic detector for the Vortox and No Dashii, because unlike other players, it can be very easy to confirm if your information is correct or not. If you get one player who doesn't add up, be suspicious. If you get three? It's time to look at other options.",
+    "Try to choose players who are not close to you. If you are neighbouring a No Dashii, you will be poisoned, and your information will favor the Demon. By choosing someone further away from you in the town, you're much less likely to hit an evil player early and get unreliable information about them. (Feel free to revisit your neighbours in the future though!)",
+    "Giving your information tends to be more powerful in the early game rather than later. Fewer people will have publicly stated their character, and since an evil pair often needs time to coordinate, you'll have a better chance of proving you are a good player.",
+    "When swapping your information with your chosen target, be careful not to reveal your information first. If you are dealing with an evil player, telling them a potential good character might be feeding them a bluff. Instead, have them reveal to you and see if your information aligns with their claims.",
+    "Revealing your information first when swapping information will conclusively prove to the player you're speaking to that you are the Dreamer... providing your information is good. This will allow them to put a lot of trust in you right away, because it's very difficult to have that information otherwise.",
+    "Encourage players to not reveal who they are in the early game. If people come out with who they are, you can still check their claim, but it's much harder for you to confirm yourself if everyone is open about who they are from the get go!",
+    "Check people who you think are lying, not those you think are telling the truth. Catching players out in a lie is awesome, because you'll know what evil player they are and can decide right then and there if you want them dead.",
+    "Check players whom you think are telling the truth; not only does this enable you to back up players whom you trust, but if your information is differs from what you expect, then you can be suspicious that it has been tampered with.",
+    "You should never receive information about a Vortox, because the Vortox forces all information received by good players to be false. This means that if the Vortox is play, your information about them will be incorrect, so you will always receive a different evil character.",
+    "If you have an Evil Twin, don't bother checking them. You will receive the Good Twin's character and the Evil Twin for both players, which is... not very useful. One exception: You can check for Vortox this way, since the information would have to be false!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Dreamer"
+  },
+  "snakecharmer": {
+   "name": "Snake Charmer",
+   "ability": "Each night, choose an alive player: a chosen Demon swaps characters & alignments with you & is then poisoned.",
+   "flavour": "",
+   "summary": [
+    "The Snake Charmer learns player after player that is not the Demon... but becomes the Demon if they get either too greedy or too bold.",
+    "Each night, they choose a player. If that player is not the Demon, nothing happens. If they are the Demon, the Snake Charmer becomes that Demon and turns evil, and the Demon becomes good and poisoned permanently.",
+    "If the Philosopher has the Snake Charmer ability and becomes the Demon, the Demon becomes a poisoned Philosopher."
+   ],
+   "how_to_run": [
+    "Each night, wake the Snake Charmer. They point at any player.",
+    "If that player is not the Demon, nothing happens. Put the Snake Charmer to sleep.",
+    "If that player is the Demon, the old Snake Charmer changes into the new (evil) Demon, and the old Demon changes into the new (good) Snake Charmer—swap the Snake Charmer token and the Demon’s token. The new Snake Charmer is poisoned - mark them with the POISONED reminder. Wake the new Demon and show them the YOU ARE info token, a thumbs-down, the YOU ARE token, then the Demon’s token. (This shows they are now evil and the Demon.) Put the new Demon to sleep. Wake the new Snake Charmer and show them the YOU ARE info token, a thumbs-up, the YOU ARE info token, then the Snake Charmer token. (This shows they are now good and the Snake Charmer.) Put the new Snake Charmer to sleep.",
+    "In the strange situation that the Snake Charmer is evil, or the Demon good, swap their alignments as appropriate."
+   ],
+   "examples": [
+    "The Snake Charmer chooses a player who is the Pit-Hag, so nothing happens. The Snake Charmer simply goes to sleep. The next night, the Snake Charmer chooses themself, so nothing happens.",
+    "The Snake Charmer chooses a player who is the Vigormortis. The Snake Charmer immediately becomes the evil Vigormortis, and the Vigormortis becomes the good Snake Charmer and gets poisoned.",
+    "The Pit-Hag turns themself into the Snake Charmer. Then, the Snake Charmer chooses a player who is the Fang Gu. The Snake Charmer becomes the Fang Gu, while the Fang Gu becomes the Snake Charmer and gets poisoned. Both remain evil."
+   ],
+   "tips": [
+    "The Snake Charmer exists in a state of duality. At any given moment, you may turn evil and begin betraying your team. Until that happens, though, you are good and playing for the good team, and your information is incredibly useful (knowing who isn't a demon is just as important as knowing who the demon is!). Unlike the other players, you are not playing so much for a team but for yourself, and for the team that you want to end up on.",
+    "Play cautiously; select only a few players to confirm as not the demon. Aim for players you expect to survive for a while - if you have players alive on the final day who are not the demon, then that can bring your odds down from 1 in 3 to 1 in 2! Once you reach a point where you're satisfied with the information gathered (or you just don't want to risk it anymore), keep in mind that you can always choose yourself at night to safely avoid becoming the demon!",
+    "Play recklessly! Select as many players as you can - the more you have confirmed as not the demon, the more powerful you are! This method increases your odds of being the demon, but if you remain good for the entire game, you'll have a TON of powerful information to utilize against the evil team. And if you turn evil... well, it probably doesn't bother you that much if you're taking such big risks.",
+    "Don't tell anyone you're the Snake Charmer unless you are sure that you are not going to be the demon. Even when playing carefully, there's always the chance you will flip to evil with one unlucky pick. The demon you just stole from is now good and has a large incentive to reveal what happened to them - if anyone knows you are the Snake Charmer when the demon claims to have turned good, you are going to be in trouble. Try to avoid revealing until you're dead, OR when you're no longer choosing new players each night.",
+    "Remember that every player you pick who doesn't swap you is not the demon! You are more accurate than a Fortune Teller when it comes to detecting demons... providing you can get the good team to trust you.",
+    "If you stay good, come out with your information eventually - sitting on your information all game will only hurt the good team! If you have become evil... don't admit to being the Snake Charmer, and instead come up with a different bluff on the fly.",
+    "Becoming the demon unexpectedly can be a shock, so try to be ready for the possibility at any time. Have a bluff ready, or if worst comes to worst, just claim that you were the demon and were just snake charmed. Get in fast and aggressive enough, and the poor demon you just suckered out of their ability will be scrambling to catch up and prove you as the evil one.",
+    "So you were the demon, and you've just become the Snake Charmer? Never fret - you're playing for the good team now, and a path to victory is still clear. You have a few options - reveal your new alignment, snitch on your minions, and start a demon hunt with all of your evil knowledge... or say nothing for a few days. This way, your minions will still trust you and you can use their powers to hunt out and undermine the new demon. Secretly telling one or two good players in the meantime can also grant you allies in your stealthy demon hunt."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Snake_Charmer"
+  },
+  "mathematician": {
+   "name": "Mathematician",
+   "ability": "Each night, you learn how many players' abilities worked abnormally (since dawn) due to another character's ability.",
+   "flavour": "",
+   "summary": [
+    "The Mathematician knows how many things have gone wrong since dawn today.",
+    "When an ability does not work in the intended way due to another character's interference, the Mathematician will learn that it happened. They'll learn that something went wrong if a piece of information was false but was supposed to be true, or if an ability should have worked but didn't, due to another character.",
+    "The Mathematician does not learn which players this happened to, only how many times it happened.",
+    "The Mathematician does not detect their own ability failing.",
+    "The Mathematician does not detect drunkenness or poisoning itself, but does detect when drunk or poisoned players' abilities did not work as intended. The Recluse registering as evil to the Chef, and the poisoned Soldier dying from the Imp's attack, would each be detected. The poisoned Empath getting true information would not."
+   ],
+   "how_to_run": [
+    "Each time a character's ability works abnormally due to another character's ability, mark them with an ABNORMAL reminder.",
+    "Each night, wake the Mathematician. Show fingers (0, 1, 2, etc.) equaling the number of characters with ABNORMAL reminders. Put the Mathematician to sleep. Remove all ABNORMAL reminders."
+   ],
+   "examples": [
+    "The poisoned Oracle learns that two dead players are evil, when three dead players are actually evil. All other character abilities work normally. Later that night, the Mathematician learns a \"1\".",
+    "The poisoned Snake Charmer chooses a Townsfolk player, and nothing happens. The drunk Juggler gets correct information. The Savant learns two pieces of true information. Later that night, the Mathematician learns a \"1\" because the Snake Charmer and Juggler's abilities worked as normal, whilst one of the Savant's facts was true when it should have been false.",
+    "A Vortox is in play. Five good players got false information. The Witch is drunk, and when their cursed player nominated, nothing happened. Even though six abilities worked abnormally, the Mathematician learns a \"4\" due to the Vortox's ability."
+   ],
+   "tips": [
+    "Your information is valuable, but only if you know what the rest of the town is doing. Get chatty with your fellow players and find out what their information is - figuring out who has an ability that isn't working correctly will help out the good team a lot. Characters like the Clockmaker, Flowergirl, Seamstress, and Oracle (among others) will need your help making sure their information should be acted upon!",
+    "Pay attention to game changes that would affect your data, and be wary if your data suddenly changes. If a recent executee is claiming to be the Sweetheart, your number might increment that evening. Alternatively, if you're suddenly getting a '2' when you were previously getting a '0', you can be suspicious that a Pit-Hag just created a No Dashii.",
+    "Make sure to ask your Storyteller what sort of ability malfunctions you're picking up on. In Sects & Violets, you typically detect when good characters have their ability altered due to evil characters, like the No Dashii and Vortox. However, you will also detect character abilities not working as intended due to the Sweetheart after death, or the Philosopher duplicating an in-play character, and a poisoned Snake Charmer trying to use their ability on the Demon to no avail.",
+    "Beware of the Vortox! Just like everyone else, all of your information will be false. If you are getting a low number, but it seems like a lot of Townsfolk are getting misinformation, you can suspect that this is in play. In particular, getting a '0' when others appear to be getting bad information is a great tell that you are poisoned OR a Vortox is in town.",
+    "Getting a read of '0' is fantastic, as it means that nobody got bad information or had their ability not work correctly. Everyone should be able to trust their info for that day and night.",
+    "Getting a read of '1' is also fantastic - this means only one ability didn't work as intended, and if you can figure out who that is, everyone else can trust their information is reliable for that day and night.",
+    "If you're getting a read of '2' or more, your town might be in trouble. This is a very good sign that multiple sources of poisoning or ability malfunctions are afoot in the town... or that maybe you're the one who is poisoned.",
+    "Unlike other townsfolk, the Mathematician doesn't need to be shy in coming out. Not only is your information most useful when shared, but even one night of it is incredibly powerful when it comes to helping the town. Compared to a Flowergirl or a Juggler, you're also just not as much of a threat."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Mathematician"
+  },
+  "flowergirl": {
+   "name": "Flowergirl",
+   "ability": "Each night*, you learn if a Demon voted today.",
+   "flavour": "",
+   "summary": [
+    "The Flowergirl knows if the Demon voted or not.",
+    "A Demon’s vote counts whether or not the nominee was executed.",
+    "The Flowergirl does not detect if the Demon raised their hand for other reasons, such as when the players “vote” on what to order for dinner, or when the players raise their hand to exile a Traveller.",
+    "If the Demon changes players after the original Demon voted but before the Flowergirl wakes to learn their information, the Flowergirl detects the original Demon.",
+    "If there are two (or more!) Demons, even dead Demons, the Flowergirl detects if any of them voted. If even one Demon voted, the Flowergirl learns a “yes”."
+   ],
+   "how_to_run": [
+    "Each dawn, mark the Flowergirl with the DEMON NOT VOTED reminder, and remove the DEMON VOTED reminder, if any.",
+    "Each day, if the Demon votes for any execution, replace the DEMON NOT VOTED reminder with the DEMON VOTED reminder.",
+    "Each night except the first, wake the Flowergirl. If the Flowergirl is marked DEMON NOT VOTED, shake your head no. If the Flowergirl is marked DEMON VOTED, nod your head yes.",
+    "Then, put the Flowergirl to sleep.",
+    "If you forget whether the Demon voted or not, wake the Demon at night and ask by showing them the DID YOU VOTE TODAY? info token. They must answer honestly, then go to sleep."
+   ],
+   "examples": [
+    "There was one nomination today. Lots of players voted, the player was executed, but the Demon did not vote. That night, the Flowergirl learns that the Demon did not vote today.",
+    "There were three nominations today. The Demon voted during the second nomination. Nobody was executed. That night, the Flowergirl learns that the Demon voted today.",
+    "There were no nominations today. A Traveller was exiled, and all players raised their hand to support the exile. That night, the Flowergirl learns that the Demon did not vote today. (Exiles are never affected by abilities.)"
+   ],
+   "tips": [
+    "Pay attention! You need to keep track of who votes each day, or your information isn't going to be very helpful. Evil players can and will lie about whether they voted or not, so you can't rely on polling the group about who voted if you forget, either. Your information narrows the demon's location down every time you receive it, so make sure it's useful.",
+    "Keep an eye on who doesn't vote as much as on the players who do. Evil players are less likely to want to vote and draw your attention, but if you get a number of players voting and get a 'no', then you know that the demon is among those who didn't that day. Also, keep an eye out for players jumping on a bandwagon of a large voting majority - this could be the demon trying to disguise themselves among the large number of players, limiting your information.",
+    "For an execution, only half the living players' votes are required. If an execution is happening, try to convince the group to limit their votes to only what is required. This will allow you to make a clean divide between two sets of players - if you receive a \"yes\", then you know the demon is among those asked to vote today. If \"no\", you know that the demon is among those who didn't. Controlling voting in this way makes it easier to narrow down where the demon is, BUT be aware that it will likely get you targeted and killed much more quickly than staying quiet and observing the votes naturally.",
+    "Your power allows you to detect the demon, so you are an extremely high-value target for the evil team to undermine and kill early. Try to form an alliance with another player you think is good and let them do the talking for you. In particular, characters like the Sage (who want the demon to target them) will be eager to take on your role and draw the demon's ire while you continue to collect information in the background. This can also protect you from being targeted by the Witch, Cerenovus, and Pit-Hag, all of whom can disrupt you.",
+    "You share a special synergy with the Town Crier, as both of you are invested in nominations and executions. While you are keeping track of who voted, also pay special consideration to who nominates. Not only can this help out your fellow good player, but if you are controlling votes for the sake of your information, it doesn't cost you anything to give them a little extra to work with.",
+    "You can detect if a Vortox is in play under rare circumstances. If all players vote, and you learn that Demon did not vote, then either a Vortox is in play (which is extremely helpful information to know), or you are drunk/poisoned (which is also very useful for the town to know!)"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Flowergirl"
+  },
+  "towncrier": {
+   "name": "Town Crier",
+   "ability": "Each night*, you learn if a Minion nominated today.",
+   "flavour": "",
+   "summary": [
+    "The Town Crier knows when Minions nominate.",
+    "Each night, the Town Crier learns either a “yes” or a “no”.",
+    "They do not learn which players are Minions or how many Minions made nominations, just whether or not any Minions made nominations today."
+   ],
+   "how_to_run": [
+    "Each dawn, mark the Town Crier with the MINIONS NOT NOMINATED reminder, and remove the MINION NOMINATED reminder, if any.",
+    "Each day, if any Minion makes a nomination, replace the MINIONS NOT NOMINATED reminder with the MINION NOMINATED reminder.",
+    "Each night except the first, wake the Town Crier. If the Town Crier is marked MINIONS NOT NOMINATED, shake your head no. If the Town Crier is marked MINION NOMINATED, nod your head yes. Then, put the Town Crier to sleep. Remove the MINION NOMINATED reminder, if any.",
+    "If you forget whether a Minion made a nomination or not, wake each Minion at night and ask by showing them the DID YOU NOMINATE TODAY? info token. They must answer honestly, then go to sleep."
+   ],
+   "examples": [
+    "Today, four players nominated. Two of them were Minions. Many players voted, but there was no execution. That night, the Town Crier learns a “yes.”",
+    "A Minion called for the exile of a Traveller, who was exiled. That night, the Town Crier learns a “no.” (Exiles are never affected by character abilities.)"
+   ],
+   "tips": [
+    "Pay attention to who is doing the nominating! This seems obvious, but your information only matters if you know who nominated to correspond with the info you get each night. Evil players will definitely lie to you if you rely on the town to remember on your behalf, and there's a lot of info flying around in general, which can lead to good players simply forgetting after a few days.",
+    "Get different people to nominate each day. You become more powerful the more people you detect over the course of the game.",
+    "Unlike the Fortune Teller, getting a \"no\" doesn't tell you very much. A \"no\" might still be a Demon whom you very much want to execute. Value your \"yes\" instead - this tells you that you have definitively got a Minion, and you can work on getting them neutralized or executed.",
+    "Beware the Witch! They want nominations as much as you do, since it increases their chance of killing players. Try to guess who the Witch may have chosen (e.g., Players who are playing very aggressively or have already nominated a lot), and encourage different players to be the ones to nominate instead.",
+    "If you are faced with an Evil Twin, you can get just one of them to nominate and get a read on which one is actually the Minion! Just be sure to combine your information with other Townsfolk and rule out dangers like the Vortox or your ability malfunctioning; getting the wrong Twin is a game over!",
+    "You have a special synergy with the Flowergirl, who also has a vested interest in nominations and executions. While trying to get nominations, it can also help to pay attention to who is voting and when - it doesn't cost anything extra to help out your fellow good player, and it helps them avoid the risk of coming out to try and curry those votes themselves and exposing themselves to the demon.",
+    "If you learn that a particular player is a Minion early in the game, it is best to execute them. If you learn learn that a particular player is a Minion late in the game, then you may want to keep them alive, whilst you execute other players. After all, the aim of the game is to execute the Demon, not Minions."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Town_Crier"
+  },
+  "oracle": {
+   "name": "Oracle",
+   "ability": "Each night*, you learn how many dead players are evil.",
+   "flavour": "",
+   "summary": [
+    "The Oracle knows how many dead players are evil.",
+    "Because the Oracle acts after the Demon attacks each night, the Oracle’s info refers to the players that are dead when dawn breaks and all players open their eyes.",
+    "The Oracle detects dead Minions and Demons, but also any other players that are evil, such as evil Travellers, or Townsfolk and Outsiders that have been turned evil.",
+    "When counting the number of dead players, remember to count Townsfolk and Outsider tokens that are upside-down, which means their alignment is the opposite of what is printed."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Oracle. Show fingers (0, 1, 2, etc.) equaling the number of dead evil players. Then, put the Oracle to sleep."
+   ],
+   "examples": [
+    "During the first day, the Flowergirl is executed. That night, the Demon kills the Juggler. The Oracle wakes and learns a \"0,” because all dead players are good.",
+    "Halfway through the game, seven players are dead. Five of them are good and two of them are evil. During the day, an evil Traveller is Exiled. That night, the Demon kills one of it's Minions. The Oracle wakes and learns a \"4,” because four dead players are evil."
+   ],
+   "tips": [
+    "So long as you are getting a \"0\", you can trust that all the dead players are good, and can therefore work with them and use their information.",
+    "The moment you get a \"1\" or more, an evil player has entered the realm of the dead, and you should now be very careful about who you speak to. Outsource your suspicions to the dead - they'll be incentivised to prove themselves good and can do a lot of the work of accusations for you.",
+    "Most players who die at night will be good players; evil players want to stay alive as long as possible, so the demon will be focusing their kill on good player threats. If you suddenly start getting a read on an evil player, you should start your suspicions with the most recent executee.",
+    "The Fang Gu and the Vigormortis are both demons that you can detect when they move around the town. The Fang Gu will cause unexpected jumps in the evil count if they hit an outsider and jump between players, while the Vigormortis will probably take out a minion (or two!) close to the beginning of the game to ensure their ability stays active. If you're noticing either of these trends, check for other tells of these demons (e.g., increased outsider count, minion abilities activating despite only a few alive players remaining). If you can confirm one of them is in play, you know it isn't Vortox and can start forming a strategy for victory!",
+    "Feel free to come out early or late in the game - you receive valuable information the entire day, so even your first piece of info alone can give the good team a lot to work with. You might be able to make a deduction or two based on when you die - an early Oracle death could indicate a spooked Vigormortis, OR that someone evil recently was executed and they don't want you to know."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Oracle"
+  },
+  "savant": {
+   "name": "Savant",
+   "ability": "Each day, you may visit the Storyteller to learn 2 things in private: 1 is true & 1 is false.",
+   "flavour": "",
+   "summary": [
+    "The Savant gets crazy, amazing information that is different every day and every game, but exactly half of it is completely false.",
+    "Each day, the Storyteller chooses two pieces of information to give the Savant... so get creative! One must be true, and one must be false, and the Savant won’t know which is which.",
+    "It is up to the Savant to talk with the Storyteller, not the other way around. This isn’t a public conversation, and the group can’t listen in. It’s private.",
+    "The Savant can choose to not visit the Storyteller if they wish.",
+    "A drunk or poisoned Savant might get two pieces of true information or two pieces of false information."
+   ],
+   "how_to_run": [
+    "Once per day, if the Savant requests a private chat with you, take them away from the circle so you cannot be overheard. Whisper two pieces of information, one true and one false, to the Savant. (If you cannot think of two straight away, either take your time or ask them to come back in a few minutes.)",
+    "Keep the information you give helpful and related to the game. Avoid saying who exactly the Demon is, or it could be a very short game. If you need help on choosing what to say, give information similar to what Townsfolk abilities would provide."
+   ],
+   "examples": [
+    "The Savant learns that \"All players wearing glasses are good\" and that \"One player sitting on the black couch is a Minion.\"",
+    "The Savant learns that \"A Snake Charmer is in play\" and \"Everybody got true information last night.\"",
+    "The Savant learns that \"The Demon is a woman\" and \"Benjamin is evil.\"",
+    "The Savant learns that \"Evin and Amy are the same alignment\" and \"There is one Outsider in play.\""
+   ],
+   "tips": [
+    "Each day, you will receive one true piece of information, and one false piece of information. The easiest way to utilize this is to pick which piece of information you believe to be true, and run with it. For example, if the Storyteller tells you that either a) a Mutant is in-play, or b) both your neighbours are good, and there is no evidence that a Mutant is in-play, then just assume that both your neighbours are good. You might be wrong, but you've made a \"best guess\", which is something.",
+    "In some situations, one half of your information may be proved to be true, in which case, the other piece of information is false. Or, one half of your information is proved to be false, in which case the other half of your information must be true. This gives you multiple facts to work with. For example, if you learnt that either a) the Minion has blonde hair, or b) there are 3 Outsiders in play, and all evidence is pointing to the fact that the Minion is dead (and no dead players have blonde hair), you can safely assume that there are 3 Outsiders in play.",
+    "You can sometimes deliberately prove that one half of your information is true or false. Again, this gives you more facts as a result. For example, if you learn that either a) the Demon is wearing a collared shirt, or b) all players on the black couch are good. If you deliberately execute all players wearing collared shirts, and the game continues with the Demon still killing at night, then you know that the Demon was not wearing a collared shirt, and therefore that all players on the black couch are good.",
+    "False information is just as useful as true information, if you know it to be false. When mentally reversing a fact from false to true, be careful that you do not make a logical error. For example, if you learn that \"the Witch chose a good player last night\", and you come to believe that information is false, reversing this information to mean \"the Witch chose an evil player last night\" is not necessarily correct. There may be no Witch in play. Or the Witch might be dead. The reversal of \"the Witch chose a good player last night\" is \"all good players are free from the Witch's curse and may safely nominate\".",
+    "Each day, you will get two pieces of information. Whilst it may sometimes seem impossible to determine which of these pieces are true, as the game progresses, you can compare later information to earlier information, and this may lead to definite conclusions. For example, if on the 1st day, you learn that a) A Snake Charmer is in play, or b) all players wearing hats are good, then on the third day, you learn that either a) a new player became the Demon last night, or b) the Minion is dead; this information overlaps. If you assume that the Demon has been swapped by the Snake Charmer, you can deduce that at least one player wearing a hat was evil on day 1, and the Minion is still alive.",
+    "Tell the group your information each day so they can help you remember it all. It can be difficult to remember everything the Storyteller told you once the days start getting numerous. You need to be a Savant, after all! Telling the group can help make sure nothing is forgotten. Alternatively, if you have an excellent memory (or you can secretly write down the information without the storyteller catching you, or the Storyteller actually lets you write down information), staying quiet for a few days and revealing everything at once can be devastating.",
+    "To maximize the information that you receive, do whatever you can to survive as many days as possible. Bluff as a character that the Demon does not want to attack, such as the Sage, or the Clockmaker, or Seamstress, who has already used their ability, or simply stay quiet. The longer you survive, the more information you have to work with. Don't leave it too long though... with players dying left, right, and center, due to the Witch, Cerenovus, and Mutant, you may need to reveal your information earlier rather than later, to help the good team kill an evil player or two. This is particularly helpful if an Evil Twin or a Vortox is in-play, as you'll need to correct the good team's information with what you know.",
+    "Pay attention to the wording that the Storyteller uses - small changes can have drastically different consequences. Since the Savant can be a difficult character for Storytellers to have in a game, as they need to create information that is helpful to you, but not game-endingly unfair for the evil team, many Storytellers choose their words very carefully. Remember exactly what was said, to avoid confusion. For example, if the Storyteller says \"All minions are on the blue couch\", and you tell the group that \"all players on the blue couch are minions\", you have made a logical error. Or, if the Storyteller says \"The Demon is wearing glasses\", and you tell the group \"The Demon is someone who wears glasses.\", be aware that these statements are slightly different - if the Demon takes their glasses off without you noticing, and you keep telling the group that the Demon is wearing glasses, you will be in error.",
+    "Visit the Storyteller every day, to receive as much information as you can. The more days that you visit the Storyteller, the more you learn, but the more likely the Demon is to kill you at night. The Savant is often too dangerous a player for the Demon to keep alive, so if the Demon player sees you visiting the Storyteller each day, they may attack you at night, even if you have not publicly revealed that you are the Savant.",
+    "Wait a few days before visiting the Storyteller. While this will mean that you get less information overall, it may mean that you live longer and that any information that you do receive is more valuable. Typically, information you get when there are only 3, 4, or 5 players left alive will be more useful, because it refers to fewer players. For example, learning that 1 of 2 players is a Minion is handy when 12 players are alive, but it is VERY handy when just 3 players are alive."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Savant"
+  },
+  "seamstress": {
+   "name": "Seamstress",
+   "ability": "Once per game, at night, choose 2 players (not yourself): you learn if they are the same alignment.",
+   "flavour": "",
+   "summary": [
+    "The Seamstress learns whether 2 players are on the same team as each other.",
+    "They only get this information once per game, so they had best choose wisely when and who.",
+    "They may choose alive or dead players or even Travellers."
+   ],
+   "how_to_run": [
+    "Each night, wake the Seamstress. They either shake their head no or point at any two players except themself.",
+    "If they shake their head no, nothing happens. Put the Seamstress to sleep.",
+    "If they point at two players, either nod your head yes (to indicate these players have the same alignment) or shake your head no (to indicate these players do not have the same alignment). Put the Seamstress to sleep. The Seamstress loses their ability - mark them with the NO ABILITY reminder and remove their night token from the night sheet."
+   ],
+   "examples": [
+    "During the first night, the Seamstress chooses two players, who are the Barber and the Clockmaker. Because they are both good, the Seamstress learns a \"yes.”",
+    "During the first three nights, the Seamstress chooses not to use their ability. During the fourth night, they choose two players, who are the Fang Gu and the Sweetheart. The Seamstress learns a \"no.”",
+    "The Pit-Hag turns the Mathematician into the Witch, who remains good. Later that night, the Seamstress chooses the two players, the Witch and the Town Crier. The Seamstress learns a \"yes\" because they are both good."
+   ],
+   "tips": [
+    "Wait a couple of days before using your ability. This has some risk attached because you can obviously be killed in that time, but waiting will give you an idea of the layout of the game, who is claiming what, and who you find suspicious. It also means there is a smaller pool of alive players to choose from since there will have been executions and demon kills.",
+    "Use your ability as soon as possible! You only have one shot, and if you die before you use it, then you'll be kicking yourself. Even picking two random players on the first night is better than picking nobody!",
+    "A common mistake that Seamstresses can make is not remembering that you detect the same alignment - not \"good\" alignment. This means if you get lucky enough to pick two evil players, then they will register as 'Yes' for your ability. It is much more likely to get two good players, but if you're not sure, try coordinating your information with other information gatherers (e.g. Clockmaker) and see if they line up with your concerns. You can also watch your two players and see if they begin colluding before you get a chance to reveal they're the same alignment.",
+    "If you have a player that you trust is good (alive or dead), you can use this person as a reference point for another player's alignment. If you get they are of different alignments, then you can be reasonably sure it's the unknown player that's the evil one. This is especially potent when dealing with a troublesome Evil Twin.",
+    "Use your ability on people you don't know much about! Learning whether two people are on the same team or not is very powerful, and will help you decide whether or not to trust them when they begin revealing who they are and what they do.",
+    "Pick people for your ability that have a lot of sway over the game. Figuring out if a Savant or Flowergirl claim is legitimate is usually more potent than figuring out if that Barber is being upfront.",
+    "In general, try to pick players who are not your neighbour. If you are sitting next to a No Dashii, they will poison you and of course read positively to your information. By picking players further away from you, you will still be getting poisoned information, but at least you know there isn't a potential demon in the mix muddying things up further."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Seamstress"
+  },
+  "philosopher": {
+   "name": "Philosopher",
+   "ability": "Once per game, at night, choose a good character: gain that ability. If this character is in play, they are drunk.",
+   "flavour": "",
+   "summary": [
+    "The Philosopher has no ability until they decide which character they want to emulate.",
+    "They can do this once per game. When they do so, they gain that character’s ability. They do not become that character.",
+    "They may want to wait a while to choose. If the Philosopher chooses a character that is already in play, the player of that character becomes drunk. If the Philosopher then dies or becomes drunk or poisoned, the player they are making drunk becomes sober again.",
+    "If the Philosopher chose a character that was not in play at the time but is in play now, that character is drunk.",
+    "If the Philosopher gains an ability that works at night, they wake when that character would wake. If this ability is used on the first night only, they use it tonight.",
+    "If the Philosopher regains their ability via the Bone Collector, or uses their ability twice via the Barista, the Philosopher may choose a new ability, or the same ability as before.",
+    "If the Philosopher’s ability works while dead, such as the Klutz’s, it works if the Philosopher is dead."
+   ],
+   "how_to_run": [
+    "Each night, wake the Philosopher. They either shake their head no or point at any Townsfolk icon or any Outsider icon on their character sheet. Put the Philosopher to sleep.",
+    "If they pointed to an icon of a character not in play, swap the Philosopher token with the chosen character token and mark them with the IS THE PHILOSOPHER reminder.",
+    "If they pointed to an icon of a character in play, the player of the chosen character becomes drunk - mark them with the DRUNK reminder. (You can now use the duplicated character’s reminders for the Philosopher). If the Philosopher dies, the player made drunk by the Philosopher becomes sober - remove the DRUNK reminder."
+   ],
+   "examples": [
+    "During the first night, the Philosopher chooses to gain the Dreamer's ability. They gain the Dreamer's ability from now on and act when the Dreamer normally acts.",
+    "During the third night, the Philosopher chooses to gain the Clockmaker's ability. That night, they learn the distance from the Demon to their nearest Minion.",
+    "An Artist is in play. The Philosopher chooses to gain the Artist's ability. The original Artist becomes drunk. Later, the Philosopher dies, so the original Artist becomes sober again. (The original Artist would also become sober if the Philosopher became drunk.)"
+   ],
+   "tips": [
+    "The Philosopher's strongest asset is their versatility. You can emulate any good character on the list! Try to get a read on what the good team is lacking and/or what would be most effective in countering the evil team. Every Townsfolk is a viable option:",
+    "* Clockmaker - Since the Clockmaker gets their information on the first night, you can safely gain a Clockmaker's ability at any point in the game after that. Not only will this allow you to confirm an existing Clockmaker's information, but getting this information later in the game can help you make connections between Minions and Demons when combined with other players' information.",
+    "* Dreamer - If people are clamming up about their characters, choose the Dreamer to get that information out in the open! A Dreamer gets amazing information and can quickly build up trust with other good players. It is also a fantastic detector for the Vortox!",
+    "* Snake Charmer - The Snake Charmer can detect who is and who isn't the Demon, and cannot be affected by the Vortox, making their information especially potent. It also affords you the opportunity to turn into the Demon, but surely you'd never abuse your power for something like that, right?",
+    "* Mathematician - Knowing who is and isn't getting reliable information is vital in Sects & Violets, especially when contending with Demons like the No Dashii. If you want to get a read on how accurate the good team's info is, nobody is more effective than the Mathematician.",
+    "* Flowergirl - The innocent Flowergirl terrifies Demons more than most Townsfolk in Sects & Violets. Knowing when the Demon did or didn't vote can be crucial information, narrowing down the places for the Demon to hide in the innocent village. Becoming this character secretly is even better, since you might be able to lull the Demon into a false sense of security.",
+    "* Town Crier - What the Flowergirl is to Demons, the Town Crier is for Minions. This is a great option if you have a Witch in play, since good players will be more nervous to nominate and evil players more bold. This is another one worth secretly selecting, as Minions will get comfortable thinking no Town Crier is around... and then suddenly there you are!",
+    "* Oracle - Being able to trust the dead is extremely important in Blood on the Clocktower. Unfortunately, Demons like the Vigormortis make that a more difficult prospect in Sects & Violets, as the Minions infiltrate the dead under the guise of being innocent Demon victims. The ultimate counter to this is the Oracle, who judges the dead. Even without worrying about the sneaky Vigormortis, your information is amazing.",
+    "* Savant - If you're feeling like there's just not enough information in the game in general, the Savant is the solution. Getting hints every single day directly from the Storyteller will give you a lot of varied and interesting facts to work with, and will help the good team immensely as they try to piece together who is evil.",
+    "* Seamstress - Checking the alignments of other players will give you instant insight into whether you should trust them or not. If you have any suspicions about a particular player or player(s), the Seamstress can give you some insight into their true selves. This also has the advantage of being a \"once per game\" ability, which means you can coordinate your transformation with the initial Seamstress, and get you both reliable information.",
+    "* Artist - Being able to ask one yes/no question of the Storyteller about the game is very powerful - do not underestimate this ability and what you can bring to the game at a crucial moment. The sky's the limit! Similar to the Seamstress, the Artist only uses their ability once, so be careful about your timing - you could end up getting two Artist questions with a bit of care!",
+    "* Juggler - The Juggler acts on their first day, not the first day of the game. This means that a couple of days in, you can unexpectedly emerge as the Juggler and confirm a number of claims quickly and easily. Many players will be reluctant to reveal themselves on the first day, but open up as time goes on - this gives you an edge over a real Juggler.",
+    "* Sage - Claim to be any other Townsfolk on this list for any other reason, but actually acquire the Sage's ability. The concept of a Flowergirl or Savant appearing in town will make any Demon nervous... making it the perfect bait to get the Demon to kill you at night.",
+    "You can also select an Outsider, such as the Barber or the Klutz. This is not as powerful as transforming into a Townsfolk, but there's a couple of reasons why this might be worthwhile:",
+    "* You make an existing Outsider drunk. If you think the Demon might target a Sweetheart, for example, you can transform and make them drunk. This means at the point their ability would normally activate, they are drunk and harmless.",
+    "* The Klutz's ability is scary, but reliable. You know for certain that if the game does not end, the Klutz's choice must be good (assuming they are the Klutz). If you are desperate for information or just like taking risks, this might be a viable option for you.",
+    "Using your ability early can often be to your benefit - the earlier you act, the more information and impact your new ability will have on the game overall. It also means that if the Demon kills you, at least you've gotten something to work with. Nobody wants to die a mere Philosopher!",
+    "Selecting an ability later in the game is more risky, but allows you to make a more considered choice about who you become. You'll have a better idea of who is in play, what sort of evil you're competing with, and what kind of character would be most effective to strengthen the good team's position. For example, if you suspect a Vigormortis, choose the Oracle. If you have a troublesome Evil Twin situation, perhaps select the Seamstress. Just need a straight answer already? Go with the Artist!",
+    "Gather information before you make a decision! Causing in-play characters to become drunk can hurt your team as much as you might potentially help. Knowing who is in play and who you can transform into without impacting your teammates is very important.",
+    "If a player is giving regular information, such as the Oracle or the Dreamer, then you can secretly, and deliberately, duplicate them. Since they are now drunk, their information should be different than yours, or show some other drastic change. If their information remains consistent, even after you have made them drunk, then they are almost certainly evil.",
+    "Screw the rest of the advice on this page and just pick your favorite character! Snake Charmer, anyone?",
+    "Sometimes, it might be best to deliberately double up with an in-play character. This ensures that a particular character's information definitely gets into the game even if the Demon kills one of you. This also means that the good team is less incentivized to execute you. For example, if an Evil Twin is in play, and you are afraid that the Town Crier will not survive the night, you can appropriate their ability. The good team still learns if a Minion nominated, as if you die tonight, the original Town Crier will get the news. It's win-win."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Philosopher"
+  },
+  "artist": {
+   "name": "Artist",
+   "ability": "Once per game, during the day, privately ask the Storyteller any yes/no question.",
+   "flavour": "",
+   "summary": [
+    "The Artist may ask any 1 question, and get an honest answer.",
+    "The question may deal with anything at all, phrased in any way they want. The Storyteller honestly answers “yes,” “no,” or “I don’t know.”",
+    "It is up to the Artist to talk with the Storyteller, not the other way around. This isn’t a public conversation, and the group can’t listen in. It’s private."
+   ],
+   "how_to_run": [
+    "During any day, the Artist can request a private chat with you. Take them away from the circle so you cannot be overheard. They will ask you a question. Whisper “Yes,” “No,” or “I don’t know,” to them, or if you cannot answer in one of these ways, prompt the Artist to ask again in a different way. The Artist loses their ability - mark them with the NO ABILITY reminder.",
+    "Like the Savant, evil players bluffing as the Artist may request a private chat with you and pretend to ask a question. To help them bluff, you can pretend to give an answer by nodding or shaking your head."
+   ],
+   "examples": [
+    "The Artist asks, \"Is the Demon sitting in a brown chair?\" The Storyteller answers, \"No,” because the Demon is in a black chair.",
+    "The Artist asks, \"Is David the Evil Twin?” and the Storyteller answers, \"Yes,” because David is.",
+    "The Artist asks, \"How many Minions are alive?” and the Storyteller says, \"Please ask another question. I cannot answer that with a yes, no, or I don't know.\"",
+    "The Artist asks, \"Are we winning?” and the Storyteller answers, \"I don't know,” because even though all the Minions are dead, many good players trust the Demon."
+   ],
+   "tips": [
+    "Ask your question as soon as you can on the first day! Between the demon and the Pit-Hag, you risk losing your question every day that you do not use it. Using it right away negates this risk. There are a lot of questions you can ask knowing nothing else about the game that will give you a great head-start on detecting where evil is hidden in the town.",
+    "Hold onto your question for a few days. This is very risky, since the longer you are alive without using it, the greater chance you won't get to. With that said, Sects & Violets is a game stuffed to the brim with information - waiting to hear people's claims and the information they've got available to them can enable you to ask a much more specific and deadly question that could change the course of the game with a simple 'yes' or 'no'. In particular, characters like the Flowergirl, Town Crier, and Oracle give information that can help you narrow down where the evil lies.",
+    "Being too specific with your question (e.g. Is Amy the demon?) will probably result in an unhelpful 'no'. Instead, ask questions that will divide the group into two halves. For example, ask if the demon is sitting in a particular group - yes or no, you have narrowed down where the demon is or isn't. Other questions can include asking if there's a concentration of evil players in a particular location, or asking about characters like the Evil Twin.",
+    "If you don't have a lot of in-game threads to follow, you can also ask for information outside of the game mechanics and still break the town into groups. For example, if a disproportionate number of players are wearing red shirts. you can ask if the demon is among them!",
+    "Your ability can be used to replicate many information gathering abilities in the game - providing you can phrase them as a yes/no question! Listen to the claims of the people around you and craft your question to cover weaknesses in the good team's info, or to confirm/deny another person's claims.",
+    "Hiding from the demon so they don't kill you before you use your ability is imperative. You can try bluffing as another character, but another option is come out to the town and pretend you have already asked your question. The demon will not consider you as much of a threat if they believe you, and will probably prioritize more dangerous targets that appear to be still getting information.",
+    "Don't ask about the Vortox directly. Asking \"is there a Vortox in play\" will always result in a \"no\" - either there's no Vortox, or there is a Vortox and you're getting false information. To try and detect Vortox, you can instead give a statement that is definitely true (e.g. \"Does 2+2 = 4?\") - if the storyteller says \"no\", then you know your information has been compromised in some way.",
+    "Another way to inquire after Vortox is to ask after information that can be verified in-game as true. For example: Ask if the demon is among three players (Side note: These three players should not be close enough to be your neighbours, because the No Dashii will confuse your info). If you get a \"Yes\", then execute all of them. Then, if the game continues, you know it is probably Vortox. If you get a \"No\", then you either know three players who are not the demon, or you know that one of them is most likely the Vortox."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Artist"
+  },
+  "juggler": {
+   "name": "Juggler",
+   "ability": "On your 1st day, publicly guess up to 5 players' characters. That night, you learn how many you got correct.",
+   "flavour": "",
+   "summary": [
+    "The Juggler takes the risk of convincing people to reveal their characters on the 1st day, in the hope of guessing as many as possible that are telling the truth.",
+    "On the first day, they may guess which players are which characters. That night, the Juggler learns how many guesses they got right...if they are not killed beforehand.",
+    "They must make their guesses publicly, so everyone hears what is guessed. They may guess zero characters, or up to five characters, and these characters and players may be different or the same.",
+    "If the Juggler made their guesses while drunk or poisoned, but is sober and healthy when their ability triggers that night, then the Storyteller still gives them true information."
+   ],
+   "how_to_run": [
+    "During the first day, if the Juggler declares that they are using their ability, then you enter the circle, holding the Grimoire. The Juggler can make up to five guesses, each of any one player and any one character. For each correct guess, mark the Juggler with a CORRECT reminder. (Make sure the players don’t see how many reminders you’re placing.)",
+    "That night, wake the Juggler. Show them fingers (0, 1, 2, etc.) equaling the number of CORRECT reminders. Put the Juggler to sleep. Remove the CORRECT reminders and the Juggler’s night token when convenient.",
+    "If the Juggler is guessing too fast, prompt them to slow down.",
+    "If an evil player is bluffing as the Juggler, it can help their bluff if you pretend to move tokens around the Grimoire as they make their fake guesses."
+   ],
+   "examples": [
+    "During the first day, the Juggler guesses that Alex is the Town Crier, Mia is the No Dashii, and Julian is the Sage. That night, the Juggler learns a \"2,\" meaning two of those guesses were correct.",
+    "During the fourth night, the Savant gets turned into the Juggler. The next day, the new Juggler guesses that Benjamin is the Pit-Hag, that Benjamin is the Witch, and that Amy is the Pit-Hag. That night, the Juggler learns a \"1.”"
+   ],
+   "tips": [
+    "Try to guess as many good characters as you can! The more good characters you are able to name and confirm, the more good players you'll have in the town that you can trust. This also helps protect you and other information gathering characters from the Demon - you might be a prime target alone, but the Demon will have to choose very carefully if a Savant, Flowergirl and yourself are out and active.",
+    "Guessing that someone is an evil character is powerful if you can confirm it, but difficult without a lead. If you intend to go down this path, try to seek out a Dreamer and their information (they'll definitely have one evil character for somebody by the time you use your ability!). This can also be very effective when dealing with an Evil Twin.",
+    "Guess the maximum amount of characters you can - you'll get a read on 5 people, and the number you get back will give you a LOT to work with, whether or not it backs up the claims made to you. Getting the fabled 5 is incredibly tricky, but manage it and you'll have 5 people you can completely trust - a massive blow for the evil team!",
+    "Guess a small number of characters for focused information on a particular set of players. This can be especially effective for targeting evil players, but you can also use it to confirm the existence of a Vortox by checking information that is verifiable as true.",
+    "A proactive Juggler is a high priority target for the Demon. Consider getting someone to double up with you to confuse the Demon about where the real Juggler is. Bonus points if you can find a Sage, since if the Demon picks wrong, it's doubly bad for them!",
+    "Convince as many people to reveal as possible, even if you don't eventually target them with you ability. The good team thrives on freedom of information, and your ability facilitates this - use it to get a dialogue happening in your town about information. This has the bonus of allowing the good team to coordinate while leaving the Demon with no clear cut target that they should definitely pick on - no matter what, somebody will be alive the next day with new information.",
+    "There's no penalty for guessing the wrong character; in fact, false info is just as useful as true info! If you don't get the number you expected, you might have an evil player in your midst trying to confuse things, or an outsider like the Sweetheart trying to hide, or even have been affected by the Cerenovus! Figuring out why your number was wrong will give you valuable information about the town.",
+    "This is less a tip for the Juggler, and more the Juggler's teammates. Do you suspect your Juggler is not who they claim? Lie to them! Deliberately giving them a false role and seeing if they detect you is a great test to counter the Juggler bluff. (Just be sure to let them know afterwards!)",
+    "Not everyone will want to reveal to you. Evil players will be among them - having a confident bluff on the first day can be a struggle, especially if they are a Minion. However, outsiders (especially ones like the Klutz) and characters like the Oracle or Town Crier will also be reluctant, trying to avoid drawing attention to themselves as Demon targets. It's worth being suspicious of anyone who doesn't share, but don't automatically condemn them either."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Juggler"
+  },
+  "sage": {
+   "name": "Sage",
+   "ability": "If the Demon kills you, you learn that it is 1 of 2 players.",
+   "flavour": "",
+   "summary": [
+    "The Sage knows nothing while alive, but learns the most important information of all at the moment of their death - who killed them.",
+    "The Sage only gets this information when killed by a Demon attack. Being executed does not count."
+   ],
+   "how_to_run": [
+    "If the Sage was killed by the Demon, wake the Sage. Point at two players, one who is the Demon that killed the Sage. Put the Sage to sleep.",
+    "If the Sage dies early, you will probably want to show the Sage two alive players, which lets the evil team still have a slim chance of winning. If the Sage dies on the final night, feel free to show one alive and one dead player."
+   ],
+   "examples": [
+    "During the second night, the Demon kills the Sage. The Storyteller points at two players, one of whom is the Demon.",
+    "During the final night, the Demon kills the Sage, who is drunk because of the Sweetheart. The Storyteller points at a dead player and one of the remaining three alive players. This information is incorrect.",
+    "The Pit-Hag creates a Demon. Because the Pit-Hag ability says that \"all deaths tonight are arbitrary,” the Storyteller decides that the old Demon dies, and the Sage dies. Because the Sage died due to the Pit-Hag, not the Demon, the Sage does not wake to learn anything tonight"
+   ],
+   "tips": [
+    "Get killed by the Demon. Do it. By any means, and as quickly as possible. If the Demon kills you, you get fantastic information, so do whatever you can to make it happen. Pretend to be a character the Demon would want to kill, such as a Flowergirl or a Savant, or stay silent. Unlike the Ravenkeeper, who benefits more so when the Demon attacks them later in the game, you benefit most when the Demon attacks you earlier in the game. If the Demon attacks you on the first or second night (or in the first half of the game), then you will have enough days left to execute both suspects you learn might be the Demon.",
+    "Reveal your information immediately if the Demon does kill you. The sooner the good team knows that you are the Sage, and that you know 1 of two players is the Demon, then the sooner you can figure out who the Demon is. If you wait until the final day to reveal your information (in the way that a Fortune Teller might wait until the final day to reveal that 1 or 2 still-living players are not the Demon), then you may still only know that the Demon is 1 of 2 players. Also, in this case, you will have to convince the good team that you are the Sage, and you may not have enough time left to do so.",
+    "You can simply come out publicly as the Sage, in order to survive until the final day. If you believe that the group trusts you, telling the group that you are the Sage can be a great way to get the Demon to leave you alone, so that other players are killed at night, and other players are executed during the day. Having other players believe that you are good is crucial for this strategy to work. Surviving until the final day means that evil can not automatically win by having all 3 players alive be evil, and it also means that the good team is choosing between 2 players to execute, not 3.",
+    "If you die at night but didn't get any information, this is also great news! While you didn't get to find out who the Demon is, you know that the only way you can die at night but not be killed by the Demon is if you were killed by the Pit-Hag's arbitrary deaths, so you can confirm that to town."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Sage"
+  },
+  "mutant": {
+   "name": "Mutant",
+   "ability": "If you are \"mad\" about being an Outsider, you might be executed.",
+   "flavour": "",
+   "summary": [
+    "The Mutant is killed if they try to reveal who they are.",
+    "“Madness” is a term that means “you are trying to convince the group of something.” So, if the Mutant player is mad about being the Mutant, this means they are trying to convince people that they are the Mutant. If they are mad about being an Outsider, this means they are trying to convince people that they are an Outsider.",
+    "This can be by verbally hinting who they are, or by their silence when questioned. It is always up to the Storyteller to decide what the Mutant is doing. If you think they are trying to convince the group they are an Outsider in any way, you can execute them—even outside the nomination phase, or at night. If you do, no other executions may happen today by normal means, since there is only one execution per day.",
+    "If the Mutant hints that they are the Mutant at night, you may execute them that night, even if an execution happened today. Declare they have died, and continue the night phase as normal. An execution may still happen the next day."
+   ],
+   "how_to_run": [
+    "At any time (even at night), if you believe that the Mutant is mad about being an Outsider, then you can decide to execute the Mutant. Declare this to the group. They die - mark them with a shroud.",
+    "If you execute them during the day before the normal execution",
+    "happens, go to the night phase. (There is a maximum of one execution per day.)"
+   ],
+   "examples": [
+    "Ten seconds into the first day, the Mutant says to the group that they’re the Mutant. The Storyteller declares that the Mutant is executed immediately. There is no nomination for an execution today, since there can be a maximum of one execution per day.",
+    "A Witch privately talks to the Storyteller and says that Evin, who is playing the Mutant, told them they are the Klutz. The Storyteller chooses to execute the Mutant immediately.",
+    "The Mutant tells the group that they are a Townsfolk, but does not say which one. When questioned if they are the Mutant, they stay silent. After a minute or so of silence, the Storyteller executes the Mutant.",
+    "The Mutant says they are the Oracle, gives some bogus Oracle information, then says \"By the way, I am definitely not the Mutant\" while giving a subtle wink. The Storyteller chooses to execute the Mutant immediately."
+   ],
+   "tips": [
+    "Never admit to being the Mutant. Never even admit to being an Outsider. \"Admitting\", of course, is a tricky thing to define. In Blood On The Clocktower, the term \"mad\" is used instead. What this means, is that if you try to convince anybody that you are the Mutant, the Storyteller can (and should) execute you immediately. Or, if you try to convince the group that you are an Outsider, the Storyteller can (and should) execute you immediately. This is the judgement call of the Storyteller, and the Storyteller will make their decision based on what they think you are trying to do, not just the words you use. For example, if you tell the group that \"you might be the Mutant, but might not be\", then the Storyteller may judge that you are trying to convince the group that you are the Mutant, and execute you. Or, if the whole group is asking what your character is, and you stay silent, refusing to say who you are, then the Storyteller may judge that your silence is a way that you are trying to convince the group that you are the Mutant, and execute you.",
+    "Be proactive. Don't stay silent. As discussed above, Mutant players that stay silent the whole game tend to get executed by the Storyteller. If you talk, pick a Townsfolk to claim to be, and do your best to convince the group that you are a character other than the Mutant, then you almost certainly won't get executed. For example, if you spend the game convincing people that you are the Oracle, and give the best, most sensible sounding information that you can, you won't be executed. And, if the Demon kills you because they think you are a threat, then that's fine too! After all, if you die at night, it means that another good player (which, statistically speaking, would have been a Townsfolk character) doesn't die instead.",
+    "Deliberately coming out as the Mutant has some benefits and some drawbacks. On the one hand, if your execution goes off, you will be confirmed as a good player, and everyone will believe you. On the other hand, that's an execution that the good team don't get to dictate themselves, and if you go off too early in the day, you can block characters like the Savant. Artist and Juggler from using their abilities. Finally, the storyteller may simply choose not to execute you, which will leave you in an ambiguous state of unconfirmed despite not satisfying the madness of your ability... which will make you look especially evil.",
+    "Come out secretly to one or two players you trust. You're going to be bluffing as a townsfolk, which can look suspicious and cause problems for you down the line (especially if your information isn't adding up with what the other players are getting). Admitting the truth early on means that the people you trust will know to discount your information and protect you from accusations. (Additionally, knowing about your presence can be particularly important for determining if there is a Fang Gu around!)",
+    "Beware the Storyteller! They will be on the watch for you fulfilling your madness, and it won't take too much for them to execute you, thus denying the good team a chance at killing the Demon! Avoid mentioning your true identity within earshot of the Storyteller, but also be wary about revealing to suspected evil players - they can tell the Storyteller what you've said, and get you killed that way!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Mutant"
+  },
+  "sweetheart": {
+   "name": "Sweetheart",
+   "ability": "When you die, 1 player is drunk from now on.",
+   "flavour": "",
+   "summary": [
+    "The Sweetheart, when they die, causes someone to be drunk for the rest of the game.",
+    "The Storyteller chooses which player becomes drunk.",
+    "This ability works while the Sweetheart is dead."
+   ],
+   "how_to_run": [
+    "If the Sweetheart dies, you choose any one player to become drunk - mark this player with the DRUNK reminder. The Sweetheart does not lose this ability when dead.",
+    "You will almost always want to make a Townsfolk drunk, which will hurt the good team, but if evil is winning quite convincingly, you can make an Outsider, Minion, or even the Demon drunk."
+   ],
+   "examples": [
+    "The Sweetheart dies. The Mathematician is now drunk, and may get false information at night.",
+    "The Sweetheart dies. The Mutant is now drunk. The Mutant may safely come out as the Mutant, but they do not know this.",
+    "The Sweetheart dies. The Demon is now drunk, so their attack at night won’t kill anyone."
+   ],
+   "tips": [
+    "Don't die! Your death will immediately cause a fellow villager to become drunk, rendering their ability and any information they gain from that point on will be unreliable. While it is possible for an evil player to become drunk via this method, you are an Outsider and your ability hinders the Good Team - you should always assume that a fellow good player has been afflicted.",
+    "Bluff as an undesirable target for the Demon. To increase your chances of survival, claim to be a character that the Demon wouldn't want to touch - this can be a character like the Sage who the Demon wants to avoid at all costs, or characters like the Artist and Juggler who have used their abilities already. If the Demon thinks you are low priority, they'll focus on other targets, allowing you to avoid death. (Note that it may be to your benefit to reveal your true identity to one or two people secretly so they know whatever 'information' you're offering is not true.)",
+    "If you do die, reveal immediately. Knowing that you are the Sweetheart is very important for the good team since your ability only activates on death. It is also worth revealing if you are going to be executed - even if you are out in the open, the Demon will have to decide that night between killing you or a more dangerous target like a prominent Philosopher.",
+    "Try and figure out who has become drunk after you die. Even in death, you can be useful - figuring out who has unreliable information as a result of you also means that you can determine who does not have unreliable information.",
+    "Beware the Witch and the Cerenovus! The Demon isn't the only way that you can die - a haphazard nomination or careless madness can see you die just as easily as if the Demon kills you. If you know either of these Minions are in play, avoid attracting their ire, or else tread carefully.",
+    "Die late in the game if you must. Depending on the state of the game (e.g. Who is alive), the drunkenness you inflict on the game may have minimal or no impact. For example if the only character claims alive are a poisoned Snake Charmer, Juggler, and Klutz and yourself, then your death is safer than earlier in the game, where you might have messed up the ability of an Oracle or Town Crier."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Sweetheart"
+  },
+  "barber": {
+   "name": "Barber",
+   "ability": "If you died today or tonight, the Demon may choose 2 players (not another Demon) to swap characters.",
+   "flavour": "",
+   "summary": [
+    "The Barber allows the Demon to swap any 2 player's characters.",
+    "The players’ alignments stay the same when they swap characters. Each player learns which character they become.",
+    "The Demon may choose not to swap players.",
+    "If a player becomes a new character, they gain the new ability, even if it was a “you start knowing” ability or a “once per game” ability that the original character already used.",
+    "If there is more than one living Demon, the Storyteller chooses which Demon makes the swap.",
+    "The Demon may choose themself to swap.",
+    "The Demon may not choose another Demon player to swap.",
+    "If a player dies then becomes the Barber, the Demon may not swap two players’ characters tonight."
+   ],
+   "how_to_run": [
+    "If the Barber dies, mark them with the HAIRCUTS TONIGHT reminder.",
+    "During that night, wake the Demon. Show them the THIS CHARACTER SELECTED YOU info token, then the Barber token. The Demon either shakes their head no or points to two players. Put the Demon to sleep. Remove the HAIRCUTS TONIGHT reminder.",
+    "If the Demon pointed to two players, swap the character tokens of the chosen players. One at a time, wake each swapped player, show them the YOU ARE info token and their new character token, then put them to sleep. If a player’s alignment does not match the color of their character token, turn it upside-down.",
+    "If a good player becomes a Minion or Demon, or an evil player becomes a Townsfolk or Outsider, you may wish to remind them that their alignment has not changed."
+   ],
+   "examples": [
+    "The Barber dies. The Demon considers swapping the Clockmaker and the Juggler, but then does nothing.",
+    "The Barber dies. The Demon swaps the alive Snake Charmer with the dead Barber. Now, there is an alive Barber and a dead Snake Charmer.",
+    "The Barber dies. The Vortox swaps themself with an alive Witch.",
+    "The Barber dies. The Vigormortis swaps themself with a dead Sweetheart. The old Vigormortis is now the evil Sweetheart. Because the Pit-Hag created a good Demon during the previous night, the game continues."
+   ],
+   "tips": [
+    "Don't die! Your death will immediately give the evil team a massive advantage - they have a wealth of options available to them with your swapping ability, and will definitely utilize them to undermine the good team as much as possible.",
+    "Bluff as an undesirable target for the demon. To increase your chances of survival, claim to be a character that the demon wouldn't want to touch - this can be a character like the Sage, who the demon wants to avoid at all costs, or characters like the Artist and Juggler who have used their abilities already. If the demon thinks you are low priority, they'll focus on other targets, allowing you to avoid death. (Note that it may be to your benefit to reveal your true identity to one or two people secretly so they know whatever 'information' you're offering is not true).",
+    "If you die, you should come out, but maybe not immediately. It's important for people to know that a Barber swap has taken place, but if you wait a few minutes, most good players will come out and let you know that they've had their characters changed. If you reveal after someone has come out as changed, you will look a lot more credible.",
+    "Deliberately dying might be viable in certain games - for example, if you have a good idea who all evil players are, OR if you're certain that most evil players are dead. These conditions block the most difficult Barber swap to detect (two evil players swapping characters), meaning the demon is more likely to try and swap good players (confirming you), or no players (thus minimize your effect on the game).",
+    "If you are a good player and your character changes on the night that the Barber died, it is usually best to tell the town as soon as possible, since you confirm the existence of the Barber, and can help you find the person you were swapped with. Unless you were swapped with an evil player, the other player will probably also want to come out, and then you know you can trust that person!",
+    "Help, I'm the demon and the Barber just died! The Barber's ability is very versatile and powerful, but it can be tricky to use, especially when you kill them unexpectedly! Here's a few options for the caught-off guard demon:",
+    "* Swap two evil players. In nearly all cases, you're doing this to move the demon to another evil player, thus invalidating information from all sorts of good characters (including the Flowergirl, Savant, and even the Dreamer). A well timed move of the demon can completely throw the good team off your trail.",
+    "* Swap two good players! Keeping in mind that you can swap alive and dead players this way, you can use this to disable a troublesome Philosopher or Sage, among many other difficult characters... simply by swapping them with the newly dead Barber. You can also swap a known Mutant to put a player in a difficult position where they cannot easily admit the swap has taken place. Finally, you can just swap two random players to create confusion! Be aware: Good players will obviously know that they've been swapped, and swapped players will know each others' characters and be able to trust each other. Make sure that neutralizing that troublesome townsfolk is worth the new information!",
+    "* Swap an evil and a good player. This is usually not a good idea, since a good player with an evil ability can cause team evil a lot of damage. A good Witch, or a good Cerenovus, for example, are dangerous. However, they may be so dangerous to both sides that the good team decides to execute a good player that becomes an evil character and talks about it. However, it works both ways. If the evil team can gain a good player's ability that can be used against them, it can be devastating. For example, an evil player becoming a Sweetheart, Philosopher or Snake Charmer can be awesome.",
+    "* Sometimes, it is best to do nothing at all when a Barber dies. If you have no good characters that you feel like swapping, and you are happy with which evil players are which evil characters, simply do nothing. Since this choice has no game effect, this keeps your position strong, and either makes the Barber look like they are lying, or makes it look like the Demon and Minion swapped characters. Either way, this is false information to distract and confuse the good team."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Barber"
+  },
+  "klutz": {
+   "name": "Klutz",
+   "ability": "When you learn that you died, publicly choose 1 alive player: if they are evil, your team loses.",
+   "flavour": "",
+   "summary": [
+    "The Klutz might accidentally lose the game for their team, unless they are clever.",
+    "When the Klutz dies, they must declare a player. They may take a few minutes to do so—after all, it’s a big decision, and other players may give advice on who to choose, but it is always the Klutz’s decision. If they choose an evil player, the game ends immediately and the good team loses. If they choose a good player, nothing happens and the game continues.",
+    "It is not the Storyteller’s responsibility to prompt the Klutz to declare they are the Klutz and choose a player. The Klutz must do this shortly after they learn that they are dead. Deliberately not doing so is considered cheating."
+   ],
+   "how_to_run": [
+    "When the Klutz player is declared dead, they must declare that they are the Klutz and then point at any player. (Give them time.) If they choose an evil player, the game ends and the evil team wins. If they choose a good player, the game continues.",
+    "In the strange situation where the Klutz is evil and chooses an evil player, then the game ends and the good team wins instead.",
+    "If the Klutz player doesn’t realize that they must choose a player when they die, privately remind them. New players may not understand how their character works."
+   ],
+   "examples": [
+    "The Klutz dies by execution. After much yelling and confusion, the Klutz chooses a player—who is secretly the Seamstress. Night falls, and the game continues.",
+    "The Demon kills Dave, the Klutz. In the morning, when the Storyteller informs the group that Dave is dead, Dave says \"Ok everybody, I was the Klutz\" and after discussion for a few minutes, Dave publicly chooses the player that is the Demon. The game ends immediately and evil rejoices."
+   ],
+   "tips": [
+    "Like nearly all Outsiders in Sects & Violets, you should avoid dying if at all possible. Your ability is particularly nasty as it can end the game if you choose poorly, but it only becoming an issue if you actually die!",
+    "If the good team is floundering, you can die deliberately and confirm someone as good by choosing them. Your ability yields incredibly powerful information for incredibly high risk. Knowing for sure that someone is good allows you to trust them completely, a very rare thing in this edition! Similar to the Snake Charmer, your information can also not be interfered with by the Vortox, meaning that you suspect that demon is in play, you don't have to worry about your information being false. (Note: While this all sounds incredibly useful and even tempting, remember that choosing carelessly will lose you the game!)",
+    "Before you die, work with the other players and try to find one alive player you believe is good, so you have a safe choice to pick in the event you accidentally die. (It's up to you if you want to reveal your identity before death to this player - if you do, they may be more inclined to trust you while you're both alive. If you don't, your choice will be more of a surprise, but it will look less like you're colluding with that player. It all depends on how the group is leaning right now.)",
+    "Don't pick players who are doubling up their character claim with another player - in most cases, a double up means one of the two is evil, which gives you a 50/50 chance to lose! This includes the Evil Twin and their good twin, since it is very difficult to tell for sure which one is actually evil. Aim for players with unique character claims instead.",
+    "If the group is keen to execute you, you can pre-empt the voting by loudly proclaiming which player you WILL choose as the Klutz after you die. If the group thinks that this player might be evil, they are less likely to kill you, which helps the good team. After this, if the Demon doesn't kill you that night, it probably means that the Demon did not want to kill you because it knows that you would choose a good player anyway.",
+    "If you die, and choose a player, and the game does not end, you can be almost certain that that player is good. Since the Klutz is not affected by the Vortox, the No Dashii, and probably not by the Sweetheart or Philosopher, then you can safely assume that you are not drunk or poisoned."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Klutz"
+  },
+  "eviltwin": {
+   "name": "Evil Twin",
+   "ability": "You & an opposing player know each other. If the good player is executed, evil wins. Good can't win if you both live.",
+   "flavour": "I'm not Sara! I'm Clara! SHE is Sara! Sara is the evil one! Not me!",
+   "summary": [
+    "The Evil Twin mirrors a good character, so that the players don't know which twin is good and which twin is evil.",
+    "The Evil Twin is paired with a good player, chosen by the Storyteller, called the Good Twin.",
+    "On the first night, the Evil Twin and Good Twin both wake, make eye contact, and learn each other’s character.",
+    "If the Good Twin is executed, evil wins. If the Evil Twin is executed, the game continues. A dead Evil Twin has no ability, so evil doesn’t win if the Good Twin is later executed.",
+    "Good cannot win while both twins are alive. Even if the Demon is killed, the game continues. Good will need to kill the Evil Twin as well as the Demon to win.",
+    "If a good player is turned into an Evil Twin, they are still a good player, with an evil player becoming their twin. It doesn’t matter which twin is which character, what matters is their alignment—the good team can execute the evil player safely, but if they execute the good player, evil wins.",
+    "If both Twins are the same alignment, the Storyteller chooses a new Twin."
+   ],
+   "how_to_run": [
+    "While setting up the game, choose a Good Twin by marking any good character with the TWIN reminder. During the first night, wake both Twins. Let them make eye contact. Point at the Evil Twin, then show the Evil Twin token to the Good Twin. Point at the Good Twin, then show the Good Twin’s character token to the Evil Twin. Put them both to sleep.",
+    "While both Twins are alive, the good team cannot win. If a good-aligned Twin is executed, the evil team wins.",
+    "If a Pit-Hag creates an Evil Twin during the final night, either make the other Twin the Demon player or a dead player, so that the good team is still able to win.",
+    "It is rarely a good idea to choose a Traveller to be a Twin."
+   ],
+   "examples": [
+    "Both twins are claiming to be the Oracle. The Evil Twin is executed. The game continues.",
+    "The Pit-Hag turns the good Sage, who is also the Good Twin, into the Mutant. Both twins try to convince the group that they are the Mutant. The Storyteller immediately executes the Mutant, who is also the Good Twin. The game ends and evil wins.",
+    "The Good Twin and the Evil Twin are both loudly claiming to be the Artist. Both players approach the Storyteller to ask a question in private. The good players, confused, execute the Demon. The game continues, with no death during the night from now on.",
+    "The Pit-Hag turns a good player into the Evil Twin, who remains good. The group executes the good-aligned Evil Twin. Evil wins."
+   ],
+   "tips": [
+    "Say that the good twin is the Evil Twin. Say it again, and again, and again. After all, that's what the good twin will be doing!",
+    "Claim that you are the same character as the good twin. On the first night, you learn the character of the good twin, and they learn yours. This is a hint to help you know a character that is safe to bluff as. Obviously, as you bluff as this character, the good twin will also be claiming to be this character, so you will double up. However, since the good twin will be screaming that you are evil anyway, both of you claiming to be the same character is not incriminating you any further. In fact, bluffing as their character is the safest option - if you bluff as a different character and that character is already in play, then the good players will be certain that you are evil. For example, the good twin is the Clockmaker, and the Evil Twin bluffs as the Clockmaker too - the good players know that one of the Clockmakers are evil, but not which one. In the next game, the good twin is the Klutz, but the Evil Twin bluffs as the Juggler - the real Juggler reveals who they are, and since the good players know that one of the twins is evil, they execute the one claiming to be the Juggler, because they also know that one of the Jugglers is evil.",
+    "Be passionate, not relaxed. Sometimes it is perfectly ok for a good player to die, so it is perfectly ok for an evil player to play it cool and pretend to not care about being executed. Such is not the case with pretending to be the good twin. Since the game ends, and evil wins, whenever the good twin is executed, the good twin is almost always very vocal and insistent that they do not be executed under any circumstances. Their situation is much like the Saint, in Trouble Brewing. So, any Evil Twin that is laissez faire about being executed, probably will be executed, since a good twin would have protested more.",
+    "One strategy, although usually not a very good one, is to deny everything. Never claim that an Evil Twin is in play. Claim that the player accusing you if being the Evil Twin is lying. This strategy rarely works, because the good team is faced with a dilemma that has a \"best\" solution... either they believe that the good twin is telling the truth, and execute you (which kills a Minion), or they don't believe the good twin is telling the truth, and execute them (which ends the game and makes evil win). Since the risk of executing the good twin that is accusing you is so high, clever players will almost always execute you as the safer option.",
+    "Get the good twin executed, however you can. Give false information that indicates that your fellow evil players information is true. Give true information so that you look more trustworthy. Make whatever arguments you need to make so that the good team comes to believe that the good twin is actually the Evil Twin. If they are executed, evil wins.",
+    "Similarly, if you are an evil player that is not the Evil Twin, do whatever you can to support your ally and to make the good twin look suspicious. Give false information that indicates that the good twin is evil. If the situation warrants it, you can sometimes give true information that makes the good twin look evil (for example, if the group thinks that a Vortox is in play, you can say you are the Artist, and learnt that the Evil Twin is evil). Support the Evil Twin, and campaign for the good twin's execution.",
+    "If you are the Demon, cease killing at some stage, to pretend that the Demon was executed that day. Normally, if the Demon is executed, the game continues (the Evil Twin character says that while the Evil Twin is alive, \"Good can not win\"). So, when the Demon is executed, the night phases continue without any deaths, and the good players quickly figure out who the Demon was - the player that was executed yesterday. However, if you are still alive, and choose to attack dead players of a night time, it will make it seem like the Demon has been executed already... and the poor schmuck who was the last player executed will be the only suspect!",
+    "If you are the Demon, feel free to try riskier bluffs that you may not otherwise feel fully capable of succeeding with. Since the game continues if you die, it matters less than normal if you are executed. Having an Evil Twin in play, it might be a good opportunity for you to bluff as the Savant or the Dreamer, the Snake Charmer or the Flowergirl if you are not normally confident in doing so.",
+    "It is rare, but if there is no Evil Twin in play, 2 evil players can both bluff as the good twin. If both are claiming to be the good twin, then the good players will assume that one of them is the Evil Twin, and eventually execute one of them. Since both players will be claiming to be the good twin, and both claiming that the other is the Evil Twin, then it is best that the twin that the evil team actually wants to die makes themself look a little bit more evil than the twin the evil team wants to live. In Sects & Violets, to bluff that there is an Evil Twin in play when there isn't, may require that the real Minion(s) doesn't use their ability in an obvious way. For example, if there is only one Minion in play, and you claim that the Minion is an Evil Twin, but a player dies from a Witch curse, everyone will know you are lying.",
+    "If there is no Evil Twin in play, an evil player can bluff as the good twin, and claim that a particular good player is the Evil Twin. Obviously, this player will have no idea what you are talking about, and deny that they are either the good twin or the Evil Twin, so beware. However, if you bluff well, you might be able to get that player executed, and have them look evil (and yourself good) for the rest of the game. In Sects & Violets, to bluff that there is an Evil Twin in play when there isn't, may require that the real Minion(s) doesn't use their ability in an obvious way. For example, if there is only one Minion in play, and you claim that the Minion is an Evil Twin, but a player dies from Cerenovus madness, everyone will know you are lying."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Evil_Twin"
+  },
+  "witch": {
+   "name": "Witch",
+   "ability": "Each night, choose a player: if they nominate tomorrow, they die. If just 3 players live, you lose this ability.",
+   "flavour": "Three drops of goat's blood. A lock of hair, torn in anger. The name is spoken, the shadow cast. Walk left foot first down that brambled path, and don't look back.",
+   "summary": [
+    "The Witch curses players, so that they die if they nominate.",
+    "Each night, the Witch chooses a player to curse. That player dies if they nominate any player on the next day, although their nomination still counts.",
+    "The Witch’s curse lasts only for one day, but the Witch may curse the same player again and again each night.",
+    "As soon as just three players are left alive, the Witch’s curse is immediately removed, and the Witch acts no more."
+   ],
+   "how_to_run": [
+    "Each night, wake the Witch. They point at any player. Put the Witch to sleep. Mark the chosen player with the CURSED reminder.",
+    "The next day, if the player marked CURSED makes a nomination, immediately declare that they die. (Nominations continue as normal.)"
+   ],
+   "examples": [
+    "At night, the Witch curses the Sage. During the next day, the Sage nominates the Dreamer. The Storyteller immediately declares that the player of the Sage dies. The players still vote to execute the Dreamer, who dies too.",
+    "The Witch curses themself. During the next day, the Witch nominates the Demon, and dies. The players do not vote to execute the Demon, and nominations continue.",
+    "The Witch curses the Klutz. The Fang Gu attacks the Klutz, so the Klutz becomes the Fang Gu. The new Fang Gu is now cursed by the Witch, and they nominate. The new Fang Gu dies, and good wins.",
+    "The Witch curses the Savant. Later that night, after the Demon kills a player, only three players are alive, so the curse is removed. The Savant may nominate safely.",
+    "The Witch curses the Juggler. During the next day, the Juggler calls for the exile of a Traveller. The Juggler lives, and may nominate again, because abilities do not affect exiles."
+   ],
+   "tips": [
+    "Selecting who to curse is the most important part of being the Witch, and depending on your group and the characters in play, there will be many different factors that will help you decide what that will be. Your fellow minions and demon are all equally powerful and disruptive, so make sure to coordinate with them for maximum devastation of the good team - it can be a real bummer to accidentally curse the person the demon kills that night!",
+    "Loud, boisterous players who have a lot to say are great Witch targets! It doesn't take much to antagonize them into nominating if they weren't planning to, and their death will catch them off guard, and often ruin their plans.",
+    "Aim for character claims who you want dead. This can include powerful claims like the Savant or Flowergirl, but also characters like the Klutz, who put the good team at incredible risk. Another great option is the Sage - their ability only activates upon death via demon, meaning that your curse will render them unable to receive their information.",
+    "Another good option for cursing is simply players who are regularly nominating. For example, if someone is trying to get another player killed and have nominated them twice already, you can bet they'll probably nominate the third day as well!",
+    "Some towns will be savvy to your tricks, and try to rotate the people who nominate to unlikely targets for you as a Witch. They may also want to maximize the amount of information that a potential Town Crier is gaining from those nominations. If you see this sort of trend, go after quieter players or ones who haven't nominated yet, then let the good team do the talking.",
+    "Deliberately curse another evil player or yourself to look good. Players who die by Witch are usually going to be seen as good, so sacrificing yourself at the right moment can let you sneak in behind enemy lines and spread discord. (Beware the Oracle if you choose to try this out - they'll detect that evil has died recently and could cast suspicion on you!)",
+    "Hide your identity to support bluffs that other evil minions are in play. When a Witch activates, it is obvious to the town - someone nominates and then they immediately die. If your demon and another minion are bluffing as being the Good and Evil Twin, then the reveal that you are in play will undermine that bluff and make it obvious they are lying. Remember that you can curse a dead player - this will hide your ability from the group when necessary."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Witch"
+  },
+  "cerenovus": {
+   "name": "Cerenovus",
+   "ability": "Each night, choose a player & a good character: they are \"mad\" they are this character tomorrow, or might be executed.",
+   "flavour": "Reality is merely an opinion. Specifically, my opinion.",
+   "summary": [
+    "The Cerenovus encourages players to pretend to be different characters than they actually are.",
+    "The Cerenovus chooses Townsfolk or Outsiders that players are mad about being. They must try to convince the group that they actually are this character tomorrow, or else die.",
+    "Simply hinting is not enough to avoid death. The player must make a decent effort to convince the group. Mad players are never literally forced to say things they don’t want to—but if the Storyteller doesn’t hear them make an effort, they pay the price.",
+    "Mad evil players might be executed this way, but “might” means you can choose not to, to prevent evil from winning by this strategy.",
+    "Like the Mutant, an execution penalty counts as the one execution allowed per day."
+   ],
+   "how_to_run": [
+    "Each night, wake the Cerenovus. They point at any player and at any Townsfolk or Outsider icon on their character sheet. Put the Cerenovus to sleep. Mark the chosen player with the MAD reminder. Wake this player, show them the THIS CHARACTER SELECTED YOU info token, then the Cerenovus token, then the character token of the character they are mad about being. Put that player to sleep.",
+    "During the next day or night, if you feel that the mad player has not done their best to convince the group they are this character, you can decide to execute them. Declare this to the group. They die. If you execute them during the day before the normal execution happens, go to the night phase. (There is a maximum of one execution per day.)"
+   ],
+   "examples": [
+    "The Cerenovus makes the Barber mad about being the Savant. Tomorrow, the Barber claims to be the Savant, talks to the Storyteller, and tells the group two facts that they made up. When asked whether they are mad, the Barber says \"no\" emphatically, so avoids being executed.",
+    "The dead Artist is made mad about being the Sage. The next day, they say nothing about being the Sage. The Artist is executed.",
+    "The Cerenovus makes the Flowergirl mad about being the Clockmaker. The Flowergirl says to the group that they are the Clockmaker and learned a \"2,” but hints privately to other players that they are mad. The Storyteller overhears this and executes the Flowergirl."
+   ],
+   "tips": [
+    "Madness is an infliction that can severely hinder the good team, and also a fine art - you can block a player from revealing information, force a player to change their story or double up with another good player, and even get your victim executed if they don't play along. When choosing who to make mad (and about what), think carefully about your preferred outcome!",
+    "Target players who have a lot to say. Most games will have those players who are running the show - maybe they've built up trust with other players and have some sway, or maybe they're just very sure they're right. Either way, forcing this sort of player to become mad will hinder them and their ability to coordinate with their allies... or sow seeds of doubt.",
+    "If a player is revealing a lot of important information, you can use your madness to neutralize them. The Flowergirl, Seamstress or Oracle will have a hard time revealing their game-changing info if you're forcing them to act as the Sweetheart. Track who people are listening to (publicly or privately) so you can focus on them.",
+    "One dastardly move that can really put the good team on the spot is to make them mad that they are a complicated character like the Savant, who receives a lot of information... close to the end of the game. Watching this player scramble to invent 3+ days of information is not only hilarious, but a great distraction for the good team.",
+    "When choosing who you make mad, try to be subtle or consistent. Players who are no longer mad will immediately reveal to the group that they were affected by you, and at that point on the good team will be on the lookout for loud, bold madness. A way to avoid this are to consistently choose the same player, making them mad every single day so they have no chance to reveal what you're doing to them, at the cost of restricting your movements to this one player. Another way is to pick subtle, plausible characters for your madness - for example, having someone reveal as an Outsider in a suspected Fang Gu game, or someone who has given inconsistent information reveal as a character like the Snake Charmer.",
+    "An advanced way to use madness is to build a consistent narrative. For example, you can force a player to reveal as the Sage.... but it'll lend a little credence to their forced bluff if you had them bluffing as a Dreamer the day before, just like a real Sage would. This allows you to undermine the real Sage without it necessarily coming off as just one of them being mad - the simple logical thread you have created will be something the other players find pleasing and want to hold onto. Another option for a consistent narrative is to feed into the story the evil team is trying to make - for example, if you're trying to convince them a Fang Gu is in play, make people mad they are Outsiders.",
+    "If the good team suspects that the Vortox is in play, they will be very reluctant to end the day without an execution. If they don't have any strong leads on potential evil, they may fall back to 'safe' executions - players who have used their abilities (such as the Clockmaker or Artist). Causing a more powerful character to become mad they are one of these characters can see the good team executing them without you having to lift a finger - and if they protest, they might break madness and be executed anyway!",
+    "Your ability can also affect dead players! Even if they are dead, they can still be executed should they break madness (meaning the good team does not get to execute someone of their choice instead, and the evil team gets a free night to act). If you know who your demon is going to kill, hit them with a madness about being the Barber, Sweetheart or Klutz for an extra fun distraction for the good team!",
+    "On paper, making someone mad that they are the Mutant seems like a fun trick. In reality, this madness doesn't help you - your target will be forced to reveal they are the Mutant, which obviously does nothing since they (probably) do not have the Mutant ability. The good team will know they are probably afflicted by madness, thus revealing you are in play!",
+    "Target evil players deliberately to make them look good. This has some risk associated with it since they can be executed if they don't play the madness effectively, but if the good team believes a player has been targeted by evil abilities, they'll be more likely to trust them. Just... probably warn your demon before you do it.",
+    "Your ability is obvious for the good team - madness is a very public affliction, so the good team will know you are in play pretty confidently after a few days. Keep this in mind if your evil team is bluffing that other minions are in existence; for example, in a one minion game, your demon could not have been shape-shifted by a Pit-Hag if someone died because of your madness, which will expose them as a liar!",
+    "This is an advanced tip, but a fun one: The Storyteller is the one who decides how sincere a player is when playing out a madness. This allows for some leniency for newer players, and conversely a difficulty spike for the experienced players who know the game well and understand how madness works. Targeting the latter will give you a better chance of seeing complicated and sincere madness getting played out, since more is expected of them - and it's as entertaining as it is effective!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Cerenovus"
+  },
+  "pithag": {
+   "name": "Pit-Hag",
+   "ability": "Each night*, choose a player & a character they become (if not in play). If a Demon is made, deaths tonight are arbitrary.",
+   "flavour": "Round about the cauldron go; In the poison'd entrails throw; Toad, that under cold stone; Days and nights has thirty-one; Sweated venom sleeping got; Boil thou first in the charmed pot.",
+   "summary": [
+    "The Pit-Hag changes players into different characters.",
+    "Each night, the Pit-Hag chooses a player and a character to turn that player into.",
+    "They can’t create duplicate characters. If the character is already in play, nothing happens."
+   ],
+   "how_to_run": [
+    "Each night except the first, wake the Pit-Hag. They point at any player and any character icon on their character sheet. Put the Pit-Hag to sleep.",
+    "If the chosen character is in play, nothing happens.",
+    "If the chosen character is not in play, wake the chosen player. Show them the YOU ARE info token, then their new character token, then put them to sleep. Replace their old character token with the new character token. (You may need to turn character tokens upside-down to remind you that a player’s alignment is opposite to the color of the token. You may need to remind the player that their alignment is unchanged, by giving a thumbs-up or thumbs-down.)",
+    "If a Demon is created, you may choose any players to kill or to protect throughout the night to balance the game. Additional deaths are considered attacks from the Pit-Hag.",
+    "If the Pit-Hag changes a Demon into a new Demon, it is best to make no death occur tonight, so the good team gets a clue that the Demon has changed. You can even wake the Demon, see who they choose to attack, and decide that no one dies. If the Pit-Hag creates a new evil Demon, it is best to kill the old Demon and some other player, to signal to the good team that the Demon has changed. If the Pit-Hag creates a good Demon, it is best to kill either Demon (if it is the final night), or to just let two Demons run amok (if it is not the final night)—but since all Demons must die for good to win, use caution."
+   ],
+   "examples": [
+    "The Pit-Hag turns the Clockmaker into the Mutant.",
+    "The Pit-Hag tries to turn the Savant into the Sage, but nothing happens because a Sage is already in play.",
+    "The Pit-Hag turns the Flowergirl into the Evil Twin. Now, there is a good Evil Twin, so the Evil Twin and an evil player are woken to learn each other's character.",
+    "During the final night, the Pit-Hag turns the Oracle into a good No Dashii. The Storyteller kills the evil Demon only, so that only one Demon is alive during the final day."
+   ],
+   "tips": [
+    "Your ability changes a player's character, but not their alignment. This means that if you turn a good player into a Witch, they will be a good-aligned Minion. Similarly, if you transform an evil player into the Philosopher, they are now an evil-aligned Townsfolk. Keep this in mind when deciding who to transform - there are benefits to creating evil Townsfolk/Outsiders and even good Minions/Demons, but it can be a nasty shock if you were expecting a new evil player to join your ranks!",
+    "Creating new demons is a unique ability within the Pit-Hag's domain. You can transform your existing Demon into a different type (introducing a Vortox unexpectedly to the game field), but you can also 'move' the Demon by transforming an evil player into a new Demon, and finally you can create a good Demon by transforming any of your foes! Naturally, this power comes with some major drawbacks - the Storyteller will balance any move you make by controlling the deaths that night. Often 'moving' the Demon will result in the death of an evil player (usually the former Demon) - they will not permit you to continue the game with multiple evil Demons alive! More subtle moves like changing what type of Demon is in play may simply result in no deaths at all, so the good team has an indication that something changed. Finally, while they may allow a good Demon to co-exist, you should be cautious, as that Demon has the ability to kill and every motivation to come after the evil team! (Additionally, be wary of transforming a Vigormortis - the second they are changed into something else, you will lose your ability if you are an undead Minion!)",
+    "Create outsiders! Got a pesky Savant getting lots of helpful info? Turn them into a Sweetheart! Suspect someone is a Sage trying to trick your Demon? Now they're a humble Klutz, and dying isn't looking so fortuitous anymore! Is your Demon a Fang Gu and out of places to hide? Create a new one!",
+    "Nerf troublesome Townsfolk by transforming them into less useful Townsfolk for the current game setup. For example, if you have a Vigormortis in play, the Oracle is a particularly dangerous threat, while the Clockmaker's information may not be as worrisome. Alternatively (after warning your Demon), you can turn a player into a conditionally useful Townsfolk like the Sage, neutralizing whatever information they were getting. It might seem easier to simply always turn people into Outsiders, but remember you can only transform someone into not in play characters - better to let a little info go by than to fail a transformation because there was already a Barber lurking around.",
+    "Coordinate with your evil team to get the most use out of your transformations. Nothing is more frustrating than turning a Townsfolk into something useless and waking up the next morning to see that your Demon had the same idea and killed them. Working together with your Demon and Minions to neutralize multiple targets at once is very effective. Alternatively, you can create a Klutz right as your Demon kills them, catching your victim off guard (since they won't have been thinking about who to trust in the event of their death).",
+    "Create Minions! Even good Minions! Characters like the Witch and the Cerenovus are fun, and even when good-aligned can cause a lot of damage. If you have a player who is particularly accusatory or seems to be very certain... and is wrong, give them the power to act on their impulses and sit back to enjoy the carnage. As always, beware - these powers are just as effective on you as they are on good players!",
+    "Change yourself! While it will mean the end of your transforming days, there are many moments when turning yourself into another character will change the flow of the game. Have a lot of trust with the good team? Become a No Dashii and take over as the Demon! Want to sneakily undermine the Flowergirl? Transform into the evil Philosopher, then gain the ability of the Flowergirl, making the existing one drunk! Just feeling like a change of pace? Become a Witch, and curse that one player who finally felt safe nominating!",
+    "If you did not transform a player one night, get evil players to claim they were transformed into not in play good characters, even when they weren't. Players that publicly claim to be transformed tend to be immediately trusted by the good team, since the Pit-Hag usually transforms good players. Or, if you are an evil player that was transformed by the Pit-Hag last night. tell the group that you were transformed... into a good character.",
+    "At some stage in the game, stop transforming people. As long as you transform people, the good team will know that you are still alive, since a dead Pit-Hag has no ability. This strategy is particularly useful in a game with only one Minion, or a game where the only other Minion is the Evil Twin. If the good players know that all Minions are still alive, then they also know that all executed players are good. But when they get suspicious that a Minion is dead, from that point onward, they won't know which dead players are good, and which are evil.",
+    "If a fellow evil player is claiming to be the victim of the Cerenovus, or they are claiming that an Evil Twin is in play, then their claims may clash with a good player's claim that they were transformed by the Pit-Hag. If there is only meant to be 1 Minion in the game, and that Minion is the Pit-Hag, then claiming to be affected by the Cerenovus will not make sense. Pay attention to your fellow evil players, and don't transform people at night if you want their claims to be believed.",
+    "You can transform Travellers... maybe. It's an optional rule that your Storyteller may allow. Be careful though, as if a Traveller is changed into a non-Traveller, their token in the Town Square is changed so everyone will know there is a Pit-Hag in play."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Pit-Hag"
+  },
+  "fanggu": {
+   "name": "Fang Gu",
+   "ability": "Each night*, choose a player: they die. The 1st Outsider this kills becomes an evil Fang Gu & you die instead. [+1 Outsider]",
+   "flavour": "",
+   "summary": [
+    "The Fang Gu possesses Outsiders.",
+    "The first time a Fang Gu attacks and kills an Outsider, the Fang Gu dies, and the Outsider becomes a Fang Gu and turns evil.",
+    "This can only happen once per game. If the new Fang Gu attacks an Outsider, the Outsider dies as normal.",
+    "The new Fang Gu counts as the Demon, and good wins if they die. They do not learn which players are Minions.",
+    "There is an extra Outsider in play.",
+    "If the Fang Gu attacks an Outsider but that Outsider does not die, that Outsider does not become an evil Fang Gu and the Fang Gu does not die."
+   ],
+   "how_to_run": [
+    "While setting up the game, before putting character tokens in the bag, add one extra Outsider character token and remove one Townsfolk character token.",
+    "Each night except the first, wake the Fang Gu. They point at any player. Put the Fang Gu to sleep.",
+    "If the chosen player is not an Outsider, that player dies—mark them with the DEAD reminder.",
+    "If the chosen player is an Outsider and the ONCE reminder is in the center of the Grimoire, that player dies—mark them with the DEAD reminder.",
+    "If the chosen player is an Outsider and the ONCE reminder is not in the centre of the Grimoire, the Fang Gu dies—mark them with the DEAD reminder. Wake the chosen Outsider. Show them the YOU ARE info token, then the Fang Gu token, then the YOU ARE info token, then a thumbs-down. Change their character to a Fang Gu—swap their character token with the spare Fang Gu token. They become evil. Put the new Fang Gu to sleep. Put the ONCE reminder in the center of the Grimoire. (Unlike “Once per game” abilities, this reminder stays there for the rest of the game. Don’t remove it, even if the Fang Gu dies or changes character.)"
+   ],
+   "examples": [
+    "The Fang Gu attacks the Artist, who dies. The next night, the Fang Gu attacks the Sweetheart, who becomes the Fang Gu while the old Fang Gu dies. The Sweetheart does not make a player drunk, because they did not die. The next night, the new Fang Gu attacks the Klutz, who dies."
+   ],
+   "tips": [
+    "Thanks to your body-hopping ability, you have a vested interest in figuring out who is an Outsider. Having this information early on is important, as your main option to escape trouble and grow your strength is to pass the Demon ability on - timing this correctly can be the difference between a triumphant town and a dastardly evil victory.",
+    "When the heat is on and you suspect you might be heading to the chopping block soon, deliberately target an Outsider to die instead, ensuring the Demon lives on (and hoping goes back into hiding among the good players). Even if the good team suspects that you've done this, they won't be able to stop it happening!",
+    "Jump to an Outsider to expand your empire! The more evil players you have, the more votes you have on your side. This can be risky since you are potentially exposing the Demon when you move them around - characters like the Oracle and the Dreamer will be able to catch on to these sorts of shenanigans if you don't time your demon jump carefully. Ultimately though, the extra voting power is invaluable.",
+    "If you have managed to carve out a solid bluff and are well trusted by the good team, don't kill an Outsider. Their bluff is unlikely to be as strong as yours since you know for certain characters that are not in play, so passing the demonhood on at that point is just making the evil team vulnerable.",
+    "Keep your Minions in the loop! Your Minions (in particular the Witch, Cerenovus and Pit-Hag) are very destructive, and if they aren't aware of who their Demon is, the game could have an abrupt and unsatisfying end. Try to let them know ahead of time if you intend to jump bodies/who you are targeting in general - that way even if you hit a hidden Outsider unexpectedly, they won't wake up cursed, mad or transformed on top of being newly evil.",
+    "Because you can factor in dying to part of your plans at some point, consider taking advantage of some of the bolder bluffs that Sects & Violets has to offer. Die, then claim to be the Sage and point out two people who are not the new Demon! Claim to be the Sweetheart and get everyone doubting their information... or claim to be the Klutz and exonerate one of your evil players with your 'choice'. Other bluffs will also work great for the Fang Gu, but if you have to die anyway, why not?",
+    "If you become the new Fang Gu... don't panic! Your first point of order should be figuring out who the evil team is - start with the recently dead Fang Gu, and then go on to get the Minions. After that, it's evil business as usual - kill, avoid detection, and win for your new team!"
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Fang_Gu"
+  },
+  "vigormortis": {
+   "name": "Vigormortis",
+   "ability": "Each night*, choose a player: they die. Minions you kill keep their ability & poison 1 Townsfolk neighbor. [-1 Outsider]",
+   "flavour": "",
+   "summary": [
+    "The Vigormortis kills their own Minions, but those Minions keep their ability.",
+    "Every time the Vigormortis kills a Minion, they die but keep their ability for as long as the Vigormortis remains alive. The Witch, Cerenovus, and Pit-Hag still act each night.",
+    "Somewhat like the No Dashii, the dead Minion’s closest clockwise or closest counterclockwise Townsfolk becomes poisoned, even if they are dead. If the Vigormortis dies or otherwise loses their ability, then those players become healthy again. One Townsfolk per Minion will always be poisoned this way, as neighboring Outsiders, Minions, or Travellers are skipped. The Storyteller chooses which of the two Townsfolk is poisoned.",
+    "All Minions killed by the Vigormortis keep their ability and poison a Townsfolk, not just the most recent.",
+    "If a dead Minion becomes a non-Minion character, they no longer poison a Townsfolk and have no ability. If a dead Minion becomes drunk or poisoned, they lose their ability until they become sober and healthy again."
+   ],
+   "how_to_run": [
+    "While setting up the game, before putting the character tokens in the bag, remove one Outsider character token and add one Townsfolk character token. (If there are no Outsider tokens to remove, do not add a Townsfolk token.)",
+    "Each night except the first, wake the Vigormortis. They point at any player. Put the Vigormortis to sleep. If the chosen player isn’t a Minion, that player dies - mark them with a DEAD reminder.",
+    "If the chosen player is a Minion, that player dies - mark them with a DEAD reminder and a HAS ABILITY reminder. The closest clockwise or closest counterclockwise Townsfolk to the Minion becomes poisoned - mark them with a POISONED reminder."
+   ],
+   "examples": [
+    "The Vigormortis kills the Witch. The player that the Witch cursed tonight remains cursed. The next day, when the cursed player nominates, they die.",
+    "The Vigormortis kills the Evil Twin. The Evil Twin neighbours a Klutz and a Flowergirl. The Sage is the next neighbour to the Klutz. The Storyteller chooses that the Sage is poisoned.",
+    "The Vigormortis kills the Pit-Hag. The Pit-Hag changes a Savant into a Witch. The Vigormortis kills the Witch, who curses and kills a player. The Pit-Hag turns the dead Witch into the Oracle, who now has no ability. The Pit-Hag turns the Vigormortis into a Vortox. The Pit-Hag now has no ability."
+   ],
+   "tips": [
+    "Kill your Minions as early as possible. If you kill your Minions at night, they keep their ability. If your Minions die during the day, then they lose their ability. Killing them yourself guarantees that they get to keep their ability for the rest of the game. A Witch, Pit-Hag or Cerenovus that is guaranteed to act each and every night can be an incredible boon for your team, either causing good player after good player to lose their ability by dying (Witch and Cerenovus) or to lose their ability by becoming a different character (Pit-Hag). In Sects & Violets, any way that you can reduce the amount of information that the good team has received by the time that the final day comes around will be helpful.",
+    "Be patient, and listen to what the good players are saying. If they are not suspicious of any of your Minions, it is probably best to keep them alive. Each day, your living Minions get to use their vote to help you avoid being executed, and that is very helpful. There is no benefit to killing a Minion until you think that the good team might execute them.",
+    "At night, kill players that the good team was planning on executing as soon as possible. If you kill suspicious good players, there is a good chance that the rest of the group will believe that a Vigormortis is in play and that the player that died at night was a Minion. And, if they believe that the good player is a Minion, they will not listen to anything that player says, even believing the opposite of any information they shared before they died, and are unlikely to form a bond of trust with that player. If a Clockmaker or a Town Crier is in play, their information is disrupted because they will base their logic on the false assumption of which player is the Minion. This strategy works particularly well if the good team already has reason to believe that a Vigormortis is the in-play Demon, due to information received via the Dreamer, Savant, or Artist.",
+    "Killing the Witch, Pit-Hag or Cerenovus allows them to use their ability independently after they are dead. Killing the Evil Twin means that the good team will lose if the good twin is executed. However, since most players will not execute a single, living twin, they may need your help to convince them to do so. Killing an Evil Twin at night removes the possibility that the good team will learn which twin is evil and which twin is good by executing the evil twin - and the less the good team knows, the better.",
+    "Kill the Evil Twin if you suspect that the good team is going to execute them. It is much better to have them die at night, and leave the good team wondering whether you actually killed the good twin instead. The added bonus of a Townsfolk being poisoned is also very helpful.",
+    "If you don't know which Minion to kill, choose the one next to a particularly troublesome Townsfolk, so that the Storyteller can poison them. It is often better to have a dangerous Townsfolk alive and getting false information than dead and looking trustworthy.",
+    "Since there is one fewer Outsider in play than normal, and you know this, it can be very easy and very effective to bluff as an Outsider. Even better - tell your Minions to bluff as an Outsider. A Minion that dies at night is usually perceived as very trustworthy, so if they claim to be the Klutz or the Sweetheart, then the good team can think there is a lot of misinformation when there isn't. Bluffing as the Sage is also an excellent choice for Minions that die at night."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Vigormortis"
+  },
+  "nodashii": {
+   "name": "No Dashii",
+   "ability": "Each night*, choose a player: they die. Your 2 Townsfolk neighbors are poisoned.",
+   "flavour": "",
+   "summary": [
+    "The No Dashii poisons their neighboring Townsfolk.",
+    "The No Dashii’s closest clockwise and counterclockwise Townsfolk neighbors are poisoned, regardless of whether they are alive or dead. If a No Dashii dies or otherwise loses their ability, then those two players become healthy. Two Townsfolk players will always be poisoned this way, as neighboring Outsiders, Minions, or Travellers are skipped.",
+    "If a new player becomes the No Dashii, or a poisoned Townsfolk changes into a non-Townsfolk character, the players who are poisoned may change immediately based on who the neighbors of the No Dashii are."
+   ],
+   "how_to_run": [
+    "While preparing the first night, the two Townsfolk neighboring the No Dashii become poisoned - mark them with POISONED reminders.",
+    "If a Townsfolk poisoned by the No Dashii becomes a non-Townsfolk character, or the No Dashii turns into a different character, or if a new player becomes the No Dashii, the new neighbors of the No Dashii become poisoned, and the old neighbors become healthy - move the No Dashii’s POISONED reminders immediately if needed.",
+    "Each night except the first, wake the No Dashii. They point at any player. That player dies - mark them with the DEAD reminder. Put the No Dashii to sleep."
+   ],
+   "examples": [
+    "At the start of the game, the No Dashii neighbors a Town Crier and a Snake Charmer. They are both poisoned. A few days later, they are both dead, and the closest alive neighbors to the No Dashii are an unpoisoned Clockmaker and an unpoisoned Barber.",
+    "Clockwise from the No Dashii sits a Philosopher, a Mathematician, then a Sage. Anticlockwise from the No Dashii sits a Witch, a Mutant, then a Seamstress. The Philosopher and the Seamstress are poisoned"
+   ],
+   "tips": [
+    "Find out who your neighboring Townsfolk are. You may be sitting next to Minions, Travellers or Outsiders, so it may not be immediately obvious who you have poisoned.",
+    "Once you know who your neighboring Townsfolk are, support them as much as possible. Listen to them. Repeat their arguments to the group. Since they are poisoned, their information is probably false, and spreading their false information will make others look dodgy, particularly when it is not you that revealed the false information originally.",
+    "At night, don't kill your neighboring Townsfolk. Since they are poisoned, the longer they stay alive, and the shorter that unpoisoned Townsfolk live, the more misinformation will be in the game, and the more chance you have of winning.",
+    "Kill your neighbors, if people begin to think that a No Dashii is in play. Doing this makes it look like someone else is the No Dashii, or at least it makes it look like you are a different Demon than the No Dashii.",
+    "If all evil players are spreading false information, then it can sometimes look like a Vortox is in play. Making the argument that the Demon is actually the Vortox makes the remaining good players mistrust their own information, and makes you look good."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/No_Dashii"
+  },
+  "vortox": {
+   "name": "Vortox",
+   "ability": "Each night*, choose a player: they die. Townsfolk abilities yield false info. Each day, if no-one is executed, evil wins.",
+   "flavour": "",
+   "summary": [
+    "The Vortox makes all information false.",
+    "Anytime a Townsfolk player gets information from their ability, they get false information. Even if they are drunk or poisoned, it must be false.",
+    "The Vortox does not affect information gained by other means, such as when the Storyteller explains the rules, or when a player’s character or alignment changes.",
+    "When night falls, if nobody was executed today, evil wins. Exiling a Traveller does not count."
+   ],
+   "how_to_run": [
+    "While the Vortox is alive, you must give false information whenever a Townsfolk ability prompts you to give information.",
+    "Each night except the first, wake the Vortox. They point at any player. That player dies - mark them with the DEAD reminder. Put the Vortox to sleep.",
+    "Each dusk, if no player was executed today, the game ends and the evil team wins."
+   ],
+   "examples": [
+    "The Vortox kills the Sage. The Sage learns two players, both of which are not Demons.",
+    "Nobody voted or nominated today, but the Mutant is executed. That night, both the Flowergirl and the Town Crier learn a \"yes.”",
+    "The Savant is in play, and learns two pieces of information each day. Both are false. That night, the Dreamer chooses a player who is the Savant, and learns that player is either the Philosopher or the No Dashii.",
+    "The Pit-Hag turns the Juggler into the Witch. The Juggler learns that they are now the good Witch, because this information comes from the Pit-Hag's ability, not a Townsfolk's ability.",
+    "Today, a player died from the Witch, two Travellers were exiled, 5 nominations happened, but nobody was executed. Evil wins."
+   ],
+   "tips": [
+    "As a Demon, you have two significant strengths - forcing the good team to execute (or else!), and forcing all Townsfolk information to be false. This deadly combination makes you the scariest Demon on the list - even the potential of your presence will have your enemies shaking in their boots. Beware though - you are far from invulnerable, and if the good team know you're in play with any degree of certainty, then they can start to unravel the falsehoods caused by your ability and will have your evil team packing in no time!",
+    "Give true information to mask the existence of your Vortox ability. A lot of information in Sects & Violets is binary, and it can hard to reliably confirm your existence unless the good team is willing to expend some very powerful abilities (such as the Artist or the Juggler). This means it can be hard to confirm as true OR false right away. Mixing in true/provable information as part of your bluff will help you look trustworthy and confuse the good team about whether a Vortox is in play.",
+    "If the good team has already cottoned onto the idea of a Vortox, don't despair - simply tailor your bluff to give obviously false info instead, allowing you to blend into the confused good players who are also getting false information! People will be more inclined to trust you if you are also being 'harmed' by the Vortox power.",
+    "It's extremely difficult to pull off, but you might be able to convince the group there's no Vortox, and get them not to execute a player to prove it. This will usually require a very powerful bluff like the Artist or the Dreamer, who can detect the false information forced upon them more reliably than other abilities. Only push for this if you really think the good team will buy it - most groups will be wary about giving up an execution, especially if any information seems confusing or unreliable. With that said, it is extremely satisfying to pull off a win that way!",
+    "Get a read of the group before coming out with your bluff - you may change strategy based on their behavior. Jumping in with a strong bluff that has true information may backfire on you if the group comes to find out you're in play and starts seeking out anyone who doesn't fit that narrative!",
+    "Signal to your Minions which Demon you are - they may also be bluffing as information gathering characters, and knowing that your ability is affecting the town is important, since they may want to adjust their bluffs to account for that."
+   ],
+   "source": "https://wiki.bloodontheclocktower.com/Vortox"
+  }
+ }
+}

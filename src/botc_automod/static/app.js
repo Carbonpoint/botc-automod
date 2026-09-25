@@ -7,7 +7,7 @@ const toastEl = document.getElementById("toast");
 let S = null;               // latest state from the server
 let ws = null, wsTries = 0, wsOpen = false;
 let almanac = null;
-const ui = { tab: "me", picks: [], taskId: null, slayer: false, nominate: null,
+const ui = { tab: "me", picks: [], taskId: null, nominate: null, form: {}, editions: null,
              grid: null, lastLog: 0, seenTask: null, pendingRender: false };
 
 // ---------- helpers ----------
@@ -35,6 +35,13 @@ async function api(path, body) {
 }
 const byId = id => S.players.find(p => p.id === id);
 const nameOf = id => byId(id)?.name ?? "?";
+const fv = (id, def = "") => ui.form[id] ?? def;
+const opt = (id, value, label, def) => `<option value="${esc(value)}" ${fv(id, def) === value ? "selected" : ""}>${esc(label)}</option>`;
+const playerSelect = (id, ids, blank = false) => `<select id="${id}">${blank ? opt(id, "", "—", "") : ""}${
+  ids.map(x => opt(id, x, nameOf(x), blank ? "" : ids[0])).join("")}</select>`;
+const roleSelect = (id, roles, blank = false) => `<select id="${id}">${blank ? opt(id, "", "—", "") : ""}${
+  roles.map(r => opt(id, r.id, r.name, blank ? "" : roles[0]?.id)).join("")}</select>`;
+const alivePlayers = () => S.players.filter(p => p.seat != null && p.alive).map(p => p.id);
 const fmt = t => t == null ? "" : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
 
 // ---------- connection ----------
@@ -71,7 +78,7 @@ function onState(state) {
     if (navigator.vibrate) navigator.vibrate(120);
   }
   if (prev && prev.game.phase !== S.game.phase) {
-    ui.nominate = null; ui.slayer = false;
+    ui.nominate = null;
     if (S.game.phase === "vote" && navigator.vibrate) navigator.vibrate([80, 60, 80]);
   }
   if (prev?.game.phase === "lobby" && S.game.phase !== "lobby") { ui.tab = S.me.storyteller ? "grim" : "me"; keepAwake(); }
@@ -204,6 +211,11 @@ function lobbyView() {
       <div class="grow"><h3>Invite players</h3><p>Open <b>${esc(joinUrl)}</b> on the same Wi-Fi, then join code
       <span class="code">${esc(g.code)}</span>.</p></div></div>`;
   }
+  if (me.is_host) {
+    if (!ui.editions) api("/api/editions").then(e => { ui.editions = e; render(); }).catch(() => {});
+    html += `<div class="card stack"><h3>Edition</h3>
+      ${ui.editions ? seg("edition", ui.editions.map(e => [e.id, e.name]), g.edition.id) : ""}</div>`;
+  } else html += `<div class="card"><p>Edition: <b>${esc(g.edition.name)}</b></p></div>`;
   if (me.is_host) html += `<div class="card stack"><h3>Storyteller</h3>
     ${seg("mode", [["auto", "Automated"], ["human", "Human (me)"]], g.mode)}
     <p class="small muted">${g.mode === "human"
@@ -278,8 +290,8 @@ function tabsView() {
     k === "town" && ["nominations", "vote", "defense"].includes(S.game.phase) && ui.tab !== "town" ? '<span class="badge"></span>' : ""}</button>`).join("")}</nav>`;
 }
 
-function roleCard(r) {
-  return `<div class="card role ${r.team}"><div class="type">${esc(r.type)} · <span class="tag-${r.team}">${r.team}</span></div>
+function roleCard(r, team = r.team) {
+  return `<div class="card role ${team}"><div class="type">${esc(r.type)} · you are <span class="tag-${team}">${team}</span></div>
     <h2>${esc(r.name)}</h2><p>${esc(r.ability)}</p>${r.tip ? `<p class="small muted">${esc(r.tip)}</p>` : ""}</div>`;
 }
 
@@ -297,7 +309,8 @@ function wikiDetails(id, open = false) {
 function meView() {
   const me = S.me;
   if (!me.role) return `<div class="card"><p>The Storyteller is preparing the game. Your character appears here soon.</p></div>`;
-  let html = roleCard(me.role).replace(/<\/div>$/, wikiDetails(me.role.id) + "</div>");
+  let html = forcedActions();
+  html += roleCard(me.role, me.team || me.role.team).replace(/<\/div>$/, wikiDetails(me.role.id) + "</div>");
   html += `<div class="card"><p>You are <b>${me.alive ? "alive" : "dead"}</b>.
     ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
@@ -323,16 +336,52 @@ function townView() {
       `<p class="muted">${me.seat == null ? "Players nominate from their phones." : me.alive ? "You have already nominated today." : "Dead players cannot nominate."}</p>`}
       ${d.nominees.length ? `<p class="small muted">Already nominated today: ${d.nominees.map(nameOf).map(esc).join(", ")}</p>` : ""}</div>`;
   }
-  if (["day", "nominations"].includes(g.phase) && me.seat != null && me.alive && !me.slayer_claimed) {
-    html += `<div class="card stack"><h3>Slayer shot</h3>${ui.slayer ?
-      `<p>Tap the player you shoot. Everyone sees this.</p><button data-act="slayer-cancel">Cancel</button>` :
-      `<p class="small muted">Anyone may claim to be the Slayer. Only the real Slayer's shot can kill.</p>
-       <button data-act="slayer">Claim a Slayer shot</button>`}</div>`;
-  }
+  html += (me.day_actions || []).filter(a => !a.forced).map(dayActionCard).join("");
   if (d.history.length) html += `<div class="card"><h3>Votes today</h3><ul class="log">${d.history.map(h =>
     `<li>${esc(nameOf(h.nominator))} → ${esc(nameOf(h.nominee))}: <b>${h.votes}</b>
      <span class="small muted">${h.yes.map(nameOf).map(esc).join(", ")}</span></li>`).join("")}</ul></div>`;
   return html;
+}
+
+function forcedActions() {
+  return (S.me.day_actions || []).filter(a => a.forced).map(dayActionCard).join("");
+}
+
+function dayActionCard(a) {
+  const id = `da-${a.key}`;
+  const roles = almanac?.roles || [];
+  let form = "";
+  if (a.kind === "target") {
+    form = playerSelect(`${id}-target`, a.candidates || alivePlayers());
+  } else if (a.kind === "statement" || a.kind === "question") {
+    const k = fv(`${id}-kind`, "is_evil");
+    form = `<select id="${id}-kind">${opt(`${id}-kind`, "is_evil", "[player] is evil", "is_evil")}
+        ${opt(`${id}-kind`, "is_role", "[player] is the [character]", "is_evil")}
+        ${opt(`${id}-kind`, "is_type", "[player] is a [type]", "is_evil")}
+        ${opt(`${id}-kind`, "in_play", "The [character] is in play", "is_evil")}
+        ${opt(`${id}-kind`, "text", "Something else (free text)", "is_evil")}</select>
+      ${k !== "in_play" && k !== "text" ? playerSelect(`${id}-player`, S.players.filter(p => p.seat != null).map(p => p.id)) : ""}
+      ${k === "is_role" || k === "in_play" ? roleSelect(`${id}-role`, roles) : ""}
+      ${k === "is_type" ? `<select id="${id}-type">${["townsfolk", "outsider", "minion", "demon"].map(t => opt(`${id}-type`, t, t, "demon")).join("")}</select>` : ""}
+      ${k === "text" ? `<input id="${id}-text" maxlength="200" value="${esc(fv(`${id}-text`))}" placeholder="Your statement">` : ""}`;
+  } else if (a.kind === "guesses") {
+    const ids = S.players.filter(p => p.seat != null).map(p => p.id);
+    form = [0, 1, 2, 3, 4].map(i => `<div class="row">${playerSelect(`${id}-p${i}`, ids, true)}${roleSelect(`${id}-r${i}`, roles, true)}</div>`).join("");
+  }
+  return `<div class="card stack ${a.forced ? "read" : ""}"><h3>${esc(a.label)}</h3><p class="small muted">${esc(a.help || "")}
+    ${a.public ? " Everyone sees this." : " Only you see the answer."}</p><div class="stack">${form}</div>
+    <button class="${a.forced ? "primary big" : ""}" data-act="dayact" data-key="${esc(a.key)}" data-kind="${esc(a.kind)}">${a.kind === "visit" ? "Visit" : "Confirm"}</button></div>`;
+}
+
+function dayPayload(key, kind) {
+  const id = `da-${key}`, val = x => document.getElementById(`${id}-${x}`)?.value;
+  if (kind === "target") return { target: val("target") };
+  if (kind === "statement" || kind === "question") {
+    const k = val("kind");
+    return k === "text" ? { kind: "text", text: val("text") || "" } : { kind: k, player: val("player"), role: val("role"), type: val("type") };
+  }
+  if (kind === "guesses") return { guesses: [0, 1, 2, 3, 4].map(i => ({ player: val(`p${i}`), character: val(`r${i}`) })).filter(x => x.player && x.character) };
+  return {};
 }
 
 function voteCard() {
@@ -419,6 +468,10 @@ function grimView() {
         <button data-act="addpending">Add a message</button></div>
       <button class="primary big" data-act="sendpending">${g.stage === "review" ? "Send to players" : "Send and start the day"}</button></div>`;
   }
+  if (st.requests.length) html += `<div class="card read stack"><h3>Private requests</h3>${st.requests.map(r => `<div class="stack">
+    <p><b>${esc(r.name)}</b> (${esc(r.kind)}, ${esc(r.label)}) ${esc(r.text)}</p>
+    <textarea id="req-${r.id}" rows="2" placeholder="Your private answer"></textarea>
+    <button data-act="stanswer" data-id="${r.id}">Send answer</button></div>`).join("")}</div>`;
   if (g.phase === "night" && st.choices.length) {
     html += `<div class="card"><h3>Night ${g.night} · stage ${esc(g.stage)}</h3><ul class="log">${st.choices.map(c => `<li>
       <b>${esc(c.name)}</b> ${c.done ? "✓" : '<span class="muted">…</span>'}
@@ -432,7 +485,9 @@ function grimView() {
       <button data-act="stmsg" data-pid="${p.id}">Message</button></div>
     <div class="row"><select class="grow" data-char="${p.id}">${roleOptions(p.role)}</select>
       ${p.role === "drunk" ? `<select class="grow" data-shown="${p.id}">${roleOptions(p.shown, r => r.type === "townsfolk")}</select>` : ""}</div>
-    ${p.role === "drunk" ? `<span class="small muted">Thinks they are the ${esc(rname(p.shown))}</span>` : ""}</li>`).join("")}</ul></div>`;
+    ${p.role !== p.shown ? `<span class="small muted">Thinks they are the ${esc(rname(p.shown))}</span>` : ""}
+    ${p.notes.length ? `<span class="small">${p.notes.map(esc).join(" · ")}</span>` : ""}
+    ${["day", "nominations", "defense", "vote"].includes(g.phase) ? `<button class="danger" data-act="stexec" data-pid="${p.id}">Execute now</button>` : ""}</li>`).join("")}</ul></div>`;
   html += `<div class="card"><h3>Status</h3><ul class="log">${st.status.map(x => `<li class="row"><span class="grow">${esc(x.label)}</span>
     ${x.key === "red_herring" ? `<select data-stset="red_herring">${st.grimoire.map(p => `<option value="${p.id}" ${p.name === x.value ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>`
     : x.key === "bluffs" ? x.ids.map((b, i) => `<select data-bluff="${i}">${roleOptions(b, r => r.team === "good")}</select>`).join("")
@@ -445,15 +500,23 @@ function grimView() {
 // ---------- night ----------
 function nightView() {
   const t = S.task;
-  if (!t) return `<div class="night"><div class="inner done"><b>You are done.</b>
-    Put your phone face down and wait for dawn.</div></div>`;
+  if (!t) return `<div class="night"><div class="inner">${forcedActions()}<div class="done"><b>You are done.</b>
+    Put your phone face down and wait for dawn.</div></div></div>`;
   let body = "";
   if (t.kind === "choose") {
     const chosen = ui.picks;
     body = `<p>${esc(t.text)}</p><div class="choice">${t.candidates.map(id => `<button class="${chosen.includes(id) ? "sel" : ""}"
       data-act="pick" data-pid="${id}">${esc(nameOf(id))}${id === S.me.id ? " (you)" : ""}</button>`).join("")}</div>
       <p class="small muted">${chosen.length}/${t.pick} chosen</p>
-      <button class="primary big" data-act="submit" ${chosen.length === t.pick ? "" : "disabled"}>Confirm</button>`;
+      <button class="primary big" data-act="submit" ${chosen.length === t.pick ? "" : "disabled"}>Confirm</button>
+      ${t.allow_none ? `<button class="big" data-act="none">Choose no one</button>` : ""}`;
+  } else if (t.kind === "character") {
+    body = `<p>${esc(t.text)}</p>${roleSelect(`nt-${t.id}-c`, t.options)}
+      <button class="primary big" data-act="submitchar">Confirm</button>
+      ${t.allow_none ? `<button class="big" data-act="none">Choose no one</button>` : ""}`;
+  } else if (t.kind === "player_character") {
+    body = `<p>${esc(t.text)}</p><div class="stack">${playerSelect(`nt-${t.id}-p`, t.candidates)}${roleSelect(`nt-${t.id}-c`, t.options)}</div>
+      <button class="primary big" data-act="submitpc">Confirm</button>`;
   } else if (t.kind === "decoy") {
     body = `<p>${esc(t.text)}</p><div class="choice">${t.options.map(o =>
       `<button data-act="decoy" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
@@ -462,7 +525,7 @@ function nightView() {
       <p class="small muted">This is also saved in your notebook.</p>
       <button class="primary big" data-act="ack">Got it</button>`;
   }
-  return `<div class="night"><div class="inner"><h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
+  return `<div class="night"><div class="inner">${forcedActions()}<h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
 }
 
 // ---------- actions ----------
@@ -502,6 +565,7 @@ app.addEventListener("click", async ev => {
       case "stwin": if (confirm(`Declare that ${d.v} wins?`)) send({ type: "st_win", team: d.v }); return;
       case "pref": {
         if (d.k === "mode") { send({ type: "mode", mode: d.v }); return; }
+        if (d.k === "edition") { send({ type: "edition", edition: d.v }); return; }
         const p = { ...S.me.prefs, [d.k]: d.v };
         send({ type: "prefs", team: p.team, style: p.style }); return;
       }
@@ -530,10 +594,6 @@ app.addEventListener("click", async ev => {
         render(); window.scrollTo(0, 0); return;
       case "player": {
         const pid = d.pid; if (!pid) return;
-        if (ui.slayer) {
-          if (confirm(`Claim a Slayer shot at ${nameOf(pid)}? Everyone will see it.`)) send({ type: "slayer", target: pid });
-          ui.slayer = false; render(); return;
-        }
         if (S.game.phase === "nominations" && S.me.alive && !S.day.nominators.includes(S.me.id)) {
           if (S.day.nominees.includes(pid)) return toast(`${nameOf(pid)} was already nominated today.`);
           ui.nominate = pid; render();
@@ -542,8 +602,21 @@ app.addEventListener("click", async ev => {
       }
       case "nominate-ok": send({ type: "nominate", target: ui.nominate }); ui.nominate = null; return;
       case "nominate-cancel": ui.nominate = null; render(); return;
-      case "slayer": ui.slayer = true; render(); toast("Tap the player you shoot on the map.", "info"); return;
-      case "slayer-cancel": ui.slayer = false; render(); return;
+      case "dayact": {
+        const payload = dayPayload(d.key, d.kind);
+        const a = (S.me.day_actions || []).find(x => x.key === d.key);
+        if (a?.public && !confirm(`${a.label}: everyone will see this. Go ahead?`)) return;
+        send({ type: "day_action", key: d.key, payload }); return;
+      }
+      case "none": send({ type: "task", task: S.task.id, response: S.task.kind === "choose" ? [] : null }); return;
+      case "submitchar": send({ type: "task", task: S.task.id, response: document.getElementById(`nt-${S.task.id}-c`).value }); return;
+      case "submitpc": send({ type: "task", task: S.task.id, response: {
+        player: document.getElementById(`nt-${S.task.id}-p`).value, character: document.getElementById(`nt-${S.task.id}-c`).value } }); return;
+      case "stexec": if (confirm(`Execute ${nameOf(d.pid)} now? This is today's execution and ends the day.`)) send({ type: "st_execute", player: d.pid }); return;
+      case "stanswer": {
+        const text = document.getElementById(`req-${d.id}`)?.value || "";
+        send({ type: "st_answer", request: d.id, text }); return;
+      }
       case "vote": send({ type: "vote", yes: d.v === "1" }); return;
       case "pick": {
         const t = S.task, i = ui.picks.indexOf(d.pid);
@@ -564,6 +637,7 @@ app.addEventListener("click", async ev => {
 });
 app.addEventListener("change", ev => {
   const el = ev.target, d = el.dataset;
+  if (el.id && (el.id.startsWith("da-") || el.id.startsWith("nt-"))) { ui.form[el.id] = el.value; render(); }
   if (d.setting) send({ type: "setting", key: d.setting, value: +el.value });
   if (d.char) {
     const p = S.st.grimoire.find(x => x.id === d.char);

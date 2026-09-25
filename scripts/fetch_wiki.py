@@ -23,6 +23,20 @@ EDITIONS = {
         "Butler", "Drunk", "Recluse", "Saint",
         "Poisoner", "Spy", "Scarlet Woman", "Baron", "Imp",
     ],
+    "bad_moon_rising": [
+        "Grandmother", "Sailor", "Chambermaid", "Exorcist", "Innkeeper", "Gambler", "Gossip",
+        "Courtier", "Professor", "Minstrel", "Tea Lady", "Pacifist", "Fool",
+        "Tinker", "Moonchild", "Goon", "Lunatic",
+        "Godfather", "Devil's Advocate", "Assassin", "Mastermind",
+        "Zombuul", "Pukka", "Shabaloth", "Po",
+    ],
+    "sects_and_violets": [
+        "Clockmaker", "Dreamer", "Snake Charmer", "Mathematician", "Flowergirl", "Town Crier",
+        "Oracle", "Savant", "Seamstress", "Philosopher", "Artist", "Juggler", "Sage",
+        "Mutant", "Sweetheart", "Barber", "Klutz",
+        "Evil Twin", "Witch", "Cerenovus", "Pit-Hag",
+        "Fang Gu", "Vigormortis", "No Dashii", "Vortox",
+    ],
 }
 
 
@@ -87,7 +101,7 @@ def main() -> None:
     for edition, titles in EDITIONS.items():
         data = {"fetched": time.strftime("%Y-%m-%d"), "characters": {}}
         for t in titles:
-            rid = t.lower().replace(" ", "")
+            rid = re.sub(r"[^a-z]", "", t.lower())
             data["characters"][rid] = parse(t, wikitext(t))
             print(f"{t:15} {data['characters'][rid]['ability'][:70]}")
             time.sleep(0.5)

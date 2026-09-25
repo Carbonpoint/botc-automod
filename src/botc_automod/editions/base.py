@@ -56,8 +56,26 @@ class Edition:
         """Let the human storyteller change an edition setting (red herring...)."""
         raise NotImplementedError
 
+    def alignment(self, p: Player) -> str:
+        return p.alignment or self.roles[p.role].team
+
+    def player_notes(self, game: Game, p: Player) -> list[str]:
+        """Grimoire reminders for the human storyteller."""
+        return []
+
     # Setup ---------------------------------------------------------------
     def setup(self, game: Game) -> None:
+        raise NotImplementedError
+
+    def on_dawn(self, game: Game) -> list[str]:
+        """Called at dawn. Return extra public lines (for example a resurrection)."""
+        return []
+
+    def day_actions(self, game: Game, p: Player) -> list[dict]:
+        """Day actions p may take now (Slayer shot, Gossip statement, Klutz choice...)."""
+        return []
+
+    def do_day_action(self, game: Game, p: Player, key: str, payload: dict) -> None:
         raise NotImplementedError
 
     # Night ---------------------------------------------------------------

@@ -39,7 +39,12 @@ DEFAULT_SETTINGS = {
     "night_max": 120,        # s before unanswered choices are made at random
     "misregister": 0.35,     # chance the Spy/Recluse registers falsely per check
     "mayor_bounce": 0.5,     # chance a night kill on the Mayor hits another player
+    "pacifist_save": 0.5,    # chance an executed good player survives with the Pacifist
+    "tinker_chance": 0.1,    # chance per night the Tinker dies
+    "shabaloth_regurgitate": 0.3,  # chance per night the Shabaloth brings back a victim
 }
+CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
+SCHEMA = 2  # bump when saved games from older versions cannot load
 
 LOBBY_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 
@@ -62,7 +67,10 @@ class Player:
     ready: bool = False
     role: str | None = None       # the true character
     shown: str | None = None      # the character the player believes they are
+    alignment: str = ""           # good | evil; "" means the team of the true character
+    gained: list = field(default_factory=list)  # abilities gained (Philosopher)
     alive: bool = True
+    fake_dead: bool = False       # alive, but registers as dead (Zombuul)
     ghost_vote: bool = True
     connected: bool = False
     slayer_claimed: bool = False
@@ -82,6 +90,7 @@ class Game:
     pending: dict | None = None
 
     def __init__(self, code: str, edition_id: str = "tb", seed: int | None = None):
+        self.schema = SCHEMA
         self.code = code
         self.edition_id = edition_id
         self.rng = random.Random(seed)
@@ -140,6 +149,10 @@ class Game:
 
     def alive(self) -> list[Player]:
         return [p for p in self.seated() if p.alive]
+
+    def living(self, p: Player) -> bool:
+        """Alive as everyone sees it: a fake-dead Zombuul counts as dead."""
+        return p.alive and not p.fake_dead
 
     def p(self, pid: str) -> Player:
         try:
@@ -224,6 +237,13 @@ class Game:
         for p in self.players.values():
             if p.seat is not None and p.seat >= seats:
                 p.seat = None
+
+    def set_edition(self, edition_id: str) -> None:
+        if self.phase != "lobby":
+            raise GameError("The edition is fixed once the game starts.")
+        if edition_id not in EDITIONS:
+            raise GameError("Unknown edition.")
+        self.edition_id = edition_id
 
     def set_mode(self, mode: str) -> None:
         if self.phase != "lobby":
@@ -316,7 +336,7 @@ class Game:
         self.stage = stage
         n = 0
         for p in self.seated():
-            queue = tasks.get(p.id) or [decoy_task(self.rng)]
+            queue = [t for t in tasks.get(p.id, []) if self._fits(t)] or [decoy_task(self.rng)]
             for t in queue:
                 n += 1
                 t.setdefault("key", t["kind"])
@@ -330,6 +350,17 @@ class Game:
         self.stage_started = time.time()
         self.set_timer(self.settings["night_max"])
 
+    @staticmethod
+    def _fits(t: dict) -> bool:
+        """Shrink a choice when too few players remain; drop it when none do."""
+        if t["kind"] == "choose" and len(t["candidates"]) < t["pick"]:
+            if not t["candidates"]:
+                return bool(t.get("allow_none"))
+            t["pick"] = len(t["candidates"])
+        if t["kind"] == "player_character" and not t["candidates"]:
+            return False
+        return True
+
     def submit_task(self, pid: str, task_id: str, response) -> None:
         if self.phase != "night":
             raise GameError("It is not night.")
@@ -338,12 +369,26 @@ class Game:
         if task is None or task["done"]:
             return  # a double tap, or an answer that arrived after the stage ended
         if task["kind"] == "choose":
-            picks = response if isinstance(response, list) else [response]
-            if len(picks) != task["pick"] or len(set(picks)) != len(picks):
-                raise GameError(f"Choose exactly {task['pick']} player(s).")
-            if any(x not in task["candidates"] for x in picks):
-                raise GameError("You cannot choose that player.")
+            picks = [] if response is None else response if isinstance(response, list) else [response]
+            if not (task.get("allow_none") and not picks):
+                if len(picks) != task["pick"] or len(set(picks)) != len(picks):
+                    raise GameError(f"Choose exactly {task['pick']} player(s).")
+                if any(x not in task["candidates"] for x in picks):
+                    raise GameError("You cannot choose that player.")
             task["response"] = picks
+        elif task["kind"] == "character":
+            ids = [o["id"] for o in task["options"]]
+            if response is None and task.get("allow_none"):
+                task["response"] = None
+            elif response in ids:
+                task["response"] = response
+            else:
+                raise GameError("Choose a character.")
+        elif task["kind"] == "player_character":
+            if not isinstance(response, dict) or response.get("player") not in task["candidates"] \
+                    or response.get("character") not in [o["id"] for o in task["options"]]:
+                raise GameError("Choose a player and a character.")
+            task["response"] = {"player": response["player"], "character": response["character"]}
         elif task["kind"] == "decoy":
             if response not in task["options"]:
                 raise GameError("Tap one of the answers.")
@@ -359,19 +404,16 @@ class Game:
         answers: dict[str, dict] = {}
         for p in self.seated():
             for t in p.tasks:
-                if not t["done"] and t["kind"] == "choose":
-                    t["response"] = self.rng.sample(t["candidates"], t["pick"])
-                    p.note(self.label(), "Time ran out, so a choice was made for you: "
-                           + ", ".join(self.p(x).name for x in t["response"]) + ".")
+                if not t["done"]:
+                    self._auto_answer(p, t)
                 t["done"] = True
-                if t["kind"] == "choose":
+                if t["kind"] in ("choose", "character", "player_character"):
                     answers.setdefault(p.id, {})[t["key"]] = t["response"]
             p.tasks = []
         if self.stage == "A":
             tasks = self.edition.resolve_a(self, answers)
             if self.mode == "human":
-                chosen = [{"name": self.p(pid).name, "key": key,
-                           "picks": [self.p(x).name for x in picks]}
+                chosen = [{"name": self.p(pid).name, "key": key, "picks": self._describe(picks)}
                           for pid, keys in answers.items() for key, picks in keys.items()]
                 self._review("review", {"tasks": dict(tasks), "choices": chosen})
             else:
@@ -383,6 +425,33 @@ class Game:
             else:
                 self._deliver(messages)
                 self.dawn()
+
+    def _describe(self, answer) -> list[str]:
+        """A night answer in words, for the storyteller."""
+        roles = self.edition.roles
+        if not answer:
+            return ["no one"]
+        if isinstance(answer, str):
+            return [roles[answer].name if answer in roles else answer]
+        if isinstance(answer, dict):
+            return [f"{self.p(answer['player']).name} as the {roles[answer['character']].name}"]
+        return [self.p(x).name for x in answer]
+
+    def _auto_answer(self, p: Player, t: dict) -> None:
+        """Time ran out: optional abilities pass, required ones choose at random."""
+        kind, rng = t["kind"], self.rng
+        if kind == "choose":
+            t["response"] = [] if t.get("allow_none") else rng.sample(t["candidates"], t["pick"])
+            text = ", ".join(self.p(x).name for x in t["response"]) or "no one"
+        elif kind == "character":
+            t["response"] = None if t.get("allow_none") else rng.choice(t["options"])["id"]
+            text = t["response"] or "no one"
+        elif kind == "player_character":
+            t["response"] = {"player": rng.choice(t["candidates"]), "character": rng.choice(t["options"])["id"]}
+            text = self.p(t["response"]["player"]).name
+        else:
+            return
+        p.note(self.label(), f"Time ran out, so a choice was made for you: {text}.")
 
     def _review(self, stage: str, pending: dict) -> None:
         """Hold the night results for the human storyteller. No timer runs."""
@@ -492,6 +561,32 @@ class Game:
             raise GameError("The message is empty.")
         self.p(pid).note("Storyteller", text)
 
+    def st_answer(self, req_id: str, text: str) -> None:
+        """Answer a private request (Artist, Savant) and clear it."""
+        self._need_storyteller()
+        reqs = self.estate.get("requests", [])
+        req = next((r for r in reqs if r["id"] == req_id), None)
+        if not req:
+            raise GameError("That request is already answered.")
+        text = str(text).strip()
+        if text:
+            self.p(req["pid"]).note("Storyteller", f"{req['kind']}: {text}")
+        reqs.remove(req)
+
+    def st_execute(self, pid: str) -> None:
+        """Execute a player now (madness). It is the day's execution, so the day ends."""
+        self._need_storyteller()
+        p = self.p(pid)
+        self._need_seat(p)
+        if self.phase not in ("day", "nominations", "defense", "vote"):
+            raise GameError("Executions happen during the day.")
+        if self.executed_today:
+            raise GameError("There has already been an execution today.")
+        self.current_nom = None
+        self.block = {"pid": pid, "votes": 0}
+        self.announce(f"The Storyteller executes {p.name}.", read=False)
+        self.end_day()
+
     def st_win(self, team: str, reason: str = "") -> None:
         self._need_storyteller()
         if team not in ("good", "evil"):
@@ -514,9 +609,11 @@ class Game:
         self.tonight_deaths = []
         self.say("Dawn breaks. Everyone, put your phone down and open your eyes.")
         if deaths:
-            self.announce(" and ".join(deaths) + (" died" if len(deaths) > 1 else " died") + " in the night.")
+            self.announce(" and ".join(deaths) + " died in the night.")
         elif self.night > 1:
             self.announce("Nobody died last night.")
+        for line in self.edition.on_dawn(self):
+            self.announce(line)
         if self._check_win():
             return
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
@@ -532,7 +629,7 @@ class Game:
         self.set_timer(self.settings["nominations"])
 
     def votes_needed(self) -> int:
-        return math.ceil(len(self.alive()) / 2)
+        return math.ceil(sum(1 for p in self.seated() if self.living(p)) / 2)
 
     def nominate(self, pid: str, target: str) -> None:
         if self.phase != "nominations":
@@ -540,7 +637,7 @@ class Game:
         nominator, nominee = self.p(pid), self.p(target)
         self._need_seat(nominator)
         self._need_seat(nominee)
-        if not nominator.alive:
+        if not self.living(nominator):
             raise GameError("Dead players cannot nominate.")
         if pid in self.nominators_today:
             raise GameError("You have already nominated today.")
@@ -565,7 +662,7 @@ class Game:
         self.set_timer(self.settings["vote"])
 
     def can_vote(self, p: Player) -> bool:
-        return p.alive or p.ghost_vote
+        return self.living(p) or p.ghost_vote
 
     def vote(self, pid: str, yes: bool) -> None:
         if self.phase != "vote":
@@ -583,7 +680,7 @@ class Game:
         votes = nom["votes"]
         for pid, yes in votes.items():
             p = self.p(pid)
-            if yes and not p.alive:
+            if yes and not self.living(p):
                 p.ghost_vote = False
         count = self.edition.count_votes(self, votes)
         nominee = self.p(nom["nominee"])
@@ -627,18 +724,30 @@ class Game:
         self.begin_night()
 
     def slayer_claim(self, pid: str, target: str) -> None:
-        if self.phase not in ("day", "nominations"):
-            raise GameError("A Slayer shot can only be taken during the day, outside a vote.")
-        p, t = self.p(pid), self.p(target)
-        self._need_seat(p)
-        self._need_seat(t)
-        if not p.alive:
-            raise GameError("Dead players cannot claim a Slayer shot.")
+        p = self.p(pid)
         if p.slayer_claimed:
             raise GameError("You have already claimed a Slayer shot.")
-        p.slayer_claimed = True
-        self.edition.slayer_shot(self, p, t)
-        self._check_win()
+        self.day_action(pid, "slayer", {"target": target})
+
+    def day_action(self, pid: str, key: str, payload: dict | None = None) -> None:
+        """A day ability: Slayer shot, Gossip statement, Juggler guesses, Klutz choice..."""
+        p = self.p(pid)
+        self._need_seat(p)
+        payload = payload or {}
+        for k in ("target", "player"):
+            if k in payload:
+                self._need_seat(self.p(payload[k]))
+        actions = {a["key"]: a for a in self.edition.day_actions(self, p)}
+        action = actions.get(key)
+        if action is None:
+            raise GameError("You cannot do that now.")
+        if not action.get("forced") and self.phase not in ("day", "nominations"):
+            raise GameError("Day abilities are used during the day, outside a vote.")
+        if "candidates" in action and payload.get("target") not in action["candidates"]:
+            raise GameError("You cannot choose that player.")
+        self.edition.do_day_action(self, p, key, payload)
+        if self.phase not in ("ended", "lobby"):
+            self._check_win()
 
     # Ending --------------------------------------------------------------------------
     def _check_win(self) -> bool:
@@ -698,7 +807,7 @@ class Game:
         if key not in DEFAULT_SETTINGS:
             raise GameError("Unknown setting.")
         value = float(value)
-        if key in ("misregister", "mayor_bounce"):
+        if key in CHANCES:
             if not 0 <= value <= 1:
                 raise GameError("A chance is between 0 and 1.")
         elif not 5 <= value <= 3600:
@@ -725,11 +834,12 @@ class Game:
 
     # Views -----------------------------------------------------------------------------
     def _public_alive(self, p: Player) -> bool:
-        return p.alive or (self.phase == "night" and p.id in self.tonight_deaths)
+        return self.living(p) or (self.phase == "night" and p.id in self.tonight_deaths)
 
     def grimoire(self) -> list[dict]:
         ed = self.edition
         return [{"id": p.id, "name": p.name, "role": ed.roles[p.role].card(),
+                 "alignment": ed.alignment(p),
                  "shown": ed.roles[p.shown].name if p.shown != p.role else None,
                  "alive": p.alive} for p in self.seated() if p.role]
 
@@ -752,6 +862,9 @@ class Game:
                    "prefs": me.prefs, "ready": me.ready,
                    "alive": self._public_alive(me), "ghost_vote": me.ghost_vote,
                    "role": ed.roles[me.shown].card() if me.shown and self.phase != "setup" else None,
+                   "team": self._believed_team(me) if me.shown and self.phase != "setup" else None,
+                   "day_actions": ed.day_actions(self, me) if me.seat is not None
+                   and self.phase not in ("lobby", "setup", "ended") else [],
                    "storyteller": self.is_storyteller(pid),
                    "log": me.log, "slayer_claimed": me.slayer_claimed,
                    "night_done": self.phase == "night" and task is None},
@@ -774,6 +887,12 @@ class Game:
         if self.phase == "ended":
             view["grimoire"] = self.grimoire()
         return view
+
+    def _believed_team(self, p: Player) -> str:
+        """The team the player believes they are on (a Lunatic thinks evil)."""
+        if p.role != p.shown and p.role in ("drunk", "lunatic"):
+            return self.edition.roles[p.shown].team
+        return self.edition.alignment(p)
 
     def _storyteller_view(self) -> dict:
         ed = self.edition
@@ -807,8 +926,10 @@ class Game:
                                 "title": "Message", "lines": lines, "text": ""})
         return {
             "grimoire": [{"id": p.id, "name": p.name, "seat": p.seat, "role": p.role, "shown": p.shown,
-                          "team": ed.roles[p.role].team, "alive": p.alive, "ghost_vote": p.ghost_vote}
+                          "team": ed.alignment(p), "alive": p.alive, "ghost_vote": p.ghost_vote,
+                          "notes": ed.player_notes(self, p)}
                          for p in self.seated()],
+            "requests": self.estate.get("requests", []),
             "status": ed.st_status(self),
             "choices": choices,
             "pending": pending,

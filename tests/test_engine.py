@@ -27,9 +27,7 @@ def rigged(roles: list[str], shown: dict[int, str] | None = None, seed: int = 1)
         p.role = r
         p.shown = (shown or {}).get(i, r)
     good = [p for p in g.seated() if ROLES[p.role].team == "good"]
-    g.estate.update({"bluffs": ["mayor", "soldier", "chef"], "red_herring": good[-1].id,
-                     "poisoned": None, "protected": None, "master": None,
-                     "virgin_used": [], "slayer_used": False})
+    g.estate.update({"bluffs": ["mayor", "soldier", "chef"], "red_herring": good[-1].id})
     g.settings["misregister"] = 0.0
     g.settings["mayor_bounce"] = 0.0
     g.begin_night()

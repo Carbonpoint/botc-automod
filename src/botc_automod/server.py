@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .editions import EDITIONS
-from .game import Game, GameError, new_code
+from .game import SCHEMA, Game, GameError, new_code
 
 log = logging.getLogger("botc")
 STATIC = Path(__file__).parent / "static"
@@ -49,6 +49,9 @@ def load_all() -> None:
             g = pickle.loads(f.read_bytes())
         except Exception as e:  # a stale save from an old version
             log.warning("skipping %s: %s", f.name, e)
+            continue
+        if getattr(g, "schema", 1) != SCHEMA:
+            log.warning("skipping %s: saved by an older version", f.name)
             continue
         for p in g.players.values():
             p.connected = False
@@ -168,6 +171,11 @@ async def join_game(code: str, body: NameIn) -> dict:
     return {"code": g.code, "token": p.token, "player": p.id}
 
 
+@app.get("/api/editions")
+def editions() -> list[dict]:
+    return [{"id": e.id, "name": e.name} for e in EDITIONS.values()]
+
+
 @app.get("/api/editions/{eid}")
 def almanac(eid: str) -> dict:
     if eid not in EDITIONS:
@@ -200,7 +208,7 @@ def _find(code: str, token: str):
 
 HOST_ONLY = {"room", "start", "kick", "pause", "resume", "add_time", "advance", "setting", "end", "mode",
              "begin", "set_character", "st_set", "edit_pending", "add_pending", "send_pending",
-             "st_kill", "st_revive", "st_message", "st_win"}
+             "st_kill", "st_revive", "st_message", "st_win", "edition", "st_answer", "st_execute"}
 
 
 def handle(g: Game, pid: str, msg: dict) -> None:
@@ -221,6 +229,14 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.vote(pid, bool(msg.get("yes")))
         case "slayer":
             g.slayer_claim(pid, msg["target"])
+        case "day_action":
+            g.day_action(pid, msg["key"], msg.get("payload") or {})
+        case "edition":
+            g.set_edition(msg["edition"])
+        case "st_answer":
+            g.st_answer(msg["request"], msg.get("text", ""))
+        case "st_execute":
+            g.st_execute(msg["player"])
         case "room":
             g.set_room(msg["shape"], msg.get("seats", 0), msg.get("rows", 0),
                        msg.get("cols", 0), msg.get("cells"))
