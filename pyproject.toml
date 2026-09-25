@@ -1,0 +1,27 @@
+[project]
+name = "botc-automod"
+version = "0.1.0"
+description = "Self-hosted Blood on the Clocktower server with an automated storyteller"
+readme = "README.md"
+authors = [
+    { name = "carbonpoint", email = "carbonpoint@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.141.1",
+    "segno>=1.6.6",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+botc-automod = "botc_automod:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "playwright>=1.63.0",
+    "pytest>=9.1.1",
+]
