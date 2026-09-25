@@ -29,7 +29,7 @@ p { margin: 6px 0; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .row > .grow { flex: 1 1 160px; }
 .stack > * + * { margin-top: 8px; }
-input, select { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
+input, select, textarea { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
   border-radius: 10px; padding: 10px 12px; width: 100%; }
 input[type=number] { width: 90px; }
 button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
@@ -131,3 +131,10 @@ button.big { width: 100%; font-size: 1.1rem; padding: 14px; }
 #toast.info { background: #1d2b3b; border-color: var(--good); color: #d9e8ff; }
 .qr { background: #fff; border-radius: 10px; width: 150px; height: 150px; }
 .conn { font-size: .75rem; color: var(--evil); }
+details { margin-top: 6px; }
+details summary { cursor: pointer; color: var(--gold); font-size: .9rem; }
+details ul { padding-left: 18px; margin: 4px 0 8px; }
+details li { margin: 4px 0; font-size: .92rem; }
+details h3 { margin-top: 10px; }
+a { color: var(--gold); }
+textarea { resize: vertical; }

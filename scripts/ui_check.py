@@ -1,6 +1,8 @@
 """Drive 5 phone-sized browsers through lobby, night 1, a nomination and a vote.
 
-Usage: uv run python scripts/ui_check.py OUTDIR [BASE_URL]
+Usage: uv run python scripts/ui_check.py OUTDIR [BASE_URL] [human]
+With "human", a 6th browser is a human storyteller who checks the deal and
+approves the night results.
 Screenshots go to OUTDIR. Needs a running server (default port 8765).
 """
 import asyncio
@@ -10,7 +12,8 @@ from playwright.async_api import async_playwright
 
 OUT = sys.argv[1]
 BASE = sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8765"
-NAMES = ["Hana", "Ivo", "Jess", "Kofi", "Lena"]
+HUMAN = len(sys.argv) > 3 and sys.argv[3] == "human"
+NAMES = (["Sam"] if HUMAN else []) + ["Hana", "Ivo", "Jess", "Kofi", "Lena"]
 
 
 async def main():
@@ -30,6 +33,9 @@ async def main():
         await host.click('[data-act="host"]')
         await host.wait_for_selector(".top .code")
         code = (await host.inner_text(".top .code")).strip()
+        if HUMAN:
+            await host.click('[data-act="pref"][data-k="mode"][data-v="human"]')
+            await host.wait_for_timeout(300)
         for pg, n in zip(pages[1:], NAMES[1:]):
             await pg.fill("#name", n)
             await pg.fill("#code", code)
@@ -38,7 +44,8 @@ async def main():
         for _ in range(3):
             await host.click('[data-act="seats"][data-d="-1"]')
             await host.wait_for_timeout(250)
-        for i, pg in enumerate(pages):
+        players = pages[1:] if HUMAN else pages
+        for i, pg in enumerate(players):
             await pg.click(f'.seat.empty[data-seat="{i}"]')
             await pg.wait_for_timeout(200)
             await pg.click('[data-act="pref"][data-k="team"][data-v="%s"]' % ("evil" if i == 1 else "good"))
@@ -46,6 +53,13 @@ async def main():
         await host.wait_for_timeout(400)
         await host.screenshot(path=f"{OUT}/02_lobby_host.png", full_page=True)
         await host.click('[data-act="start"]')
+        if HUMAN:
+            await host.wait_for_selector('[data-act="begin"]')
+            await host.wait_for_timeout(500)
+            await host.screenshot(path=f"{OUT}/h1_setup_grimoire.png", full_page=True)
+            await pages[1].screenshot(path=f"{OUT}/h2_player_waiting.png")
+            await host.click('[data-act="begin"]')
+            host = pages[1]
         await host.wait_for_selector(".night")
         await host.wait_for_timeout(300)
         await host.screenshot(path=f"{OUT}/03_night.png")
@@ -70,9 +84,19 @@ async def main():
                 elif await pg.locator('[data-act="ack"]').count():
                     await pg.screenshot(path=f"{OUT}/05_night_info_{NAMES[i]}.png")
                     await pg.click('[data-act="ack"]')
-            if all_day:
+            reviewing = HUMAN and await pages[0].locator('[data-act="sendpending"]').count()
+            if reviewing:
+                await pages[0].wait_for_timeout(300)
+                await pages[0].screenshot(path=f"{OUT}/h3_review.png", full_page=True)
+                await pages[0].click('[data-act="sendpending"]')
+            if all_day and not reviewing:
                 break
             await asyncio.sleep(1)
+        if HUMAN:
+            await pages[0].screenshot(path=f"{OUT}/h4_day_grimoire.png", full_page=True)
+            print("page errors:", errors or "none")
+            await b.close()
+            return
         await pages[2].screenshot(path=f"{OUT}/06_day_me.png", full_page=True)
         await pages[2].click('[data-act="tab"][data-v="town"]')
         await pages[2].screenshot(path=f"{OUT}/07_day_town.png", full_page=True)

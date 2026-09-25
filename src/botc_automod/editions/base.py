@@ -41,10 +41,20 @@ class Edition:
     min_players = 5
     max_players = 15
     roles: dict[str, Role] = {}
+    wiki: dict[str, dict] = {}   # per character: flavour, summary, how_to_run, examples, tips, source
 
     def almanac(self) -> dict:
         return {"id": self.id, "name": self.name,
-                "roles": [r.card() for r in self.roles.values()]}
+                "roles": [{**r.card(), "wiki": self.wiki.get(r.id, {})} for r in self.roles.values()]}
+
+    # Human storyteller -----------------------------------------------------
+    def st_status(self, game: Game) -> list[dict]:
+        """Grimoire facts the human storyteller sees (poison, red herring...)."""
+        return []
+
+    def st_set(self, game: Game, key: str, value) -> None:
+        """Let the human storyteller change an edition setting (red herring...)."""
+        raise NotImplementedError
 
     # Setup ---------------------------------------------------------------
     def setup(self, game: Game) -> None:
@@ -62,8 +72,9 @@ class Edition:
         """Resolve choices in night order. Return tasks for stage B."""
         raise NotImplementedError
 
-    def resolve_b(self, game: Game, answers: dict[str, dict]) -> None:
-        """Resolve stage B (for example the Ravenkeeper)."""
+    def resolve_b(self, game: Game, answers: dict[str, dict]) -> dict[str, list[str]]:
+        """Resolve stage B (for example the Ravenkeeper). Return private messages."""
+        return {}
 
     # Day -----------------------------------------------------------------
     def on_nominate(self, game: Game, nominator: Player, nominee: Player) -> bool:

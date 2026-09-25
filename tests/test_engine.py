@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 
@@ -348,3 +349,80 @@ def test_night_hides_deaths_until_dawn():
     other = by(g, "virgin")
     seen = {p["id"]: p["alive"] for p in g.view_for(other.id)["players"]}
     assert seen[chef.id] is True
+
+
+# Human storyteller mode -------------------------------------------------------
+
+def human_lobby(n: int, seed: int = 1) -> tuple[Game, str]:
+    g = Game("TEST", seed=seed)
+    g.set_room("circle", seats=max(n, 5))
+    st = g.join("Storyteller", is_host=True)
+    g.set_mode("human")
+    for i in range(n):
+        p = g.join(NAMES[i])
+        g.claim_seat(p.id, i)
+    return g, st.id
+
+
+def test_human_mode_setup_and_review():
+    g, st = human_lobby(7)
+    with pytest.raises(GameError):
+        g.claim_seat(st, 6)
+    g.start()
+    assert g.phase == "setup"
+    assert g.p(st).role is None and len(g.seated()) == 7
+    a = g.seated()[0]
+    assert g.view_for(a.id)["me"]["role"] is None       # hidden until the storyteller begins
+    assert "st" in g.view_for(st) and "st" not in g.view_for(a.id)
+    g.set_character(a.id, "drunk", "chef")
+    g.set_character(g.seated()[1].id, "chef")
+    assert a.role == "drunk" and a.shown == "chef"
+    g.st_set("bluffs", ["mayor", "soldier", "monk"])
+    g.begin_game()
+    assert g.phase == "night" and g.view_for(a.id)["me"]["role"]["id"] == "chef"
+    for p in g.seated():
+        for t in p.tasks:
+            resp = (t["candidates"][:t["pick"]] if t["kind"] == "choose"
+                    else t["options"][0] if t["kind"] == "decoy" else True)
+            g.submit_task(p.id, t["id"], resp)
+    g.advance()
+    assert g.stage == "review" and g.deadline is None
+    assert not g.tick(time.time() + 10_000)                # no timer while reviewing
+    pend = g.view_for(st)["st"]["pending"]
+    chef_msg = next(m for m in pend if m["pid"] == a.id)
+    g.edit_pending(a.id, chef_msg["index"], ["There are 3 pairs of evil players."])
+    g.add_pending(g.seated()[2].id, "You feel watched.")
+    g.send_pending()
+    assert g.stage == "B"
+    assert any("3 pairs" in e["text"] for e in a.log)
+    assert any("watched" in e["text"] for e in g.seated()[2].log)
+
+
+def test_storyteller_powers():
+    g, st = human_lobby(5)
+    g.start(); g.begin_game()
+    while g.phase == "night":
+        for p in g.seated():
+            for t in p.tasks:
+                resp = (t["candidates"][:t["pick"]] if t["kind"] == "choose"
+                        else t["options"][0] if t["kind"] == "decoy" else True)
+                g.submit_task(p.id, t["id"], resp)
+        g.advance()
+    victim = g.seated()[3]
+    g.st_kill(victim.id)
+    assert not victim.alive
+    g.st_revive(victim.id)
+    assert victim.alive
+    g.st_message(victim.id, "Hello")
+    assert victim.log[-1]["text"] == "Hello"
+    with pytest.raises(GameError):
+        g.vote(st, True)
+    g.st_win("evil", "Test")
+    assert g.phase == "ended" and g.winner == "evil"
+
+
+def test_auto_mode_rejects_storyteller_actions():
+    g = lobby(5)
+    g.start()
+    with pytest.raises(GameError):
+        g.st_kill(g.seated()[1].id)

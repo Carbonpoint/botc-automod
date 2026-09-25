@@ -198,7 +198,9 @@ def _find(code: str, token: str):
     return g, p
 
 
-HOST_ONLY = {"room", "start", "kick", "pause", "resume", "add_time", "advance", "setting", "end"}
+HOST_ONLY = {"room", "start", "kick", "pause", "resume", "add_time", "advance", "setting", "end", "mode",
+             "begin", "set_character", "st_set", "edit_pending", "add_pending", "send_pending",
+             "st_kill", "st_revive", "st_message", "st_win"}
 
 
 def handle(g: Game, pid: str, msg: dict) -> None:
@@ -238,6 +240,28 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.set_setting(msg["key"], msg["value"])
         case "end":
             g.force_end()
+        case "mode":
+            g.set_mode(msg["mode"])
+        case "begin":
+            g.begin_game()
+        case "set_character":
+            g.set_character(msg["player"], msg["role"], msg.get("shown"))
+        case "st_set":
+            g.st_set(msg["key"], msg["value"])
+        case "edit_pending":
+            g.edit_pending(msg["player"], int(msg.get("index", 0)), list(msg["lines"]))
+        case "add_pending":
+            g.add_pending(msg["player"], msg["text"])
+        case "send_pending":
+            g.send_pending()
+        case "st_kill":
+            g.st_kill(msg["player"])
+        case "st_revive":
+            g.st_revive(msg["player"])
+        case "st_message":
+            g.st_message(msg["player"], msg["text"])
+        case "st_win":
+            g.st_win(msg["team"], msg.get("reason", ""))
         case _:
             raise GameError("Unknown action.")
 

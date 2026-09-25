@@ -1,12 +1,19 @@
 """The automated storyteller: game state, phases, timers and votes.
 
 Phase cycle:
-    lobby -> night (stage A, stage B) -> day -> nominations
+    lobby -> [setup] -> night (stage A, stage B) -> day -> nominations
           -> [defense -> vote -> nominations]* -> night -> ...
           -> ended
 
 Character rules live in the edition (editions/). This module never
 looks at a character by name.
+
+Two modes, chosen by the host in the lobby:
+    auto   the engine is the storyteller; the host is also a player.
+    human  the host is the storyteller and does not play. The engine
+           still does the work, but the storyteller checks the deal
+           (the "setup" phase), sees every night choice, and edits the
+           night results ("review" stages) before players get them.
 """
 
 from __future__ import annotations
@@ -71,6 +78,9 @@ class GameError(Exception):
 
 
 class Game:
+    mode = "auto"          # class defaults keep older saved games loadable
+    pending: dict | None = None
+
     def __init__(self, code: str, edition_id: str = "tb", seed: int | None = None):
         self.code = code
         self.edition_id = edition_id
@@ -81,6 +91,8 @@ class Game:
         self.room = {"shape": "circle", "seats": 8, "rows": 0, "cols": 0, "cells": []}
         self.layout = seating.layout("circle", seats=8)
         self.phase = "lobby"
+        self.mode = "auto"
+        self.pending = None                  # night results the storyteller is reviewing
         self.stage = ""
         self.night = 0
         self.day = 0
@@ -109,6 +121,17 @@ class Game:
     @property
     def host(self) -> Player | None:
         return next((p for p in self.players.values() if p.is_host), None)
+
+    def is_storyteller(self, pid: str) -> bool:
+        return self.mode == "human" and self.p(pid).is_host
+
+    def _need_storyteller(self) -> None:
+        if self.mode != "human":
+            raise GameError("Only a human storyteller can do that.")
+
+    def _need_seat(self, p: Player) -> None:
+        if p.seat is None:
+            raise GameError("The storyteller does not play.")
 
     def seated(self) -> list[Player]:
         """Players in clockwise seat order."""
@@ -170,7 +193,7 @@ class Game:
             raise GameError("This game has already started.")
         if any(p.name.lower() == name.lower() for p in self.players.values()):
             raise GameError("That name is taken in this game.")
-        if len(self.players) >= self.edition.max_players:
+        if len(self.players) >= self.edition.max_players + 1:
             raise GameError("This game is full.")
         pid = secrets.token_hex(4)
         p = Player(id=pid, name=name, token=secrets.token_urlsafe(18), is_host=is_host)
@@ -202,10 +225,22 @@ class Game:
             if p.seat is not None and p.seat >= seats:
                 p.seat = None
 
+    def set_mode(self, mode: str) -> None:
+        if self.phase != "lobby":
+            raise GameError("The storyteller mode is fixed once the game starts.")
+        if mode not in ("auto", "human"):
+            raise GameError("Unknown storyteller mode.")
+        self.mode = mode
+        if mode == "human" and self.host:
+            self.host.seat = None
+            self.host.ready = True
+
     def claim_seat(self, pid: str, seat: int | None) -> None:
         if self.phase != "lobby":
             raise GameError("Seats are fixed once the game starts.")
         p = self.p(pid)
+        if self.is_storyteller(pid) and seat is not None:
+            raise GameError("The storyteller does not take a seat.")
         if seat is None:
             p.seat = None
             return
@@ -236,18 +271,32 @@ class Game:
     def start(self) -> None:
         if self.phase != "lobby":
             raise GameError("The game has already started.")
-        unseated = [p.name for p in self.players.values() if p.seat is None]
+        unseated = [p.name for p in self.players.values() if p.seat is None and not self.is_storyteller(p.id)]
         if unseated:
             raise GameError("Not seated yet: " + ", ".join(unseated))
-        n = len(self.players)
+        n = len(self.seated())
         ed = self.edition
         if not ed.min_players <= n <= ed.max_players:
             raise GameError(f"{ed.name} needs {ed.min_players} to {ed.max_players} players; there are {n}.")
         ed.setup(self)
-        for p in self.players.values():
+        if self.mode == "human":
+            self.phase = "setup"
+            self.say("The Storyteller is preparing the Grimoire. Please wait.")
+            return
+        self._reveal_and_begin()
+
+    def begin_game(self) -> None:
+        """The human storyteller has checked the deal: reveal and start night 1."""
+        if self.phase != "setup":
+            raise GameError("The game is not waiting for the Storyteller.")
+        self._reveal_and_begin()
+
+    def _reveal_and_begin(self) -> None:
+        ed = self.edition
+        for p in self.seated():
             role = ed.roles[p.shown]
             p.note("Setup", f"You are the {role.name}. {role.ability}")
-        self.announce(f"Welcome to Blood on the Clocktower: {ed.name}. There are {n} players.")
+        self.announce(f"Welcome to Blood on the Clocktower: {ed.name}. There are {len(self.seated())} players.")
         self.say("Everyone: look at your phone in private to learn your character. "
                  "Never show your screen to anyone.")
         self.begin_night()
@@ -274,6 +323,9 @@ class Game:
                 t["id"] = f"{self.night}{stage}{n}"
                 t["done"] = False
                 t["response"] = None
+                if t["kind"] == "info":
+                    for line in t["lines"]:
+                        p.note(self.label(), line)
             p.tasks = queue
         self.stage_started = time.time()
         self.set_timer(self.settings["night_max"])
@@ -316,10 +368,138 @@ class Game:
                     answers.setdefault(p.id, {})[t["key"]] = t["response"]
             p.tasks = []
         if self.stage == "A":
-            self._start_stage("B", self.edition.resolve_a(self, answers))
+            tasks = self.edition.resolve_a(self, answers)
+            if self.mode == "human":
+                chosen = [{"name": self.p(pid).name, "key": key,
+                           "picks": [self.p(x).name for x in picks]}
+                          for pid, keys in answers.items() for key, picks in keys.items()]
+                self._review("review", {"tasks": dict(tasks), "choices": chosen})
+            else:
+                self._start_stage("B", tasks)
         else:
-            self.edition.resolve_b(self, answers)
+            messages = self.edition.resolve_b(self, answers) or {}
+            if self.mode == "human" and messages:
+                self._review("review_b", {"messages": dict(messages)})
+            else:
+                self._deliver(messages)
+                self.dawn()
+
+    def _review(self, stage: str, pending: dict) -> None:
+        """Hold the night results for the human storyteller. No timer runs."""
+        self.stage = stage
+        self.pending = pending
+        self.set_timer(None)
+
+    def _deliver(self, messages: dict[str, list[str]]) -> None:
+        for pid, lines in messages.items():
+            for line in lines:
+                self.p(pid).note(self.label(), line)
+
+    def edit_pending(self, pid: str, index: int, lines: list[str]) -> None:
+        self._need_storyteller()
+        lines = [str(x).strip() for x in lines if str(x).strip()]
+        if self.stage == "review":
+            tasks = self.pending["tasks"].get(pid, [])
+            if not 0 <= index < len(tasks) or tasks[index]["kind"] != "info":
+                raise GameError("There is no such message.")
+            if lines:
+                tasks[index]["lines"] = lines
+            else:
+                tasks.pop(index)
+        elif self.stage == "review_b":
+            if lines:
+                self.pending["messages"][pid] = lines
+            else:
+                self.pending["messages"].pop(pid, None)
+        else:
+            raise GameError("There are no night results to edit now.")
+
+    def add_pending(self, pid: str, text: str) -> None:
+        self._need_storyteller()
+        self._need_seat(self.p(pid))
+        text = str(text).strip()
+        if not text:
+            raise GameError("The message is empty.")
+        if self.stage == "review":
+            self.pending["tasks"].setdefault(pid, []).append(
+                {"kind": "info", "key": "storyteller", "title": "The Storyteller", "lines": [text]})
+        elif self.stage == "review_b":
+            self.pending["messages"].setdefault(pid, []).append(text)
+        else:
+            raise GameError("There are no night results to add to now.")
+
+    def send_pending(self) -> None:
+        self._need_storyteller()
+        pending, self.pending = self.pending, None
+        if self.stage == "review":
+            self._start_stage("B", pending["tasks"])
+        elif self.stage == "review_b":
+            self._deliver(pending["messages"])
             self.dawn()
+        else:
+            raise GameError("There are no night results to send now.")
+
+    # Storyteller powers --------------------------------------------------------------
+    def set_character(self, pid: str, role: str, shown: str | None = None) -> None:
+        self._need_storyteller()
+        p = self.p(pid)
+        self._need_seat(p)
+        roles = self.edition.roles
+        if role not in roles:
+            raise GameError("Unknown character.")
+        if role == "drunk":
+            shown = shown or p.shown
+            if shown not in roles or roles[shown].type != "townsfolk":
+                raise GameError("The Drunk must believe they are a Townsfolk.")
+        else:
+            shown = role
+        changed = p.shown != shown
+        p.role, p.shown = role, shown
+        if self.phase not in ("lobby", "setup") and changed:
+            p.note("Storyteller", f"Your character has changed. You are now the {roles[shown].name}. "
+                   f"{roles[shown].ability}")
+
+    def st_set(self, key: str, value) -> None:
+        self._need_storyteller()
+        self.edition.st_set(self, key, value)
+
+    def st_kill(self, pid: str) -> None:
+        self._need_storyteller()
+        p = self.p(pid)
+        self._need_seat(p)
+        if not p.alive:
+            raise GameError(f"{p.name} is already dead.")
+        self.kill(pid, "storyteller")
+        if self.phase != "night":
+            self.public_log.append({"label": self.label(), "text": f"{p.name} dies."})
+
+    def st_revive(self, pid: str) -> None:
+        self._need_storyteller()
+        p = self.p(pid)
+        if p.alive:
+            raise GameError(f"{p.name} is alive.")
+        p.alive = True
+        p.ghost_vote = True
+        if pid in self.tonight_deaths:
+            self.tonight_deaths.remove(pid)
+        elif self.phase != "night":
+            self.public_log.append({"label": self.label(), "text": f"{p.name} is alive again."})
+
+    def st_message(self, pid: str, text: str) -> None:
+        self._need_storyteller()
+        text = str(text).strip()
+        if not text:
+            raise GameError("The message is empty.")
+        self.p(pid).note("Storyteller", text)
+
+    def st_win(self, team: str, reason: str = "") -> None:
+        self._need_storyteller()
+        if team not in ("good", "evil"):
+            raise GameError("The winner is good or evil.")
+        if self.phase in ("lobby", "ended"):
+            raise GameError("There is no game running.")
+        self.winner, self.win_reason = team, reason or "The Storyteller has decided."
+        self._check_win()
 
     def dawn(self) -> None:
         self.phase = "day"
@@ -358,6 +538,8 @@ class Game:
         if self.phase != "nominations":
             raise GameError("Nominations are not open.")
         nominator, nominee = self.p(pid), self.p(target)
+        self._need_seat(nominator)
+        self._need_seat(nominee)
         if not nominator.alive:
             raise GameError("Dead players cannot nominate.")
         if pid in self.nominators_today:
@@ -389,6 +571,7 @@ class Game:
         if self.phase != "vote":
             raise GameError("There is no vote now.")
         p = self.p(pid)
+        self._need_seat(p)
         if not self.can_vote(p):
             raise GameError("You have used your ghost vote.")
         self.current_nom["votes"][pid] = bool(yes)
@@ -447,6 +630,8 @@ class Game:
         if self.phase not in ("day", "nominations"):
             raise GameError("A Slayer shot can only be taken during the day, outside a vote.")
         p, t = self.p(pid), self.p(target)
+        self._need_seat(p)
+        self._need_seat(t)
         if not p.alive:
             raise GameError("Dead players cannot claim a Slayer shot.")
         if p.slayer_claimed:
@@ -477,8 +662,13 @@ class Game:
     # Host controls ---------------------------------------------------------------------
     def advance(self) -> None:
         """Move on from the current phase (the host button, or the timer)."""
-        if self.phase == "night":
-            self._finish_stage()
+        if self.phase == "setup":
+            self.begin_game()
+        elif self.phase == "night":
+            if self.stage in ("review", "review_b"):
+                self.send_pending()
+            else:
+                self._finish_stage()
         elif self.phase == "day":
             self.open_nominations()
         elif self.phase == "nominations":
@@ -519,12 +709,14 @@ class Game:
         """Advance on timeouts. Return True when the state changed."""
         now = now or time.time()
         if self.phase == "night":
+            if self.stage not in ("A", "B"):
+                return False  # the human storyteller is reviewing
             done_early = self._stage_done() and now >= self.stage_started + self.settings["night_min"]
             if done_early or (self.deadline is not None and now >= self.deadline):
                 self._finish_stage()
                 return True
             return False
-        if self.phase in ("lobby", "ended") or self.deadline is None:
+        if self.phase in ("lobby", "setup", "ended") or self.deadline is None:
             return False
         if now >= self.deadline:
             self.advance()
@@ -550,7 +742,7 @@ class Game:
         remaining = self.remaining()
         view = {
             "game": {"code": self.code, "edition": {"id": ed.id, "name": ed.name},
-                     "phase": self.phase, "stage": self.stage, "label": self.label(),
+                     "mode": self.mode, "phase": self.phase, "stage": self.stage, "label": self.label(),
                      "night": self.night, "day": self.day,
                      "timer": None if remaining is None else round(remaining),
                      "paused": self.paused_left is not None,
@@ -559,7 +751,8 @@ class Game:
             "me": {"id": me.id, "name": me.name, "is_host": me.is_host, "seat": me.seat,
                    "prefs": me.prefs, "ready": me.ready,
                    "alive": self._public_alive(me), "ghost_vote": me.ghost_vote,
-                   "role": ed.roles[me.shown].card() if me.shown else None,
+                   "role": ed.roles[me.shown].card() if me.shown and self.phase != "setup" else None,
+                   "storyteller": self.is_storyteller(pid),
                    "log": me.log, "slayer_claimed": me.slayer_claimed,
                    "night_done": self.phase == "night" and task is None},
             "task": task,
@@ -576,9 +769,52 @@ class Game:
         }
         if me.is_host:
             view["host"] = {"script": self.script[-40:], "settings": self.settings}
+        if self.is_storyteller(pid) and self.phase != "lobby":
+            view["st"] = self._storyteller_view()
         if self.phase == "ended":
             view["grimoire"] = self.grimoire()
         return view
+
+    def _storyteller_view(self) -> dict:
+        ed = self.edition
+        name = lambda pid: self.p(pid).name if pid in self.players else "?"
+
+        def said(t: dict):
+            r = t.get("response")
+            if not t["done"]:
+                return None
+            if t["kind"] == "choose":
+                return ", ".join(name(x) for x in r)
+            return r if t["kind"] == "decoy" else "read"
+
+        choices = []
+        if self.phase == "night" and self.stage in ("A", "B"):
+            for p in self.seated():
+                real = [t for t in p.tasks if t["kind"] != "decoy"]
+                choices.append({"pid": p.id, "name": p.name, "decoy": not real,
+                                "done": all(t["done"] for t in p.tasks),
+                                "tasks": [{"title": t["title"], "kind": t["kind"], "text": t.get("text", ""),
+                                           "lines": t.get("lines", []), "answer": said(t)} for t in real]})
+        pending = []
+        if self.stage == "review":
+            for pid, tasks in self.pending["tasks"].items():
+                for i, t in enumerate(tasks):
+                    pending.append({"pid": pid, "name": name(pid), "index": i, "kind": t["kind"],
+                                    "title": t["title"], "lines": t.get("lines", []), "text": t.get("text", "")})
+        elif self.stage == "review_b":
+            for pid, lines in self.pending["messages"].items():
+                pending.append({"pid": pid, "name": name(pid), "index": 0, "kind": "info",
+                                "title": "Message", "lines": lines, "text": ""})
+        return {
+            "grimoire": [{"id": p.id, "name": p.name, "seat": p.seat, "role": p.role, "shown": p.shown,
+                          "team": ed.roles[p.role].team, "alive": p.alive, "ghost_vote": p.ghost_vote}
+                         for p in self.seated()],
+            "status": ed.st_status(self),
+            "choices": choices,
+            "pending": pending,
+            "tonight_deaths": [name(x) for x in self.tonight_deaths],
+            "night_choices": (self.pending or {}).get("choices", []),
+        }
 
     def _nom_view(self, pid: str) -> dict | None:
         if not self.current_nom:

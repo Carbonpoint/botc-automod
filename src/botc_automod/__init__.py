@@ -22,6 +22,12 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Run the Blood on the Clocktower automod server.")
     ap.add_argument("--host", default="0.0.0.0", help="address to listen on (default: all)")
     ap.add_argument("--port", type=int, default=8000)
+    ap.add_argument("--no-qr", action="store_true", help="do not print the join QR code")
     args = ap.parse_args()
-    print(f"\n  botc-automod: players open  http://{lan_address()}:{args.port}  on the same network\n")
+    url = f"http://{lan_address()}:{args.port}/"
+    print(f"\n  botc-automod is running. Players scan this code, or open {url}\n  (phones must be on the same network)\n")
+    if not args.no_qr:
+        import segno
+        segno.make(url, error="l").terminal(compact=True)
+        print()
     uvicorn.run("botc_automod.server:app", host=args.host, port=args.port, log_level="warning")

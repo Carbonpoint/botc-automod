@@ -18,7 +18,10 @@ have, and is not poisoned. A Drunk or poisoned player gets false info.
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from dataclasses import replace
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .base import Edition, Role
@@ -98,6 +101,12 @@ ROLES = {r.id: r for r in [
       "Kill at night. Bluff a good character by day."),
 ]}
 
+# Ability text and the almanac details come from the official wiki
+# (scripts/fetch_wiki.py). The text above is the fallback.
+_WIKI_FILE = Path(__file__).parent / "data" / "trouble_brewing.json"
+WIKI = json.loads(_WIKI_FILE.read_text())["characters"] if _WIKI_FILE.exists() else {}
+ROLES = {k: replace(r, ability=WIKI[k]["ability"]) if k in WIKI else r for k, r in ROLES.items()}
+
 TOWNSFOLK = [r.id for r in ROLES.values() if r.type == "townsfolk"]
 OUTSIDERS = [r.id for r in ROLES.values() if r.type == "outsider"]
 MINIONS = [r.id for r in ROLES.values() if r.type == "minion"]
@@ -125,6 +134,7 @@ class TroubleBrewing(Edition):
     min_players = 5
     max_players = 15
     roles = ROLES
+    wiki = WIKI
 
     # Status helpers ------------------------------------------------------------
     def poisoned(self, game: Game, p: Player) -> bool:
@@ -284,8 +294,6 @@ class TroubleBrewing(Edition):
                 lines = self._spy(game, p)
             if lines:
                 out[p.id].append(info(s, ROLES[s].name, lines))
-                for line in lines:
-                    p.note(game.label(), line)
         # Butler
         for p in game.alive():
             if p.shown == "butler" and (c := pick(p, "butler")):
@@ -293,14 +301,16 @@ class TroubleBrewing(Edition):
                 p.note(game.label(), f"Your master tomorrow is {game.p(c[0]).name}.")
         return out
 
-    def resolve_b(self, game: Game, answers: dict[str, dict]) -> None:
+    def resolve_b(self, game: Game, answers: dict[str, dict]) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
         for pid, ans in answers.items():
             if "ravenkeeper" in ans:
                 p, t = game.p(pid), game.p(ans["ravenkeeper"][0])
                 role = self.reg(game, t)["role"]
                 if not self.truthful(game, p):
                     role = game.rng.choice([r for r in ROLES if r != role])
-                p.note(game.label(), f"{t.name} is the {ROLES[role].name}.")
+                out[pid] = [f"{t.name} is the {ROLES[role].name}."]
+        return out
 
     def _imp_kill(self, game: Game, imp: Player, target: Player, out: dict) -> None:
         es = game.estate
@@ -421,6 +431,34 @@ class TroubleBrewing(Edition):
                 tags.append("Fortune Teller red herring")
             lines.append(f"{x.name}: {name}" + (f" ({', '.join(tags)})" if tags else ""))
         return lines
+
+    # Human storyteller ---------------------------------------------------------------
+    def st_status(self, game: Game) -> list[dict]:
+        es = game.estate
+        name = lambda pid: game.p(pid).name if pid and pid in game.players else "nobody"
+        return [
+            {"label": "Poisoned", "value": name(es.get("poisoned"))},
+            {"label": "Monk protects", "value": name(es.get("protected"))},
+            {"label": "Butler's master", "value": name(es.get("master"))},
+            {"label": "Fortune Teller red herring", "value": name(es.get("red_herring")), "key": "red_herring"},
+            {"label": "Demon bluffs", "value": ", ".join(ROLES[b].name for b in es.get("bluffs", [])),
+             "key": "bluffs", "ids": es.get("bluffs", [])},
+            {"label": "Virgin used", "value": "yes" if es.get("virgin_used") else "no"},
+            {"label": "Slayer shot used", "value": "yes" if es.get("slayer_used") else "no"},
+        ]
+
+    def st_set(self, game: Game, key: str, value) -> None:
+        from ..game import GameError
+
+        if key == "red_herring":
+            game.p(value)
+            game.estate["red_herring"] = value
+        elif key == "bluffs":
+            if not (isinstance(value, list) and len(value) == 3 and all(v in ROLES for v in value)):
+                raise GameError("Pick 3 characters as bluffs.")
+            game.estate["bluffs"] = value
+        else:
+            raise GameError("Unknown Grimoire setting.")
 
     # Day -------------------------------------------------------------------------------
     def on_nominate(self, game: Game, nominator: Player, nominee: Player) -> bool:
