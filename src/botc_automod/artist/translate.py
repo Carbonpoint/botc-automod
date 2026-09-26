@@ -154,6 +154,7 @@ class OpenAITranslator(Translator):
         self.base, self.model, self.key = base_url.rstrip("/"), model, api_key
         self.compact, self.timeout, self.use_schema = compact, timeout, use_schema
         self.can_chat = model != "packaged"   # the packaged model only translates questions
+        self.chat_extra: dict = {}            # more request fields for chat() (the local chat model)
 
     def complete(self, system: str, user: str, world: World) -> str:
         body = {"model": self.model, "temperature": 0, "max_tokens": 300,
@@ -173,11 +174,18 @@ class OpenAITranslator(Translator):
         return out["choices"][0]["message"]["content"] or ""
 
     def chat(self, system: str, user: str) -> str:
-        body = {"model": self.model, "temperature": 0.7, "max_tokens": 200,
+        body = {"model": self.model, "temperature": 0.7, "max_tokens": 200, **self.chat_extra,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
         headers = {"Authorization": f"Bearer {self.key}"} if self.key else {}
         out = _post(f"{self.base}/chat/completions", body, headers, self.timeout)
-        return out["choices"][0]["message"]["content"] or ""
+        return re.sub(r"<think>.*?</think>", "", out["choices"][0]["message"]["content"] or "", flags=re.S).strip()
+
+
+def local_chat(url: str) -> OpenAITranslator:
+    """The packaged chat model (Qwen3 1.7B on llama-server): answers only, no thinking."""
+    t = OpenAITranslator(url, "chat", timeout=60, use_schema=False)
+    t.chat_extra = {"chat_template_kwargs": {"enable_thinking": False}}
+    return t
 
 
 class AnthropicTranslator(Translator):

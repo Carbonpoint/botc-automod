@@ -97,3 +97,25 @@ def test_make_translator_kinds():
     assert isinstance(t, OpenAITranslator) and "generativelanguage" in t.base
     t = make_translator({"kind": "ollama", "url": "http://h:11434/", "model": "m"})
     assert isinstance(t, OllamaTranslator) and t.url == "http://h:11434"
+
+
+def test_chat_settings_and_local_chat(monkeypatch, tmp_path):
+    from botc_automod.artist import config, translate
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.delenv("BOTC_CHAT", raising=False)
+    assert config.load_chat() == {}                       # never asked
+    config.save({"kind": "packaged"}, "artist")
+    config.save({"kind": "packaged"}, "chat")
+    assert config.load()["kind"] == "packaged" and config.load_chat() == {"kind": "packaged"}
+    monkeypatch.setenv("BOTC_CHAT", "none")
+    assert config.load_chat() == {"kind": "none"}
+    sent = {}
+
+    def fake_post(url, body, headers=None, timeout=60):
+        sent.update(body)
+        return {"choices": [{"message": {"content": "<think>\n\n</think>\n\nHello, town!"}}]}
+    monkeypatch.setattr(translate, "_post", fake_post)
+    t = translate.local_chat("http://127.0.0.1:8780/v1")
+    assert t.can_chat and t.chat("sys", "hi") == "Hello, town!"
+    assert sent["chat_template_kwargs"] == {"enable_thinking": False}

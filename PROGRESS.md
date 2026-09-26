@@ -209,6 +209,53 @@ Read README.md first.
   Tommy as the default pipe target, a scare on Jess, no page errors.
   Not heard by a person yet: the scream and the pipe.
 
+## 2026-09-26 (late): agents answer the chat
+
+- The user asked why agents seemed unresponsive in the chat. Two reasons:
+  agents never read the chat, and the packaged Artist model cannot chat,
+  so all agent talk was fixed lines.
+- Now (`agents._heard` / `_replies`): an agent answers a private message
+  (privately), a group message with its name, or a question to everyone
+  (one or two agents; a plain message: 15% that one agent comments).
+  2-6 s later, at most one answer per agent per 4 s. Nothing at night.
+- Without a chat model: `_reply_text` picks lines by keywords (claim,
+  info, a suspect, a defense, a greeting). Evil agents never suspect
+  their team; good agents use the same HUNCH as for votes.
+- With a chat model: the same prompt as other agent talk, with the
+  message in it. qwen3:1.7b on stalker: 0.7-0.8 s per reply. It leaked
+  evil secrets ("Clover is an Imp", "the evil ones are Clover and me").
+  `llm_check` now drops, for evil agents, any evil character name
+  (also plural), any teammate's name, tells like "real identity", and a
+  sentence with "evil" and a first-person word. After that, no leak got
+  through in the bench (`scripts/agent_talk_bench.py`, replies part).
+- The user usually plays with the packaged model on a laptop CPU, so
+  they got the fixed lines. Fixed below with the local chat model.
+- Verified: 412 tests pass, 1 skipped; `scripts/agent_chat_check.py`
+  (browser, human storyteller + agents): a town question, a named agent
+  and a private message all got answers; no page errors.
+
+## 2026-09-26 (late): local chat model next to the Artist model
+
+- Option at server start (first run or `--setup`, `config.wizard_chat`;
+  saved as "chat" in config.json; env `BOTC_CHAT`): Qwen3 1.7B Q4_K_M
+  from unsloth/Qwen3-1.7B-GGUF, pinned commit d7f544e (1.11 GB, Apache-2.0).
+  Asked only when the Artist model cannot chat (none or packaged).
+- A second llama-server (`LocalServer.chat`, port 8780, ctx 4096, --jinja;
+  thinking off per request with chat_template_kwargs). `server.CHAT` now
+  writes all agent talk and tips; `ARTIST` only translates questions.
+  Android: CHAT is the Artist model if it can chat; the app has no
+  chat model option yet.
+- Measured on this 4-core, 15 GB machine: downloads + start 19 s, test
+  message 1.4-1.6 s; 28 agent replies: median 2.8 s, max 7.6 s (the first
+  reply of each agent is slowest). The chat llama-server used 2.3 GB RSS,
+  the Artist one 0.2 GB. llm_check dropped 7 of 28 (all evil leaks).
+- One model slot: at dawn all agents claim at once and answers to people
+  waited ~40 s. Now a priority queue (`server._talk_worker`): replies and
+  defenses first; other talk older than 25 s uses its fixed line.
+- Verified: 414 tests pass, 1 skipped; agent_chat_check with both models
+  live: model-written answers to a named question and a private message
+  (private), no page errors. Not run on the user's laptop yet.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

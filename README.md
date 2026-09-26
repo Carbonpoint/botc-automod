@@ -24,7 +24,7 @@ cd botc-automod
 uv run botc-automod              # listens on all addresses, port 8000
 uv run botc-automod --port 8080  # another port
 uv run botc-automod --no-qr      # skip the terminal QR code
-uv run botc-automod --setup      # ask again which model answers the Artist
+uv run botc-automod --setup      # ask again which models answer the Artist and talk for agents
 ```
 
 The server prints the join address and a QR code in the terminal.
@@ -268,6 +268,25 @@ Environment variables override the file (for Docker):
 `gemini`, `openrouter`, `custom`), `BOTC_ARTIST_URL`, `BOTC_ARTIST_MODEL`,
 `BOTC_ARTIST_KEY`.
 
+### Chat model for agents and tips
+
+Then the server asks one more question (only when the Artist model cannot
+chat: no model, or the packaged one): run a small chat model too? It is
+Qwen3 1.7B, 4-bit (1.1 GB download, once), run by a second llama-server
+next to the Artist model. It needs about 2.5 GB of memory. On a 4-core
+CPU an agent's answer took 1.5 to 7.6 s (median 2.8 s). Agents and the
+helpful narrator then talk in their own words. Without it, agents use
+fixed lines. With an Ollama or cloud Artist model, that model talks for
+them and this question is skipped.
+
+The model writes one message at a time. Answers to people and defenses
+go first; other agent talk that waits more than 25 s uses its fixed
+line. Evil agents' messages that give away a character or a teammate are
+dropped and replaced by the fixed line.
+
+`BOTC_CHAT` (`none`, `packaged`) overrides the saved choice;
+`BOTC_CHAT_MODEL_URL` points to another GGUF file or URL.
+
 ## Options
 
 | Option | Default | What it does |
@@ -281,7 +300,7 @@ Environment variables override the file (for Docker):
 | Jump scares | off | Off, low, medium or high. A spooky screen flashes on one phone at a time, by day only, never in a vote. Low: about once a game per player; high: about once a day. |
 | Falling pipe sound | on | About once a game, one player's phone plays a metal pipe falling. The host picks who; with no pick, a seated player named Tommy. |
 | Keyword tasks | off | Each day every player must meet another player in person and get their keyword. Right: karma +2; missed: -1; finding someone else's: +1 for you, -1 for its owner and its receiver. |
-| Agents | none | The host fills empty seats with computer players. They do their tasks, nominate, vote and chat. With a chat-capable model (Ollama or cloud), they talk in their own words. |
+| Agents | none | The host fills empty seats with computer players. They do their tasks, nominate, vote and chat. They answer a private message, a message that names them, or a question to everyone (one or two of them) after 2-6 s. With a chat model (the local chat model, or an Ollama or cloud model), they talk in their own words; otherwise they use fixed lines. |
 
 Karma tilts the automod's chance decisions a little: a player's "favour"
 is 1 + 0.15 x karma, kept between 0.4 and 2.5. High favour makes bad

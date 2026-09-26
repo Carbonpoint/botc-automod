@@ -1,10 +1,12 @@
-"""Run the packaged Artist model on this computer with llama.cpp's llama-server.
+"""Run the packaged models on this computer with llama.cpp's llama-server.
 
-The first start downloads two things into the data folder, then reuses them:
+The first start downloads these into the data folder, then reuses them:
   - llama-server for this system (CPU build, about 12 to 20 MB, pinned release)
-  - the packaged model file (GGUF)
+  - the packaged Artist model file (GGUF, 145 MB)
+  - with the chat option on: a small chat model (Qwen3 1.7B, 4-bit, 1.1 GB)
 
-llama-server then listens on 127.0.0.1 only and speaks the OpenAI API.
+Each model gets its own llama-server. It listens on 127.0.0.1 only and
+speaks the OpenAI API.
 """
 
 from __future__ import annotations
@@ -28,6 +30,12 @@ LLAMA_URL = "https://github.com/ggml-org/llama.cpp/releases/download/{tag}/llama
 PACKAGED_REPO = "https://huggingface.co/carbonpoint/botc-artist/resolve/main"
 MODEL_FILE = "botc-artist.gguf"
 PORT = 8779
+# The chat model for agents and the helpful narrator (Apache-2.0), pinned to one commit.
+# BOTC_CHAT_MODEL_URL overrides it with a URL or a local .gguf file.
+CHAT_MODEL_URL = ("https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/"
+                  "d7f544eead698dbd1f15126ef60b45a1e1933222/Qwen3-1.7B-Q4_K_M.gguf")
+CHAT_MODEL_FILE = "qwen3-1.7b-q4_k_m.gguf"
+CHAT_PORT = 8780
 
 
 def default_model_url() -> str:
@@ -92,26 +100,34 @@ def server_binary(root: Path) -> Path:
     return found
 
 
-def model_file(root: Path, source: str = "") -> Path:
-    source = source or default_model_url()
+def model_file(root: Path, source: str = "", name: str = MODEL_FILE, label: str = "the packaged Artist model") -> Path:
+    source = source or (default_model_url() if name == MODEL_FILE else "")
     if source and Path(source).expanduser().is_file():
         return Path(source).expanduser()
-    path = root / MODEL_FILE
+    path = root / name
     if path.exists():
         return path
     if not source:
         raise RuntimeError("The packaged model is not published yet. Set BOTC_PACKAGED_MODEL_URL to a URL or a "
                            ".gguf file, or choose another model with --setup.")
-    download(source, path, "the packaged Artist model")
+    download(source, path, label)
     return path
 
 
 class LocalServer:
     """A llama-server child process. Stops when botc-automod exits."""
 
-    def __init__(self, root: Path, source: str = "", port: int = PORT):
+    def __init__(self, root: Path, source: str = "", port: int = PORT, name: str = MODEL_FILE,
+                 label: str = "the packaged Artist model", context: int = 2048, extra: tuple[str, ...] = ()):
         self.root, self.source, self.port = root, source, port
+        self.name, self.label, self.context, self.extra = name, label, context, extra
         self.proc: subprocess.Popen | None = None
+
+    @classmethod
+    def chat(cls, root: Path) -> "LocalServer":
+        """The chat model's server. --jinja applies Qwen3's own chat template (thinking off per request)."""
+        return cls(root, os.environ.get("BOTC_CHAT_MODEL_URL") or CHAT_MODEL_URL, CHAT_PORT, CHAT_MODEL_FILE,
+                   "the chat model (Qwen3 1.7B)", 4096, ("--jinja",))
 
     @property
     def url(self) -> str:
@@ -119,22 +135,22 @@ class LocalServer:
 
     def start(self, timeout: float = 90) -> None:
         exe = server_binary(self.root)
-        model = model_file(self.root, self.source)
+        model = model_file(self.root, self.source, self.name, self.label)
         threads = str(max(1, min(4, (os.cpu_count() or 2) - 1)))
         env = dict(os.environ)
         lib = str(exe.parent)
         env["LD_LIBRARY_PATH"] = lib + os.pathsep + env.get("LD_LIBRARY_PATH", "")
         env["DYLD_LIBRARY_PATH"] = lib + os.pathsep + env.get("DYLD_LIBRARY_PATH", "")
-        log = open(self.root / "llama-server.log", "w", encoding="utf-8")
+        log = open(self.root / f"llama-server-{self.port}.log", "w", encoding="utf-8")
         self.proc = subprocess.Popen(
-            [str(exe), "-m", str(model), "--host", "127.0.0.1", "--port", str(self.port), "-c", "2048",
-             "-t", threads, "-np", "1", "--no-webui"],
+            [str(exe), "-m", str(model), "--host", "127.0.0.1", "--port", str(self.port), "-c", str(self.context),
+             "-t", threads, "-np", "1", "--no-webui", *self.extra],
             stdout=log, stderr=subprocess.STDOUT, env=env, cwd=exe.parent)
         atexit.register(self.stop)
         deadline = time.time() + timeout
         while time.time() < deadline:
             if self.proc.poll() is not None:
-                raise RuntimeError(f"llama-server stopped; see {self.root / 'llama-server.log'}")
+                raise RuntimeError(f"llama-server stopped; see {self.root / f'llama-server-{self.port}.log'}")
             try:
                 with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/health", timeout=2) as r:
                     if r.status == 200:

@@ -8,6 +8,7 @@ suits Docker:
     BOTC_ARTIST_URL    server address (ollama, custom, packaged)
     BOTC_ARTIST_MODEL  model name
     BOTC_ARTIST_KEY    API key (cloud)
+    BOTC_CHAT          none | packaged: a small local chat model for agents and tips
 """
 
 from __future__ import annotations
@@ -53,14 +54,24 @@ def load() -> dict:
         return {}
 
 
-def save(artist: dict) -> None:
+def load_chat() -> dict:
+    """The chat model settings ({"kind": "none" | "packaged"}), or {} if never asked."""
+    if os.environ.get("BOTC_CHAT"):
+        return {"kind": os.environ["BOTC_CHAT"]}
+    try:
+        return json.loads(config_file().read_text(encoding="utf-8")).get("chat", {})
+    except (OSError, ValueError):
+        return {}
+
+
+def save(artist: dict, key: str = "artist") -> None:
     f = config_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     try:
         data = json.loads(f.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         data = {}
-    data["artist"] = artist
+    data[key] = artist
     f.write_text(json.dumps(data, indent=1), encoding="utf-8")
     try:
         os.chmod(f, 0o600)
@@ -78,6 +89,10 @@ def describe(cfg: dict) -> str:
         return f"Ollama model {cfg.get('model')} at {cfg.get('url')}"
     name = dict((k, n) for k, n, _ in PROVIDERS).get(kind, kind)
     return f"{name}, model {cfg.get('model') or 'default'}"
+
+
+def describe_chat(cfg: dict) -> str:
+    return "the local chat model (Qwen3 1.7B)" if cfg.get("kind") == "packaged" else "off"
 
 
 # Questions ------------------------------------------------------------------------
@@ -141,3 +156,17 @@ model, decides the answer, so the model cannot lie.)
     cfg["api_key"] = key
     cfg["model"] = ask("Model", default=default_model)
     return cfg
+
+
+def wizard_chat(artist: dict) -> dict:
+    """Ask whether to run the small chat model. Not needed when the Artist's model can chat."""
+    if artist.get("kind") not in ("none", "packaged", None, ""):
+        return {"kind": "none"}
+    print("""
+Agents (computer players) and the helpful narrator can talk in their own words
+with a small chat model. Without it, agents answer with fixed lines.
+
+  1  No chat model
+  2  The local chat model (Qwen3 1.7B: downloaded once, 1.1 GB; runs here on
+     the CPU next to the Artist model and needs about 2.5 GB of memory)""")
+    return {"kind": "packaged" if ask("Choose", ["1", "2"], "1") == "2" else "none"}

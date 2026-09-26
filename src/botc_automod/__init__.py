@@ -57,6 +57,42 @@ def setup_artist(force: bool, data_dir):
         return None
 
 
+def setup_chat(force: bool, data_dir, artist=None):
+    """Settle the chat model for agents and tips: ask on first run (or --setup), then start and test it.
+    Without the local chat model, an Artist model that can chat is used (Ollama or cloud)."""
+    import os
+    import sys
+    import time
+
+    from .artist import config
+    from .artist.translate import local_chat
+
+    cfg = config.load_chat()
+    interactive = sys.stdin.isatty() and not os.environ.get("BOTC_CHAT") and not os.environ.get("BOTC_ARTIST")
+    if (force or not cfg) and interactive:
+        cfg = config.wizard_chat(config.load() or {"kind": "none"})
+        config.save(cfg, "chat")
+    fallback = artist if artist is not None and artist.can_chat else None
+    if (cfg or {}).get("kind") != "packaged":
+        print(f"  Agent chat: {'the Artist model' if fallback else 'fixed lines (no chat model)'}   (change with --setup)")
+        return fallback
+    print(f"  Agent chat: {config.describe_chat(cfg)}   (change with --setup)")
+    try:
+        from .artist.runtime import LocalServer
+
+        server = LocalServer.chat(data_dir / "llm")
+        server.start(timeout=180)
+        talker = local_chat(server.url)
+        start = time.time()
+        if not talker.chat("Reply with one short sentence.", "Say hello to the town."):
+            raise RuntimeError("the test message came back empty")
+        print(f"  Chat model test passed in {time.time() - start:.1f}s.")
+        return talker
+    except Exception as e:  # never block the game on the chat model
+        print(f"  Chat model unavailable ({e}). Agents use fixed lines.")
+        return fallback
+
+
 def main() -> None:
     import uvicorn
 
@@ -64,12 +100,13 @@ def main() -> None:
     ap.add_argument("--host", default="0.0.0.0", help="address to listen on (default: all)")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--no-qr", action="store_true", help="do not print the join QR code")
-    ap.add_argument("--setup", action="store_true", help="ask again how the Artist's questions are answered")
+    ap.add_argument("--setup", action="store_true", help="ask again which models answer the Artist and talk for agents")
     args = ap.parse_args()
 
     from . import server
 
     server.ARTIST = setup_artist(args.setup, server.DATA)
+    server.CHAT = setup_chat(args.setup, server.DATA, server.ARTIST)
     url = public_url(args.port)
     print(f"\n  botc-automod is running. Players scan this code, or open {url}\n  (phones must be on the same network)\n")
     if not args.no_qr:

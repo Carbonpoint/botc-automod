@@ -31,3 +31,20 @@ for p in agents.agents(g):
         raw = t.chat(system, user)
         ok = agents.llm_check(g, p, raw)
         print(f"{p.name} ({R.roles[p.role].name}, {R.alignment(p)}): {'OK ' if ok else 'DROPPED'} {raw.strip()[:200]!r}")
+
+# Chat replies: the reason text is the one agents._replies builds.
+print("\n--- replies ---")
+QUESTIONS = [("group", "{n}, what's your character?"), ("group", "Anyone learn anything last night?"),
+             ("private", "Be honest with me, are you the Demon?"), ("private", "Who do you think is evil?"),
+             ("group", "{n} you're lying, you're evil")]
+import time
+for p in agents.agents(g):
+    for where, q in QUESTIONS:
+        text = q.format(n=p.name)
+        w = "sent you a private message" if where == "private" else "said in the group chat"
+        system, user = agents.llm_prompt(g, p, f'Hana {w}: "{text}". Answer them.')
+        t0 = time.time()
+        raw = t.chat(system, user)
+        ok = agents.llm_check(g, p, raw)
+        print(f"{p.name} ({R.roles[p.role].name}, {R.alignment(p)}) [{time.time() - t0:.1f}s] {text!r} -> "
+              f"{'OK ' if ok else 'DROPPED'} {raw.strip()[:160]!r}")

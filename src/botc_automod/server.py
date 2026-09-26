@@ -38,6 +38,7 @@ DEBUG = os.environ.get("BOTC_DEBUG") == "1"
 
 games: dict[str, Game] = {}
 ARTIST = None                 # the Artist's question translator, set by main() (see artist/)
+CHAT = None                   # the model that writes agent talk and tips (can_chat), set by main(); None: fixed lines
 previews: dict[tuple[str, str], dict] = {}   # (game code, player id) -> the last translated question
 karma: dict[str, int] = {}    # player name (lower case) -> karma, kept across games
 sockets: dict[str, dict[str, set[WebSocket]]] = {}   # code -> player id -> sockets
@@ -68,7 +69,7 @@ def adopt(g: Game) -> None:
     for p in g.players.values():
         p.connected = False
     g.artist_ready = ARTIST is not None
-    g.helper_llm = bool(ARTIST is not None and ARTIST.can_chat)
+    g.helper_llm = CHAT is not None
     g.pause()
     games[g.code] = g
 
@@ -162,35 +163,59 @@ async def ticker() -> None:
         for g in list(games.values()):
             try:
                 changed = g.tick()
-                changed |= agents.act(g, time.time(), speak=lambda pid, reason, text, g=g: agent_speak(g, pid, reason, text))
+                changed |= agents.act(g, time.time(), speak=lambda pid, reason, text, to=None, g=g: agent_speak(g, pid, reason, text, to))
                 if changed:
                     await broadcast(g)
             except Exception:
                 log.exception("tick failed for %s", g.code)
 
 
-def agent_speak(g: Game, pid: str, reason: str, fallback: str) -> None:
+# Agent talk with a model goes through one queue: a local model writes one message at a
+# time. Replies to people and defenses go first. Other talk that waited too long (all the
+# agents claim at dawn) uses its fixed line, so the chat never falls far behind the game.
+TALK_STALE = 25.0   # s
+_talk = {"loop": None, "queue": None, "n": 0}
+
+
+def agent_speak(g: Game, pid: str, reason: str, fallback: str, to: str | None = None) -> None:
     """An agent says something: in its own words with a language model, else the fallback."""
-    if reason and g.helper_llm:
-        asyncio.get_running_loop().create_task(_agent_llm(g, pid, reason, fallback))
-    else:
-        agents._post(g, pid, fallback, time.time())
+    if not (reason and g.helper_llm):
+        agents._post(g, pid, fallback, time.time(), to)
+        return
+    loop = asyncio.get_running_loop()
+    if _talk["loop"] is not loop:
+        _talk.update(loop=loop, queue=asyncio.PriorityQueue())
+        loop.create_task(_talk_worker(_talk["queue"]))
+    _talk["n"] += 1
+    prio = 0 if agents.urgent(reason) else 1
+    _talk["queue"].put_nowait((prio, _talk["n"], time.time(), (g, pid, reason, fallback, to)))
 
 
-async def _agent_llm(g: Game, pid: str, reason: str, fallback: str) -> None:
+async def _talk_worker(queue: asyncio.PriorityQueue) -> None:
+    while True:
+        prio, _, since, job = await queue.get()
+        try:
+            await _agent_llm(*job, stale=prio > 0 and time.time() - since > TALK_STALE)
+        except Exception:
+            log.exception("agent talk failed")
+
+
+async def _agent_llm(g: Game, pid: str, reason: str, fallback: str, to: str | None = None,
+                     stale: bool = False) -> None:
     p = g.players.get(pid)
     if p is None:
         return
     text = None
     try:
-        system, user = agents.llm_prompt(g, p, reason)
-        raw = await asyncio.wait_for(asyncio.to_thread(ARTIST.chat, system, user), timeout=45)
-        text = agents.llm_check(g, p, raw)
+        if not stale:
+            system, user = agents.llm_prompt(g, p, reason)
+            raw = await asyncio.wait_for(asyncio.to_thread(CHAT.chat, system, user), timeout=45)
+            text = agents.llm_check(g, p, raw)
     except Exception:
         log.exception("agent talk failed")
     if games.get(g.code) is not g or g.phase == "night":
         return
-    agents._post(g, pid, text or fallback, time.time())
+    agents._post(g, pid, text or fallback, time.time(), to)
     await broadcast(g)
 
 
@@ -412,7 +437,7 @@ async def create_game(request: Request) -> JSONResponse:
         raise HTTPException(400, "Unknown edition.")
     g = Game(new_code(set(games)), edition)
     g.artist_ready = ARTIST is not None
-    g.helper_llm = bool(ARTIST is not None and ARTIST.can_chat)
+    g.helper_llm = CHAT is not None
     try:
         p = g.join(name, is_host=True)
     except GameError as e:
@@ -709,7 +734,7 @@ async def give_tip(g: Game, p: Player, question: str) -> None:
     if question.strip() and g.helper_llm:
         system, user = helper.llm_prompt(g, p, team, question)
         try:
-            raw = await asyncio.wait_for(asyncio.to_thread(ARTIST.chat, system, user), timeout=45)
+            raw = await asyncio.wait_for(asyncio.to_thread(CHAT.chat, system, user), timeout=45)
             answer = helper.safe_answer(g, p, raw)
         except Exception:
             log.exception("helpful narrator: the model failed")

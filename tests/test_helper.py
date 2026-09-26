@@ -136,7 +136,7 @@ def test_server_tip_with_a_model(monkeypatch, reply, shown):
     ps[4].name = "Eve"
     g.set_setting("helper", helper.EVERYONE)
     g.helper_llm = True
-    monkeypatch.setattr(server, "ARTIST", FakeModel(reply))
+    monkeypatch.setattr(server, "CHAT", FakeModel(reply))
     me = ps[1]
     asyncio.run(server.give_tip(g, me, "How do I use my info?"))
     text = " ".join(e["text"] for e in me.log if e["text"].startswith("Narrator's tip"))

@@ -32,6 +32,7 @@ def start(data_dir: str, port: int = 8000, public_url: str = "", native_dir: str
 
     server.DATA = __import__("pathlib").Path(data_dir)
     server.ARTIST = setup_artist(False, server.DATA)   # uses saved settings only; no questions on a phone
+    server.CHAT = server.ARTIST if server.ARTIST is not None and server.ARTIST.can_chat else None
     config = uvicorn.Config(server.app, host="0.0.0.0", port=port, log_level="warning",
                             loop="asyncio", http="h11", ws="wsproto", lifespan="on")
     _server = uvicorn.Server(config)
