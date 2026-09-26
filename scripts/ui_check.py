@@ -14,7 +14,7 @@ OUT = sys.argv[1]
 BASE = sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8765"
 HUMAN = len(sys.argv) > 3 and sys.argv[3] == "human"
 EDITION = sys.argv[4] if len(sys.argv) > 4 else "tb"
-NAMES = (["Sam"] if HUMAN else []) + ["Hana", "Ivo", "Jess", "Kofi", "Lena"]
+NAMES = (["Sam"] if HUMAN else []) + ["Emma", "Tommy", "Jess", "Kofi", "Lena"]
 
 
 async def main():
@@ -115,6 +115,23 @@ async def main():
             await b.close()
             return
         await pages[2].screenshot(path=f"{OUT}/06_day_me.png", full_page=True)
+        await pages[0].click('[data-act="tab"][data-v="me"]')
+        await pages[0].wait_for_timeout(300)
+        await pages[0].screenshot(path=f"{OUT}/06e_emma_me.png", full_page=True)
+        print("annoy button on Emma's Me tab:", await pages[0].locator('button.egg[data-act="annoy"]').count())
+        await pages[0].click('[data-act="tab"][data-v="chat"]')
+        print("phone settings on the chat tab:", await pages[0].locator('[data-act="feel"]').count())
+        await pages[0].click('[data-act="tab"][data-v="me"]')
+        lena = pages[4]
+        await lena.click('[data-act="tab"][data-v="me"]')
+        await lena.click('[data-act="arcade"]')
+        await lena.wait_for_selector(".arc-card")
+        await lena.screenshot(path=f"{OUT}/06l_arcade_in_game.png", full_page=True)
+        await lena.click('[data-arc="play"][data-g="snake"]')
+        await lena.keyboard.press("ArrowUp")
+        await lena.wait_for_selector(".arc-over .row", timeout=15000)
+        print("lena arcade result:", " ".join((await lena.locator(".arc-over").inner_text()).split()))
+        await lena.wait_for_timeout(800)
         await pages[2].click('[data-act="tab"][data-v="town"]')
         await pages[2].screenshot(path=f"{OUT}/07_day_town.png", full_page=True)
         act = pages[2].locator('[data-act="dayact"]')
@@ -136,6 +153,9 @@ async def main():
         for pg in pages:
             await pg.click('[data-act="tab"][data-v="town"]')
         await pages[3].screenshot(path=f"{OUT}/09_vote.png", full_page=True)
+        await pages[4].wait_for_timeout(300)
+        print("lena back in the game at the vote:", await pages[4].locator(".vote").count(), "arcade stage:", await pages[4].locator("#arc-stage").count())
+        await pages[4].screenshot(path=f"{OUT}/09l_lena_vote.png", full_page=True)
         # Two votes to execute and one no, then look at the seats (host option show_votes is on).
         for i, pg in enumerate(pages[:3]):
             if await pg.locator('[data-act="vote"][data-v="1"]').count():

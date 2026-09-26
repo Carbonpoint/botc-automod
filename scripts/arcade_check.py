@@ -138,7 +138,7 @@ async def main():
             check(f"arcade karma today is {info['today']} (>0) and total {info['total']}", info["today"] > 0 and info["total"] == info["today"])
             dbg = await pg.request.get(BASE + f"/api/games")
             check("lobby still listed", code in await dbg.text())
-            await pg.click('[data-act="home"]')
+            await pg.click('[data-arc="exit"]')
             check("back to the start page", await pg.locator("#name").count() == 1)
             await br.close()
     finally:

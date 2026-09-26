@@ -2,7 +2,8 @@
 // Karma arcade: small games on the start page. A finished round goes to
 // /api/arcade/score; the server keeps the boards and gives the karma
 // (see arcade.py). The pool table is shared: the server runs its physics.
-// Uses ui, esc, api, toast and app from app.js.
+// Opens from the start page (ui.view "arcade") or inside a game (ui.arcade,
+// with the player's name from the game). Uses ui, S, session, esc, api, toast, app and render from app.js.
 
 const Arcade = (() => {
   const A = { screen: "menu", info: null, game: null, stopFn: null, pool: null };
@@ -16,15 +17,21 @@ const Arcade = (() => {
   ];
   const C = { bg: "#14111a", panel: "#1f1a28", panel2: "#2a2336", line: "#3a3148", text: "#ece6f5",
               muted: "#a89fb8", gold: "#d9b45b", evil: "#d8484a", good: "#4d8fe8", ok: "#4fb286" };
-  const who = () => (ui.name || "").trim();
+  const inGame = () => !!(session.get() && S);
+  const who = () => inGame() ? S.me.name : (ui.name || "").trim();
 
   // ---------- screens ----------
   async function open() {
-    ui.view = "arcade"; A.screen = "menu"; render(); refresh();
+    if (inGame()) ui.arcade = true; else ui.view = "arcade";
+    A.screen = "menu"; app.innerHTML = ""; window.scrollTo(0, 0); window.render(); refresh();
   }
+  function exit() {
+    stop(); ui.arcade = false; ui.view = null; window.render();
+  }
+  const shown = () => ui.view === "arcade" || ui.arcade;
   async function refresh() {
     try { A.info = await api(`/api/arcade?name=${encodeURIComponent(who())}`); } catch (e) { toast(e.message); }
-    if (A.screen === "menu" && ui.view === "arcade") render();
+    if (A.screen === "menu" && shown()) render();
   }
   function karmaLine() {
     const i = A.info;
@@ -39,10 +46,11 @@ const Arcade = (() => {
       const b = i?.games[id]?.board || [];
       return b.length ? `Record: ${b[0].score} (${esc(b[0].name)})` : "No record yet";
     };
-    return `<div class="archive-top"><button data-act="home">← Back</button><h1>Karma arcade</h1></div>
+    return `<div class="archive-top"><button data-arc="exit">← ${inGame() ? "Game" : "Back"}</button><h1>Karma arcade</h1></div>
       <div class="card stack">
-        <label for="arc-name" class="small muted">Your name (the same as in games)</label>
-        <input id="arc-name" maxlength="24" autocomplete="nickname" value="${esc(ui.name || "")}" placeholder="Name">
+        ${inGame() ? `<p>Playing as <b>${esc(who())}</b>. You go back to the game when a vote opens or night falls.</p>`
+          : `<label for="arc-name" class="small muted">Your name (the same as in games)</label>
+        <input id="arc-name" maxlength="24" autocomplete="nickname" value="${esc(ui.name || "")}" placeholder="Name">`}
         ${karmaLine()}
         <p class="small muted">Karma: +1 for your first real game each day, +1 for a new record,
           +1 for each ${i?.pool_per_karma ?? 3} balls you pocket at the pool table. At most ${i?.cap ?? 3} a day from the arcade.</p>
@@ -582,12 +590,13 @@ const Arcade = (() => {
 
   // ---------- events ----------
   app.addEventListener("click", ev => {
-    if (ui.view !== "arcade") return;
+    if (!shown()) return;
     const b = ev.target.closest("[data-arc]");
     if (!b) return;
     const d = b.dataset;
     if (d.arc === "play") play(d.g);
     else if (d.arc === "menu") toMenu();
+    else if (d.arc === "exit") exit();
     else if (d.arc === "again") { stop(); document.getElementById("arc-stage").innerHTML = ""; start(A.game); }
   });
   app.addEventListener("change", ev => {

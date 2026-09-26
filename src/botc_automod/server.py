@@ -466,10 +466,14 @@ def _arcade() -> arcade.Arcade:
     return ARCADE
 
 
-def arcade_reply(name: str, r: dict) -> JSONResponse:
+async def arcade_reply(name: str, r: dict) -> JSONResponse:
+    key = arcade.clean(name).lower()
     if r["karma"]:
-        add_karma(arcade.clean(name), r["karma"])
-    return JSONResponse({**r, "total": karma.get(arcade.clean(name).lower(), 0)})
+        add_karma(key, r["karma"])
+        for g in list(games.values()):   # a player in a game sees the new karma on the Me tab
+            if any(p.name.lower() == key for p in g.players.values()):
+                await broadcast(g)
+    return JSONResponse({**r, "total": karma.get(key, 0)})
 
 
 async def arcade_info(request: Request) -> JSONResponse:
@@ -484,7 +488,7 @@ async def arcade_info(request: Request) -> JSONResponse:
 async def arcade_score(request: Request) -> JSONResponse:
     data = await body(request)
     try:
-        return arcade_reply(data.get("name"), _arcade().submit(data.get("name"), data.get("game"), data.get("score"), data.get("secs")))
+        return await arcade_reply(data.get("name"), _arcade().submit(data.get("name"), data.get("game"), data.get("score"), data.get("secs")))
     except arcade.ArcadeError as e:
         raise HTTPException(400, str(e)) from None
 
@@ -500,7 +504,7 @@ async def pool_state(request: Request) -> JSONResponse:
 async def pool_shot(request: Request) -> JSONResponse:
     data = await body(request)
     try:
-        return arcade_reply(data.get("name"), _arcade().shoot(data.get("name"), data.get("version"), data.get("angle"), data.get("power")))
+        return await arcade_reply(data.get("name"), _arcade().shoot(data.get("name"), data.get("version"), data.get("angle"), data.get("power")))
     except arcade.ArcadeError as e:
         raise HTTPException(400, str(e)) from None
 

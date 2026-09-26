@@ -260,6 +260,10 @@ function render() {
   }
   if (!S) { app.innerHTML = `<div class="card">Connecting...</div>`; return; }
   const g = S.game;
+  if (ui.arcade) {
+    if (!arcadeOpen()) { Arcade.stop(); ui.arcade = false; toast(g.phase === "vote" ? "A vote is open." : "The game needs you.", "info"); }
+    else { Arcade.render(); return; }
+  }
   const overlay = (g.phase === "night" && !S.me.storyteller) || g.stage === "narration";  // those screens show their own copy
   let html = topBar() + (overlay ? "" : rejoinBanner());
   if (g.phase === "lobby") html += lobbyView();
@@ -277,6 +281,11 @@ function render() {
   drawTimer();
 }
 document.addEventListener("focusout", () => setTimeout(() => ui.pendingRender && render(), 0));
+
+// The karma arcade in a game: only while nothing needs the player (no night, no vote, no story).
+const arcadeOpen = () => !["night", "vote", "setup"].includes(S.game.phase) && S.game.stage !== "narration";
+const arcadeButton = () => !S.me.storyteller && arcadeOpen()
+  ? `<button class="linkish arcade-link" data-act="arcade">${ICON.star}<span>Karma arcade</span></button>` : "";
 
 function topBar() {
   const g = S.game;
@@ -500,7 +509,7 @@ function lobbyView() {
     ${me.is_host && !p.is_host ? `<button class="danger" data-act="kick" data-pid="${p.id}">Remove</button>` : ""}</li>`).join("")}</ul></div>`;
   if (me.is_host) html += hostLobby(seated);
   else html += `<p class="muted">Waiting for the host to start the game.</p>`;
-  html += feelCard();
+  html += `<div class="center">${arcadeButton()}</div>` + feelCard();
   html += `<button class="danger" data-act="leave">Leave this game</button>`;
   return html;
 }
@@ -636,11 +645,14 @@ function meView() {
     <p>These good characters are not in play, so they are safe to claim: <b>${me.bluffs.map(esc).join(", ")}</b>.</p></div>`;
   html += `<div class="card"><p>You are <b>${me.alive ? "alive" : "dead"}</b>.
     ${me.karma != null ? `Karma: <b>${me.karma > 0 ? "+" : ""}${me.karma}</b>.` : ""}
-    ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
+    ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p>
+    ${arcadeButton()}</div>`;
   html += keywordCard() + tipCard();
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
     <ul class="log">${[...me.log].reverse().map(e => `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul></div>`;
-  return html + feelCard();
+  html += feelCard();
+  if (me.annoy) html += `<button class="big egg" data-act="annoy">Annoy Tommy?</button>`;
+  return html;
 }
 
 function townView() {
@@ -738,8 +750,7 @@ function almanacView() {
   const groups = ["townsfolk", "outsider", "minion", "demon"];
   return groups.map(t => `<div class="card"><h3>${t === "townsfolk" ? "Townsfolk" : t[0].toUpperCase() + t.slice(1) + "s"}</h3>
     ${almanac.roles.filter(r => r.type === t).map(r => `<div class="alm"><b class="tag-${r.team}">${esc(r.name)}</b>
-    <span>${esc(r.ability)}</span>${wikiDetails(r.id)}</div>`).join("")}</div>`).join("")
-    + (S.me.annoy ? `<p class="egg"><button data-act="annoy">Annoy Tommy?</button></p>` : "");
+    <span>${esc(r.ability)}</span>${wikiDetails(r.id)}</div>`).join("")}</div>`).join("");
 }
 
 function logView() {
@@ -911,8 +922,7 @@ function chatView() {
       : `<div class="row"><input id="chat-text" class="grow" maxlength="300" placeholder="${t ? "Private message" : "Message everyone"}"
           value="${esc(ui.form["chat-text"] || "")}"><button class="primary" data-act="sendchat">Send</button></div>
         ${S.game.anon_chat ? `<label class="row small"><input type="checkbox" id="chat-anon" ${ui.anon ? "checked" : ""}
-          style="width:auto"> Send without my name</label>` : ""}`}</div>`
-    + feelCard();
+          style="width:auto"> Send without my name</label>` : ""}`}</div>`;
 }
 
 // ---------- dawn: the narrator tells the story of the night ----------

@@ -167,6 +167,14 @@ Read README.md first.
 - Host option `show_votes` (on by default): during a vote each seat on the
   Town map, and each Grimoire row, shows 💀 (execute) or 😇 (no) as votes
   come in. Off: votes stay hidden until the vote closes. Checked in ui_check.
+- Emma's "Annoy Tommy?" button moved from the Characters tab to the bottom
+  of the Me tab: full width, dark grey on dark, so it is easy to miss.
+- The "On this phone" card is only on the Me tab and in the lobby (not Chat).
+- The arcade opens inside a game too (Me tab and lobby link; the player's
+  game name is used). It closes by itself at night, at a vote, during the
+  dawn story and in setup. Arcade karma broadcasts to that player's games.
+- ui_check now seats Emma and Tommy and checks the button, the Chat tab
+  and the in-game arcade (it closes when the vote opens).
 
 ## Known simplifications
 
