@@ -124,5 +124,5 @@ RTX 2080 Ti.
 The server asks at first start (`botc-automod --setup` to change). The
 packaged model downloads llama.cpp (pinned `b11193`) and the model file
 once, then runs on the CPU. On Android the app bundles llama.cpp's Android
-build, so the packaged model runs on the phone. The model file needs a
-public home for downloads (a Hugging Face repository is planned).
+build, so the packaged model runs on the phone. The model file is published at
+https://huggingface.co/carbonpoint/botc-artist.

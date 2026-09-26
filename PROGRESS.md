@@ -53,9 +53,8 @@ Read README.md first.
   runs: see docs/artist-llm.md. Chosen: SmolLM2 135M run 3, 8-bit (90% / 94%
   right, 0.3 to 0.8 s on a 4-core CPU, 145 MB).
 - Model file on stalker: `~/botc-train/runs/smol-135m-v3/model-Q8_0.gguf`.
-  NOT PUBLISHED YET: needs the user's approval and a Hugging Face write
-  token; then run scripts/publish_model.sh and set PACKAGED_REPO in
-  artist/runtime.py.
+  Published 2026-09-26 at https://huggingface.co/carbonpoint/botc-artist
+  (public, the user approved); PACKAGED_REPO in artist/runtime.py points there.
 - Server moved from FastAPI to Starlette (pure Python, runs on Android).
 - Docker: Dockerfile + compose.yaml, tested with Podman.
 - Android: android/ Java + Chaquopy app (foreground service, QR, browser

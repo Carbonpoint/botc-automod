@@ -25,7 +25,7 @@ LLAMA_TAG = "b11193"
 LLAMA_URL = "https://github.com/ggml-org/llama.cpp/releases/download/{tag}/llama-{tag}-bin-{asset}"
 # Where the published model lives (a Hugging Face repository). Empty until it is published.
 # BOTC_PACKAGED_MODEL_URL overrides it with a URL or a local .gguf file.
-PACKAGED_REPO = ""   # e.g. "https://huggingface.co/OWNER/botc-artist/resolve/main"
+PACKAGED_REPO = "https://huggingface.co/carbonpoint/botc-artist/resolve/main"
 MODEL_FILE = "botc-artist.gguf"
 PORT = 8779
 

@@ -232,7 +232,7 @@ The first time the server starts, it asks which model to use:
 | Choice | What you need |
 |---|---|
 | No model | Nothing. The Artist is dealt only when a human storyteller runs the game. |
-| Local: packaged model | Nothing. It downloads llama.cpp (about 16 MB) and the model (145 MB) once, then runs on the CPU, under a second per question. *Not downloadable until the model is published; meanwhile set `BOTC_PACKAGED_MODEL_URL` to a local `.gguf` file.* |
+| Local: packaged model | Nothing. It downloads llama.cpp (about 16 MB) and the model (145 MB) once, then runs on the CPU, under a second per question. The model is at [huggingface.co/carbonpoint/botc-artist](https://huggingface.co/carbonpoint/botc-artist). |
 | Local: Ollama | An Ollama server. You give its address and pick a model from its list. |
 | Cloud | A provider (Anthropic, OpenAI, Google Gemini, OpenRouter, or any OpenAI-compatible server), an API key, and a model name. |
 
