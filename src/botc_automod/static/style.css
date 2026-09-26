@@ -177,3 +177,18 @@ input[type=file] { padding: 8px; }
 .egg { text-align: right; margin: 24px 4px 0; }
 .egg button { background: none; border: 0; min-height: 0; padding: 4px; font-size: .7rem; color: var(--line); }
 .egg button:hover { color: var(--muted); }
+
+/* Chat */
+.threads { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.threads button { flex: 0 0 auto; min-height: 36px; padding: 6px 12px; font-size: .9rem; }
+.threads .count { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--evil);
+  color: #fff; font-size: .75rem; }
+.msgs { max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.msg { background: var(--panel-2); border-radius: 10px; padding: 6px 10px; max-width: 85%; align-self: flex-start;
+  overflow-wrap: anywhere; }
+.msg.mine { align-self: flex-end; background: #2f2a1c; }
+.msg .lbl { display: block; font-size: .7rem; color: var(--muted); }
+#popup { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 25; max-width: calc(100% - 32px);
+  background: var(--panel); border: 1px solid var(--gold); color: var(--text); border-radius: 12px; padding: 10px 14px;
+  text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabs.many button { font-size: .78rem; padding: 12px 2px; }

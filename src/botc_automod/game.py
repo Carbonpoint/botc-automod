@@ -19,6 +19,7 @@ Two modes, chosen by the host in the lobby:
 from __future__ import annotations
 
 import math
+import re
 import random
 import secrets
 import string
@@ -739,6 +740,42 @@ class Game:
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
         self.set_timer(self.settings["discussion"])
 
+    # Chat ----------------------------------------------------------------------------
+    # Messages live in estate["chat"]. A message has "to": None for everyone, or one
+    # player's id. Nobody can send at night: the town is asleep.
+    CHAT_TEXT = 300
+    CHAT_KEEP = 500
+
+    def send_chat(self, pid: str, text: str, to: str | None = None, now: float | None = None) -> dict:
+        p = self.p(pid)
+        if self.phase == "night":
+            raise GameError("Chat is closed at night. Talk again at dawn.")
+        text = " ".join(str(text).split())[:self.CHAT_TEXT]
+        if not text:
+            raise GameError("Type a message first.")
+        if to is not None and (to == pid or to not in self.players):
+            raise GameError("Choose someone else to message.")
+        now = now or time.time()
+        last = self.estate.setdefault("chat_last", {})
+        if now - last.get(pid, 0) < 1.0:
+            raise GameError("Slow down a little.")
+        last[pid] = now
+        chat = self.estate.setdefault("chat", [])
+        msg = {"id": (chat[-1]["id"] + 1) if chat else 1, "from": p.id, "to": to,
+               "text": self.hide_keywords(text), "label": self.label()}
+        chat.append(msg)
+        del chat[:-self.CHAT_KEEP]
+        return msg
+
+    def hide_keywords(self, text: str) -> str:
+        """Today's secret keywords (keyword tasks) never travel through the chat."""
+        for w in self.estate.get("irl", {}).get("words", {}).values():
+            text = re.sub(rf"\b{re.escape(w)}\b", "•••", text, flags=re.I)
+        return text
+
+    def chat_for(self, pid: str) -> list[dict]:
+        return [m for m in self.estate.get("chat", []) if m["to"] is None or pid in (m["to"], m["from"])][-200:]
+
     # Helpful narrator (helper.py) ------------------------------------------------------
     def set_learner(self, pid: str, on: bool) -> None:
         """The host marks a player as learning the game (or not)."""
@@ -1087,6 +1124,7 @@ class Game:
                     "needed": self.votes_needed() if self.phase != "lobby" else 0,
                     "history": self.nom_history},
             "public_log": self.public_log[-60:],
+            "chat": self.chat_for(pid),
         }
         rejoins = [{"id": k, "name": v["name"]} for k, v in self.estate.get("rejoins", {}).items()
                    if v["status"] == "pending" and v["pid"] != pid

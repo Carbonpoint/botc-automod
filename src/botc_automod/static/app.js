@@ -84,8 +84,8 @@ const fmt = t => t == null ? "" : `${Math.floor(t / 60)}:${String(t % 60).padSta
 // Only public moments make a sound: every phone hears the same thing at the
 // same time. Night tasks only vibrate, and every player gets a night task.
 const feel = {
-  get() { try { return { sound: true, vibrate: true, ...JSON.parse(localStorage.getItem("botc-feel") || "{}") }; }
-          catch { return { sound: true, vibrate: true }; } },
+  get() { const d = { sound: true, vibrate: true, popups: true, dmBuzz: false };
+          try { return { ...d, ...JSON.parse(localStorage.getItem("botc-feel") || "{}") }; } catch { return d; } },
   set(k, v) { try { localStorage.setItem("botc-feel", JSON.stringify({ ...feel.get(), [k]: v })); } catch {} },
 };
 let audio = null;
@@ -108,9 +108,10 @@ const SOUNDS = {
   warn:        [[988, 0, .12, "sine", .2], [988, .2, .12, "sine", .2]],
   tick:        [[1400, 0, .05, "square", .06]],
   end:         [[523, 0, 1.2, "sine", .15], [659, .1, 1.1, "sine", .15], [784, .2, 1, "sine", .15]],
+  chat:        [[1047, 0, .08, "sine", .12], [1319, .07, .12, "sine", .12]],
 };
 const BUZZ = { night: [300], dawn: [80, 60, 80], narrator: [120, 60, 120, 60, 400], nominations: [60],
-               nominated: [150], vote: [80, 60, 80], warn: [200], tick: [30], end: [400] };
+               nominated: [150], vote: [80, 60, 80], warn: [200], tick: [30], end: [400], chat: [40], dm: [40, 40, 40] };
 function cue(name) {
   const f = feel.get();
   if (f.vibrate && BUZZ[name] && navigator.vibrate) navigator.vibrate(BUZZ[name]);
@@ -136,11 +137,43 @@ function timerCue(prev, now) {
 }
 function feelCard() {
   const f = feel.get(), b = (k, on) => `<button class="${f[k] === on ? "sel" : ""}" data-act="feel" data-k="${k}" data-v="${on ? 1 : 0}">${on ? "On" : "Off"}</button>`;
+  const row = (k, label) => `<div class="row"><span class="grow">${label}</span><div class="seg">${b(k, true)}${b(k, false)}</div></div>`;
   return `<div class="card stack"><h3>On this phone</h3>
-    <div class="row"><span class="grow">Sounds</span><div class="seg">${b("sound", true)}${b("sound", false)}</div></div>
-    <div class="row"><span class="grow">Vibration</span><div class="seg">${b("vibrate", true)}${b("vibrate", false)}</div></div>
-    <p class="small muted">Sounds mark night, dawn, nominations and votes, and warn when time runs low.
-      iPhones do not vibrate from a web page, and their silent switch mutes the sounds.</p></div>`;
+    ${row("sound", "Sounds")}${row("vibrate", "Vibration")}${row("popups", "Chat pop-ups")}${row("dmBuzz", "Vibrate for private messages")}
+    <p class="small muted">Sounds mark night, dawn, nominations, votes and group messages, and warn when time runs low.
+      Private messages only show a quiet "new message" pop-up. iPhones do not vibrate from a web page,
+      and their silent switch mutes the sounds.</p></div>`;
+}
+// A pop-up at the top of the screen. Tapping it opens the chat.
+function popup(text, thread) {
+  let el = document.getElementById("popup");
+  if (!el) { el = document.createElement("button"); el.id = "popup"; document.body.appendChild(el);
+             el.addEventListener("click", () => { el.hidden = true; ui.tab = "chat"; ui.thread = el.dataset.thread || ""; render(); }); }
+  el.textContent = text; el.dataset.thread = thread; el.hidden = false;
+  clearTimeout(popup.t); popup.t = setTimeout(() => (el.hidden = true), 4000);
+}
+// New messages since the last state: pop-ups, sound and vibration by this phone's settings.
+function chatCues(prev) {
+  const msgs = S.chat || [];
+  const top = msgs.length ? msgs[msgs.length - 1].id : 0;
+  if (!prev) {   // a fresh page: what is already there counts as read
+    ui.chatTop = top; ui.read = {};
+    for (const m of msgs) ui.read[threadOf(m)] = m.id;
+    return;
+  }
+  const f = feel.get();
+  for (const m of msgs.filter(m => m.id > (ui.chatTop || 0) && m.from !== S.me.id)) {
+    const thread = m.to ? m.from : "";
+    if (ui.tab === "chat" && (ui.thread || "") === thread) continue;   // already on screen
+    if (!m.to) {
+      if (f.popups) popup(`${nameOf(m.from)}: ${m.text}`, "");
+      cue("chat");
+    } else {
+      if (f.popups) popup("New private message", thread);
+      if (f.dmBuzz && navigator.vibrate) navigator.vibrate(BUZZ.dm);
+    }
+  }
+  ui.chatTop = top;
 }
 
 // ---------- connection ----------
@@ -195,6 +228,7 @@ function onState(state) {
   }
   if (prev?.game.phase === "lobby" && S.game.phase !== "lobby") { ui.tab = S.me.storyteller ? "grim" : "me"; keepAwake(); }
   if (!prev && S.me.storyteller && ui.tab === "me") ui.tab = "grim";
+  chatCues(prev);
   if (S.me.log.length > ui.lastLog && ui.tab !== "me") ui.logBadge = true;
   if (ui.tab === "me") ui.lastLog = S.me.log.length;
   render();
@@ -228,12 +262,15 @@ function render() {
   if (g.phase === "lobby") html += lobbyView();
   else {
     if (g.phase === "ended") html += endView();
-    html += ({ me: meView, grim: grimView, town: townView, almanac: almanacView, log: logView, host: hostView }[ui.tab] || meView)();
+    html += ({ me: meView, grim: grimView, town: townView, almanac: almanacView, log: logView, host: hostView,
+               chat: chatView }[ui.tab] || meView)();
     html += tabsView();
     if (g.phase === "night" && !S.me.storyteller) html += nightView();
     if (g.phase === "day" && g.stage === "narration" && S.narration) html += dawnView();
   }
   app.innerHTML = html;
+  const box = document.getElementById("msgs");
+  if (box) box.scrollTop = box.scrollHeight;
   drawTimer();
 }
 document.addEventListener("focusout", () => setTimeout(() => ui.pendingRender && render(), 0));
@@ -526,9 +563,11 @@ function hostLobby(seated) {
 function tabsView() {
   const tabs = S.me.storyteller ? [["grim", "Grimoire"], ["town", "Town"], ["almanac", "Characters"], ["log", "Log"]]
                                 : [["me", "Me"], ["town", "Town"], ["almanac", "Characters"], ["log", "Log"]];
+  tabs.push(["chat", "Chat"]);
   if (S.me.is_host) tabs.push(["host", "Host"]);
-  return `<nav class="tabs">${tabs.map(([k, l]) => `<button class="${ui.tab === k ? "on" : ""}" data-act="tab" data-v="${k}">${l}${
+  return `<nav class="tabs${tabs.length > 5 ? " many" : ""}">${tabs.map(([k, l]) => `<button class="${ui.tab === k ? "on" : ""}" data-act="tab" data-v="${k}">${l}${
     k === "me" && ui.logBadge ? '<span class="badge"></span>' : ""}${
+    k === "chat" && ui.tab !== "chat" && unread().total ? '<span class="badge"></span>' : ""}${
     k === "town" && ["nominations", "vote", "defense"].includes(S.game.phase) && ui.tab !== "town" ? '<span class="badge"></span>' : ""}</button>`).join("")}</nav>`;
 }
 
@@ -799,6 +838,37 @@ function nightView() {
   return `<div class="night"><div class="inner">${rejoinBanner()}${forcedActions()}<h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
 }
 
+// ---------- chat ----------
+// ui.thread: "" for everyone, or the other player's id. ui.read: thread -> last message id read.
+function threadOf(m) { return m.to ? (m.from === S.me.id ? m.to : m.from) : ""; }
+function unread() {
+  const read = ui.read || {}, out = { total: 0 };
+  for (const m of S.chat || []) {
+    if (m.from === S.me.id) continue;
+    const t = threadOf(m);
+    if (m.id > (read[t] || 0)) { out[t] = (out[t] || 0) + 1; out.total++; }
+  }
+  return out;
+}
+function chatView() {
+  const t = ui.thread || "", msgs = (S.chat || []).filter(m => threadOf(m) === t);
+  ui.read = { ...(ui.read || {}), [t]: msgs.length ? msgs[msgs.length - 1].id : (ui.read || {})[t] || 0 };
+  const u = unread(), people = S.players.filter(p => p.id !== S.me.id);
+  const chip = (id, label) => `<button class="${t === id ? "sel" : ""}" data-act="thread" data-v="${id}">${esc(label)}${
+    u[id] ? ` <span class="count">${u[id]}</span>` : ""}</button>`;
+  const night = S.game.phase === "night";
+  return `<div class="card stack"><h3>Chat</h3>
+    <div class="threads">${chip("", "Everyone")}${people.map(p => chip(p.id, p.name + (p.agent ? " (agent)" : ""))).join("")}</div>
+    <p class="small muted">${t ? `Private with ${esc(nameOf(t))}. Nobody else sees these messages.` : "Everyone in the game sees these messages."}</p>
+    <div class="msgs" id="msgs">${msgs.length ? msgs.map(m => `<div class="msg${m.from === S.me.id ? " mine" : ""}">
+      <span class="lbl">${esc(m.from === S.me.id ? "You" : nameOf(m.from))} · ${esc(m.label)}</span>${esc(m.text)}</div>`).join("")
+      : `<p class="muted small">No messages yet.</p>`}</div>
+    ${night ? `<p class="muted">Chat is closed at night. Talk again at dawn.</p>`
+      : `<div class="row"><input id="chat-text" class="grow" maxlength="300" placeholder="${t ? "Private message" : "Message everyone"}"
+          value="${esc(ui.form["chat-text"] || "")}"><button class="primary" data-act="sendchat">Send</button></div>`}</div>`
+    + feelCard();
+}
+
 // ---------- dawn: the narrator tells the story of the night ----------
 function dawnView() {
   const n = S.narration, mine = n.narrator === S.me.id;
@@ -866,6 +936,13 @@ app.addEventListener("click", async ev => {
                                                                     body: JSON.stringify({ token: s.token }) })); return;
       }
       case "narrationdone": send({ type: "narration_done" }); return;
+      case "thread": ui.thread = d.v; render(); return;
+      case "sendchat": {
+        const el = document.getElementById("chat-text"), text = el?.value.trim();
+        if (!text) return;
+        send({ type: "chat", text, to: ui.thread || null });
+        ui.form["chat-text"] = ""; el.value = ""; return;
+      }
       case "newstory": send({ type: "new_story" }); return;
       case "annoy": send({ type: "annoy" }); return;
       case "helper": send({ type: "setting", key: "helper", value: +d.v }); return;
@@ -978,7 +1055,10 @@ app.addEventListener("click", async ev => {
     }
   } catch (e) { toast(e.message); }
 });
-app.addEventListener("input", ev => { if (ev.target.id === "name") ui.name = ev.target.value; });
+app.addEventListener("input", ev => {
+  if (ev.target.id === "name") ui.name = ev.target.value;
+  if (ev.target.id === "chat-text") ui.form["chat-text"] = ev.target.value;
+});
 app.addEventListener("change", async ev => {
   const el = ev.target, d = el.dataset;
   if (el.id === "importfile" && el.files[0]) {
@@ -1008,6 +1088,7 @@ app.addEventListener("change", async ev => {
 });
 app.addEventListener("keydown", ev => {
   if (ev.key === "Enter" && ev.target.id === "code") document.querySelector('[data-act="joincode"]')?.click();
+  if (ev.key === "Enter" && ev.target.id === "chat-text") { ev.preventDefault(); document.querySelector('[data-act="sendchat"]')?.click(); }
 });
 
 connect();

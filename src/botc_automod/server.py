@@ -484,6 +484,9 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.slayer_claim(pid, msg["target"])
         case "leave":
             g.leave(pid)
+        case "chat":
+            to = msg.get("to")
+            g.send_chat(pid, msg.get("text", ""), to if isinstance(to, str) else None)
         case "narration_done":
             g.finish_narration(pid)
         case "new_story":
