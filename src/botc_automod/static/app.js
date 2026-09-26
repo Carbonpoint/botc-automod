@@ -128,6 +128,89 @@ function cue(name) {
     o.start(t0 + at); o.stop(t0 + at + len + .05);
   }
 }
+// ---------- jump scares (host options "scares" and "pipe", scares.py) ----------
+// The server plans each scare at a random moment of the day. The phone shows it only
+// when nothing needs the player, and each scare only once (botc-scared).
+const SCARE_FACES = ["👁️", "💀", "👻", "🕷️", "🩸", "🤡", "🧟", "😱", "🦇", "🪦", "🧛", "👹"];
+const SCARE_LINES = ["I can see you.", "Don't look behind you.", "Why did you let me in?", "It is already in the house.",
+  "You forgot to lock the door.", "Smile. I am right behind you.", "Who is sitting next to you?",
+  "One of your friends is not your friend.", "It knows where you sit.", "Did you hear that?",
+  "You were not alone last night.", "Count the players again."];
+const scared = {
+  get() { try { return JSON.parse(localStorage.getItem("botc-scared") || "[]"); } catch { return []; } },
+  add(id) { const k = `${S.game.code}:${id}`; scared.mem.add(k);
+            try { localStorage.setItem("botc-scared", JSON.stringify([...scared.get(), k].slice(-50))); } catch {} },
+  has(id) { const k = `${S.game.code}:${id}`; return scared.mem.has(k) || scared.get().includes(k); },
+  mem: new Set(), due: new Map(),
+};
+function planScares() {
+  const now = Date.now(), keep = new Set();
+  for (const sc of S?.me.scares || []) {
+    keep.add(sc.id);
+    if (!scared.due.has(sc.id)) scared.due.set(sc.id, { ...sc, when: now + sc.in * 1000 });
+  }
+  for (const id of scared.due.keys()) if (!keep.has(id)) scared.due.delete(id);
+}
+const scareFree = () => S && ["day", "nominations", "defense"].includes(S.game.phase) && S.game.stage !== "narration"
+  && !S.task && document.visibilityState === "visible" && !document.getElementById("scare");
+setInterval(() => {
+  if (!scareFree()) return;
+  for (const [id, sc] of scared.due) {
+    if (Date.now() < sc.when || scared.has(id)) continue;
+    scared.add(id); scared.due.delete(id);
+    (sc.kind === "pipe" ? pipeSound : scareScreen)();
+    return;
+  }
+}, 1000);
+function noise(len) {
+  const b = audio.createBuffer(1, audio.sampleRate * len, audio.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const n = audio.createBufferSource(); n.buffer = b; return n;
+}
+function scareScreen() {
+  const f = feel.get(), pick = a => a[Math.floor(Math.random() * a.length)];
+  const el = document.createElement("div");
+  el.id = "scare"; el.className = "scare";
+  el.innerHTML = `<div class="scare-in"><div class="scare-face">${pick(SCARE_FACES)}</div>
+    ${Math.random() < .6 ? `<p>${esc(pick(SCARE_LINES))}</p>` : ""}</div>`;
+  const close = () => { el.classList.add("out"); setTimeout(() => el.remove(), 400); };
+  el.addEventListener("pointerdown", close);
+  document.body.appendChild(el);
+  setTimeout(close, 1800);
+  if (f.vibrate && navigator.vibrate) navigator.vibrate([500, 80, 300]);
+  if (!f.sound || !audio || audio.state !== "running") return;
+  const t = audio.currentTime + .01, out = audio.createGain();
+  out.gain.setValueAtTime(.55, t); out.gain.exponentialRampToValueAtTime(.001, t + 1.3);
+  out.connect(audio.destination);
+  const n = noise(1.3), bp = audio.createBiquadFilter();
+  bp.type = "bandpass"; bp.frequency.setValueAtTime(2500, t); bp.frequency.exponentialRampToValueAtTime(400, t + 1.2);
+  n.connect(bp).connect(out); n.start(t);
+  for (const hz of [98, 104, 147, 207]) {           // a dissonant scream that falls
+    const o = audio.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(hz * 4, t); o.frequency.exponentialRampToValueAtTime(hz, t + 1.2);
+    const g = audio.createGain(); g.gain.value = .12; o.connect(g).connect(out); o.start(t); o.stop(t + 1.3);
+  }
+}
+// A metal pipe falls on a hard floor: the modes of a free bar, struck again at each bounce.
+function pipeSound() {
+  const f = feel.get();
+  if (f.vibrate && navigator.vibrate) navigator.vibrate([90, 330, 50, 200, 30]);
+  if (!f.sound || !audio || audio.state !== "running") return;
+  const t0 = audio.currentTime + .01, base = 460 + Math.random() * 80;
+  [[0, 1], [.42, .5], [.7, .28], [.88, .15], [1.0, .07], [1.07, .03]].forEach(([at, v]) => {
+    const t = t0 + at;
+    [[1, 1, 1.8], [2.756, .6, 1.1], [5.404, .35, .6], [8.933, .2, .35]].forEach(([r, amp, len]) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = base * r * (1 + (Math.random() - .5) * .004);
+      g.gain.setValueAtTime(.3 * v * amp, t); g.gain.exponentialRampToValueAtTime(.0005, t + len * (.4 + v * .6));
+      o.connect(g).connect(audio.destination); o.start(t); o.stop(t + len + .05);
+    });
+    const n = noise(.03), g = audio.createGain(), hp = audio.createBiquadFilter();
+    hp.type = "highpass"; hp.frequency.value = 3000; g.gain.value = .25 * v;
+    n.connect(hp).connect(g).connect(audio.destination); n.start(t);
+  });
+}
+
 // Warnings as a day timer runs out: 30 s, 10 s, then a tick each second of the last 5 of a vote.
 function timerCue(prev, now) {
   if (!S || prev == null || now == null || now >= prev || S.game.paused) return;
@@ -231,6 +314,7 @@ function onState(state) {
   if (prev?.game.phase === "lobby" && S.game.phase !== "lobby") { ui.tab = S.me.storyteller ? "grim" : "me"; keepAwake(); }
   if (!prev && S.me.storyteller && ui.tab === "me") ui.tab = "grim";
   chatCues(prev);
+  planScares();
   if (S.me.log.length > ui.lastLog && ui.tab !== "me") ui.logBadge = true;
   if (ui.tab === "me") ui.lastLog = S.me.log.length;
   render();
@@ -261,9 +345,10 @@ function render() {
   if (!S) { app.innerHTML = `<div class="card">Connecting...</div>`; return; }
   const g = S.game;
   if (ui.arcade) {
-    if (!arcadeOpen()) { Arcade.stop(); ui.arcade = false; toast(g.phase === "vote" ? "A vote is open." : "The game needs you.", "info"); }
-    else { Arcade.render(); return; }
+    if (!arcadeOpen()) { Arcade.stop(); ui.arcade = false; }
+    else { Arcade.render(); callBar(); return; }
   }
+  callBar();
   const overlay = (g.phase === "night" && !S.me.storyteller) || g.stage === "narration";  // those screens show their own copy
   let html = topBar() + (overlay ? "" : rejoinBanner());
   if (g.phase === "lobby") html += lobbyView();
@@ -282,8 +367,34 @@ function render() {
 }
 document.addEventListener("focusout", () => setTimeout(() => ui.pendingRender && render(), 0));
 
-// The karma arcade in a game: only while nothing needs the player (no night, no vote, no story).
-const arcadeOpen = () => !["night", "vote", "setup"].includes(S.game.phase) && S.game.stage !== "narration";
+// The karma arcade in a game: open in every phase. When the game needs the player,
+// a bar over the arcade calls them back (callBar).
+const arcadeOpen = () => !S.me.storyteller;
+function gameCall() {
+  const g = S.game, me = S.me, cur = S.day.current;
+  if (S.task) return "Your night task is waiting.";
+  if (g.stage === "narration" && S.narration?.narrator === me.id) return "You are the narrator: tell the dawn story.";
+  if (g.phase === "defense" && cur?.nominee === me.id) return "You are nominated: speak your defense.";
+  if (g.phase === "vote" && cur && me.seat != null && (me.alive || me.ghost_vote) && cur.my_vote == null)
+    return `Vote on ${nameOf(cur.nominee)}.`;
+  return null;
+}
+function callBar() {
+  let bar = document.getElementById("arc-call");
+  const text = ui.arcade ? gameCall() : null;
+  document.body.classList.toggle("has-call", !!text);
+  if (!text) { bar?.remove(); ui.callText = null; return; }
+  if (!bar) {
+    bar = document.createElement("div"); bar.id = "arc-call"; bar.className = "arc-call";
+    bar.addEventListener("click", ev => { if (ev.target.closest("button")) { Arcade.stop(); ui.arcade = false; render(); } });
+    document.body.appendChild(bar);
+  }
+  if (ui.callText !== text) {
+    ui.callText = text;
+    bar.innerHTML = `<span>${esc(text)}</span><button class="primary">Go to game</button>`;
+    if (navigator.vibrate && feel.get().vibrate) navigator.vibrate([120, 80, 120]);
+  }
+}
 const arcadeButton = () => !S.me.storyteller && arcadeOpen()
   ? `<button class="linkish arcade-link" data-act="arcade">${ICON.star}<span>Karma arcade</span></button>` : "";
 
@@ -487,7 +598,7 @@ function lobbyView() {
       ${tog("anon_chat", "Anonymous messages", "Players may send chat messages, to the group or to one player, without their name. Nobody can see who sent them.")}
       ${tog("irl_tasks", "Keyword tasks", "Each day every player gets a secret keyword and must meet another player in person to get theirs. Right keyword: karma +2. Missed: −1. Finding someone else's: +1 for you, −1 for them. Needs karma on.")}
       ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`
-      + helperCard();
+      + scareCard() + helperCard();
   }
   if (me.is_host) html += `<div class="card stack"><h3>Storyteller</h3>
     ${seg("mode", [["auto", "Automated"], ["human", "Human (me)"]], g.mode)}
@@ -512,6 +623,23 @@ function lobbyView() {
   html += `<div class="center">${arcadeButton()}</div>` + feelCard();
   html += `<button class="danger" data-act="leave">Leave this game</button>`;
   return html;
+}
+// The host's jump scare controls: how often, and who hears the falling pipe.
+function scareCard() {
+  const h = S.host, lvl = h.settings.scares ?? 0, pipe = h.settings.pipe ?? 1;
+  const b = (k, v, l, on) => `<button class="${on ? "sel" : ""}" data-act="toggle" data-k="${k}" data-v="${v}">${l}</button>`;
+  const people = S.players.filter(p => p.seat != null && !p.agent);
+  return `<div class="card stack"><h3>Jump scares</h3>
+    <div class="seg">${[["Off", 0], ["Low", 1], ["Medium", 2], ["High", 3]].map(([l, v]) => b("scares", v, l, lvl === v)).join("")}</div>
+    <p class="small muted">Now and then, a spooky screen flashes on one player's phone, never on two at the same time.
+      Low: about once a game for each player. High: about once a day. Only in the day, never during a vote.</p>
+    <p>Falling pipe sound</p>
+    <div class="seg">${b("pipe", 1, "On", pipe)}${b("pipe", 0, "Off", !pipe)}</div>
+    <p class="small muted">About once a game, one player's phone plays the sound of a metal pipe falling on the floor.</p>
+    ${pipe ? `<p class="small">Who hears it:</p>${people.length ? `<div class="choice">${people.map(p =>
+      `<button class="${h.pipe_target === p.id ? "sel" : ""}" data-act="pipetarget" data-pid="${p.id}">${esc(p.name)}</button>`).join("")}</div>`
+      : `<p class="small muted">Nobody is seated yet.</p>`}
+      ${h.pipe_target ? "" : `<p class="small muted">Nobody: no Tommy is seated. Tap a player.</p>`}` : ""}</div>`;
 }
 // The host's helpful narrator controls: who gets tips, and who is learning.
 function helperCard() {
@@ -1025,6 +1153,7 @@ app.addEventListener("click", async ev => {
         if (S?.game.phase === "lobby") send({ type: "leave" });
         setTimeout(() => { session.clear(); S = null; ws?.close(); render(); }, 150); return;
       case "toggle": send({ type: "setting", key: d.k, value: +d.v }); return;
+      case "pipetarget": send({ type: "pipe_target", player: d.pid }); return;
       case "rejoin": send({ type: "rejoin_answer", request: d.id, allow: d.v === "1" }); return;
       case "seat": send({ type: "seat", seat: +d.seat }); return;
       case "unseat": send({ type: "seat", seat: null }); return;

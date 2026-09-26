@@ -214,4 +214,20 @@ button.egg:hover { border-color: var(--line); color: var(--muted); }
 .arc-board li span { display: inline-block; min-width: 60%; }
 .arc-board li.me { color: var(--gold); }
 .arc-over h2 { margin: 0; }
+.arc-call { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; background: var(--gold); color: #14111a; font-weight: 700; box-shadow: 0 2px 10px #0008; }
+.arc-call span { flex: 1; }
+body.has-call { padding-top: 64px; }
+.arc-call button { flex: none; }
 .arc-pool-status { text-align: center; min-height: 2.6em; }
+
+/* Jump scare (scareScreen in app.js) */
+.scare { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+  background: #000; animation: scare-flash .12s steps(1) 4; transition: opacity .4s; }
+.scare.out { opacity: 0; }
+.scare-in { text-align: center; animation: scare-jump .25s cubic-bezier(.2, 2, .4, 1) both, scare-shake .08s linear .25s 10; }
+.scare-face { font-size: min(60vw, 45vh); line-height: 1.25; filter: drop-shadow(0 0 30px #d00) saturate(1.6); }
+.scare p { color: #e11; font: 700 1.8rem/1.2 Georgia, serif; letter-spacing: .04em; margin: 16px 16px 0; text-shadow: 0 0 12px #f00; }
+@keyframes scare-flash { 50% { background: #5a0000; } }
+@keyframes scare-jump { from { transform: scale(.2); } to { transform: scale(1); } }
+@keyframes scare-shake { 25% { transform: translate(-6px, 4px); } 75% { transform: translate(5px, -5px); } }

@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 
 from . import seating
 from .decoys import decoy_task
-from . import helper, keywords
+from . import helper, keywords, scares
 from .narrator import THEMES, story
 from .editions import EDITIONS, Edition
 
@@ -52,8 +52,10 @@ DEFAULT_SETTINGS = {
     "show_votes": 1,         # 1: during a vote every seat shows its vote as it comes in (skull yes, angel no)
     "irl_tasks": 0,          # 1: keyword tasks each day: meet another player in person (keywords.py)
     "helper": 0,             # helpful narrator: 0 off, 1 players marked as learning, 2 everyone (helper.py)
+    "scares": 0,             # jump scares: 0 off, 1 low, 2 medium, 3 high (scares.py)
+    "pipe": 1,               # 1: one player (default: Tommy) hears a falling pipe once a game (scares.py)
 }
-TOGGLES = {"demon_bluffs", "karma", "narrator", "irl_tasks", "anon_chat", "show_votes"}
+TOGGLES = {"demon_bluffs", "karma", "narrator", "irl_tasks", "anon_chat", "show_votes", "pipe"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
 SCHEMA = 2  # bump when saved games from older versions cannot load
 
@@ -461,6 +463,7 @@ class Game:
     # Night -----------------------------------------------------------------------
     def begin_night(self) -> None:
         keywords.close(self)
+        scares.clear(self)
         self.phase = "night"
         self.night += 1
         self.tonight_deaths = []
@@ -775,6 +778,7 @@ class Game:
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
         self.set_timer(self.settings["discussion"])
         keywords.assign(self)
+        scares.plan(self)
 
     # Chat ----------------------------------------------------------------------------
     # Messages live in estate["chat"]. A message has "to": None for everyone, or one
@@ -1088,6 +1092,9 @@ class Game:
         elif key == "helper":
             if value not in (helper.OFF, helper.LEARNERS, helper.EVERYONE):
                 raise GameError("The helpful narrator is off (0), for learners (1) or for everyone (2).")
+        elif key == "scares":
+            if value not in (scares.OFF, scares.LOW, scares.MEDIUM, scares.HIGH):
+                raise GameError("Jump scares are off (0), low (1), medium (2) or high (3).")
         elif key in CHANCES:
             if not 0 <= value <= 1:
                 raise GameError("A chance is between 0 and 1.")
@@ -1156,6 +1163,7 @@ class Game:
                    "night_done": self.phase == "night" and task is None,
                    "annoy": self.can_annoy(pid),
                    "irl": keywords.view(self, pid),
+                   "scares": scares.view(self, pid),
                    "tip": {"can": helper.can_tip(self, me), "ask": self.helper_llm,
                            "on": helper.mode(self) == helper.EVERYONE
                            or (helper.mode(self) == helper.LEARNERS and helper.is_learner(self, pid))}},
@@ -1178,7 +1186,8 @@ class Game:
         view["rejoins"] = rejoins
         if me.is_host:
             view["host"] = {"script": self.script[-40:], "settings": self.settings,
-                            "learners": list(self.estate.get("learners", []))}
+                            "learners": list(self.estate.get("learners", [])),
+                            "pipe_target": scares.pipe_target(self)}
         n = self.estate.get("narration") if self.stage == "narration" else None
         if n:
             view["narration"] = {"narrator": n["pid"]}

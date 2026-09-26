@@ -57,6 +57,11 @@ async def main():
         await host.wait_for_timeout(400)
         await host.click('[data-act="toggle"][data-k="show_votes"][data-v="1"]')
         await host.wait_for_timeout(300)
+        await host.click('[data-act="toggle"][data-k="scares"][data-v="3"]')
+        await host.wait_for_timeout(300)
+        print("pipe goes to (default):", await host.inner_text('[data-act="pipetarget"].sel'))
+        await host.locator('[data-act="pipetarget"]').first.scroll_into_view_if_needed()
+        await host.screenshot(path=f"{OUT}/02s_scare_options.png")
         await host.screenshot(path=f"{OUT}/02_lobby_host.png", full_page=True)
         await host.click('[data-act="start"]')
         if HUMAN:
@@ -122,6 +127,17 @@ async def main():
         await pages[0].click('[data-act="tab"][data-v="chat"]')
         print("phone settings on the chat tab:", await pages[0].locator('[data-act="feel"]').count())
         await pages[0].click('[data-act="tab"][data-v="me"]')
+        # Jump scares (high): every player has one planned today. Make Jess's due now.
+        print("scares planned today:", [await pg.evaluate("S.me.scares.filter(s => s.kind === 'screen').length") for pg in pages])
+        jess = pages[2]
+        await jess.evaluate("scared.due.forEach(s => { if (s.kind === 'screen') s.when = 0; })")
+        await jess.wait_for_selector("#scare", timeout=4000)
+        await jess.wait_for_timeout(300)
+        await jess.screenshot(path=f"{OUT}/06s_jess_scare.png")
+        await jess.wait_for_selector("#scare", state="detached", timeout=5000)
+        await pages[1].evaluate("unlockAudio(); pipeSound(); scareScreen()")
+        await pages[1].wait_for_selector("#scare", state="detached", timeout=5000)
+        print("scare shown on Jess and gone; pipe played on Tommy")
         lena = pages[4]
         await lena.click('[data-act="tab"][data-v="me"]')
         await lena.click('[data-act="arcade"]')
@@ -150,11 +166,18 @@ async def main():
         await pages[2].wait_for_timeout(400)
         await host.click('[data-act="advance"]')
         await host.wait_for_timeout(500)
+        # Lena stays in the arcade during the game; a bar calls her to the vote.
+        await lena.wait_for_selector("#arc-call", timeout=5000)
+        print("lena call bar at the vote:", (await lena.inner_text("#arc-call")).replace("\n", " "),
+              "| arcade still open:", await lena.locator("#arc-stage").count())
+        await lena.screenshot(path=f"{OUT}/09c_lena_call_bar.png")
+        await lena.click("#arc-call button")
         for pg in pages:
             await pg.click('[data-act="tab"][data-v="town"]')
         await pages[3].screenshot(path=f"{OUT}/09_vote.png", full_page=True)
         await pages[4].wait_for_timeout(300)
-        print("lena back in the game at the vote:", await pages[4].locator(".vote").count(), "arcade stage:", await pages[4].locator("#arc-stage").count())
+        print("lena back in the game at the vote:", await pages[4].locator(".vote").count(), "arcade stage:", await pages[4].locator("#arc-stage").count(),
+              "bar gone:", await lena.locator("#arc-call").count() == 0)
         await pages[4].screenshot(path=f"{OUT}/09l_lena_vote.png", full_page=True)
         # Two votes to execute and one no, then look at the seats (host option show_votes is on).
         for i, pg in enumerate(pages[:3]):

@@ -48,7 +48,7 @@ const Arcade = (() => {
     };
     return `<div class="archive-top"><button data-arc="exit">← ${inGame() ? "Game" : "Back"}</button><h1>Karma arcade</h1></div>
       <div class="card stack">
-        ${inGame() ? `<p>Playing as <b>${esc(who())}</b>. You go back to the game when a vote opens or night falls.</p>`
+        ${inGame() ? `<p>Playing as <b>${esc(who())}</b>. The game goes on. When it needs you, a bar at the top calls you back.</p>`
           : `<label for="arc-name" class="small muted">Your name (the same as in games)</label>
         <input id="arc-name" maxlength="24" autocomplete="nickname" value="${esc(ui.name || "")}" placeholder="Name">`}
         ${karmaLine()}

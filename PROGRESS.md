@@ -176,6 +176,39 @@ Read README.md first.
 - ui_check now seats Emma and Tommy and checks the button, the Chat tab
   and the in-game arcade (it closes when the vote opens).
 
+## 2026-09-26 (late): arcade during the game
+
+- The user played real games: sounds work, vibration works on Android,
+  and the arcade runs nicely.
+- The arcade no longer closes by itself in a game. It stays open at
+  night, in votes and during the dawn story (not for a storyteller).
+- When the game needs the player, a gold bar at the top says why and has
+  "Go to game" (`gameCall`/`callBar` in app.js). Reasons: a night task,
+  the narrator's story, your own defense, a vote you have not cast. The
+  phone buzzes when the reason changes. "Go to game" ends the round.
+- Verified: 396 tests pass, 1 skipped; ui_check (Lena sees "Vote on Kofi."
+  over the arcade, taps the bar, votes) and arcade_check, no page errors.
+  Not checked in a browser: the bar at night.
+
+## 2026-09-26 (late): jump scares and the falling pipe
+
+- Host options (lobby card "Jump scares", `scares.py`): `scares` 0 off,
+  1 low, 2 medium, 3 high = chance 0.25 / 0.5 / 1.0 per human player per
+  day. `pipe` (on by default): one player hears a falling metal pipe once
+  a game (chance 0.3 on day 1, 0.5 on day 2, 1.0 from day 3). Target:
+  `estate["pipe_target"]` (host picks), else a seated Tommy (`is_tommy`).
+- Planned at the start of each day (after the story), each in its own
+  5 s slot 20-240 s in, so no two phones go off together. Dropped at night.
+  The phone waits while it has a night task, a vote, or the dawn story.
+  It shows each scare once (`botc-scared` in localStorage). Agents: none.
+- Screen: random scary emoji, often with a creepy line, red flashes and
+  shake, 1.8 s (a tap ends it); a falling scream. Pipe: a synthesized
+  metal bar (free-bar modes 1, 2.756, 5.404, 8.933) bouncing 6 times.
+  Both are Web Audio, no files, and follow the phone's sound/buzz settings.
+- Verified: 405 tests pass, 1 skipped; ui_check shows the options card,
+  Tommy as the default pipe target, a scare on Jess, no page errors.
+  Not heard by a person yet: the scream and the pipe.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

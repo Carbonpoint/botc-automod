@@ -278,6 +278,8 @@ Environment variables override the file (for Docker):
 | Theme | Default | The setting of the narrator's stories: Default, or Jo Jo's Mid-Autumn Festival. |
 | Helpful narrator | off | One small tip a day: for everyone, or only for players the host marks as learning. |
 | Anonymous messages | off | Players may send chat messages without their name. |
+| Jump scares | off | Off, low, medium or high. A spooky screen flashes on one phone at a time, by day only, never in a vote. Low: about once a game per player; high: about once a day. |
+| Falling pipe sound | on | About once a game, one player's phone plays a metal pipe falling. The host picks who; with no pick, a seated player named Tommy. |
 | Keyword tasks | off | Each day every player must meet another player in person and get their keyword. Right: karma +2; missed: -1; finding someone else's: +1 for you, -1 for its owner and its receiver. |
 | Agents | none | The host fills empty seats with computer players. They do their tasks, nominate, vote and chat. With a chat-capable model (Ollama or cloud), they talk in their own words. |
 

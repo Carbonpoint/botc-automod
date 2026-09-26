@@ -27,7 +27,7 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-from . import agents, arcade, archive, helper, keywords
+from . import agents, arcade, archive, helper, keywords, scares
 from .editions import EDITIONS
 from .game import Game, GameError, NameTaken, Player, new_code
 
@@ -591,6 +591,10 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.new_story(pid)
         case "annoy":
             g.annoy(pid)
+        case "pipe_target":
+            if not me.is_host:
+                raise GameError("Only the host can do that.")
+            scares.set_pipe_target(g, msg.get("player") or None)
         case "learner":
             if not me.is_host:
                 raise GameError("Only the host can do that.")
