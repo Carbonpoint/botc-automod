@@ -82,8 +82,13 @@ def extract_json(text: str) -> dict | None:
 class Translator:
     name = "none"
     compact = False
+    can_chat = False   # can write free text (the helpful narrator); the packaged model cannot
 
     def complete(self, system: str, user: str, world: World) -> str:
+        raise NotImplementedError
+
+    def chat(self, system: str, user: str) -> str:
+        """A short free-text answer. Only when can_chat."""
         raise NotImplementedError
 
     def translate(self, world: World, asker: str, question: str) -> tuple[dict | None, str]:
@@ -108,6 +113,7 @@ def _post(url: str, body: dict, headers: dict | None = None, timeout: float = 60
 
 class OllamaTranslator(Translator):
     name = "ollama"
+    can_chat = True
 
     def __init__(self, url: str, model: str, compact: bool = False, timeout: float = 120):
         self.url, self.model, self.compact, self.timeout = url.rstrip("/"), model, compact, timeout
@@ -125,6 +131,19 @@ class OllamaTranslator(Translator):
             out = _post(f"{self.url}/api/chat", body, timeout=self.timeout)
         return out["message"]["content"]
 
+    def chat(self, system: str, user: str) -> str:
+        body = {"model": self.model, "stream": False, "think": False, "keep_alive": "10m",
+                "options": {"temperature": 0.7, "num_predict": 200},
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+        try:
+            out = _post(f"{self.url}/api/chat", body, timeout=self.timeout)
+        except urllib.error.HTTPError as e:
+            if e.code != 400:
+                raise
+            body.pop("think")
+            out = _post(f"{self.url}/api/chat", body, timeout=self.timeout)
+        return out["message"]["content"]
+
 
 class OpenAITranslator(Translator):
     """OpenAI-compatible chat completions (OpenAI, Gemini, OpenRouter, llama-server...)."""
@@ -134,6 +153,7 @@ class OpenAITranslator(Translator):
                  timeout: float = 120, use_schema: bool = True):
         self.base, self.model, self.key = base_url.rstrip("/"), model, api_key
         self.compact, self.timeout, self.use_schema = compact, timeout, use_schema
+        self.can_chat = model != "packaged"   # the packaged model only translates questions
 
     def complete(self, system: str, user: str, world: World) -> str:
         body = {"model": self.model, "temperature": 0, "max_tokens": 300,
@@ -152,10 +172,18 @@ class OpenAITranslator(Translator):
             out = _post(f"{self.base}/chat/completions", body, headers, self.timeout)
         return out["choices"][0]["message"]["content"] or ""
 
+    def chat(self, system: str, user: str) -> str:
+        body = {"model": self.model, "temperature": 0.7, "max_tokens": 200,
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+        headers = {"Authorization": f"Bearer {self.key}"} if self.key else {}
+        out = _post(f"{self.base}/chat/completions", body, headers, self.timeout)
+        return out["choices"][0]["message"]["content"] or ""
+
 
 class AnthropicTranslator(Translator):
     """Claude via the official SDK (`pip install anthropic`)."""
     name = "anthropic"
+    can_chat = True
 
     def __init__(self, api_key: str, model: str = "claude-opus-5"):
         import anthropic  # optional dependency
@@ -172,6 +200,15 @@ class AnthropicTranslator(Translator):
             output_config={"effort": "low",
                            "format": {"type": "json_schema", "schema": wrapped_schema(world)}},
         )
+        return self._create(kwargs)
+
+    def chat(self, system: str, user: str) -> str:
+        # max_tokens leaves room for thinking; the prompt asks for 3 sentences at most.
+        return self._create(dict(model=self.model, max_tokens=2000, system=system,
+                                 messages=[{"role": "user", "content": user}],
+                                 output_config={"effort": "low"}))
+
+    def _create(self, kwargs: dict) -> str:
         if self.model in ("claude-opus-5", "claude-fable-5-1"):
             # Server-side fallback: if the model declines, the API reruns the request on
             # another model inside the same call.

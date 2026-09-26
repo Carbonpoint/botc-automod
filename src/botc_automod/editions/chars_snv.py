@@ -162,7 +162,11 @@ class Savant(Char):
     def do_action(self, R, game, p, payload):
         game.estate.setdefault("savant_day", {})[p.id] = game.day
         if game.mode == "human":
-            R.request(game, p, "Savant", "wants their 2 statements (1 true, 1 false).")
+            facts = savant_facts(R, game, p)
+            t = game.rng.choice([f for f in facts if f[1]])[0]
+            f = game.rng.choice([f for f in facts if not f[1]])[0]
+            R.request(game, p, "Savant", f"wants their 2 statements (1 true, 1 false). "
+                      f"Idea: true “{t}”, false “{f}”.")
             return
         facts = savant_facts(R, game, p)
         rng = game.rng
@@ -178,27 +182,70 @@ class Savant(Char):
 
 
 def savant_facts(R, game, p) -> list[tuple[str, bool]]:
-    """Candidate statements with their truth."""
+    """Candidate statements with their truth, decided from the true game state.
+
+    Many kinds, so a pair can be about seats, teams, the dead, the day's
+    nominations or the script. Each kind gives both true and false
+    candidates, so the false statement looks as likely as the true one.
+    """
     rng = game.rng
     seated = game.seated()
+    n = len(seated)
+    living = R.living(game)
+    evil = lambda x: R.alignment(x) == "evil"
+    kind = lambda x: R.type_of(x.role)
+    others = [x for x in seated if x is not p]
     facts = []
-    evil_alive = sum(1 for x in R.living(game) if R.alignment(x) == "evil")
+    evil_alive = sum(1 for x in living if evil(x))
     for k in range(0, 4):
         facts.append((f"There {'is' if k == 1 else 'are'} {k} evil player{'s' if k != 1 else ''} alive.",
                       k == evil_alive))
-    for x in rng.sample(seated, min(4, len(seated))):
+    for x in rng.sample(seated, min(4, n)):
         for t in ("Townsfolk", "Outsider", "Minion", "Demon"):
-            facts.append((f"{x.name} is a {t}.", R.type_of(x.role) == t.lower()))
+            facts.append((f"{x.name} is a {t}.", kind(x) == t.lower()))
     for _ in range(4):
         a, b = rng.sample(seated, 2)
         facts.append((f"{a.name} and {b.name} are on the same team.", R.alignment(a) == R.alignment(b)))
-    demon = next((x for x in seated if R.type_of(x.role) == "demon"), None)
+        facts.append((f"Exactly one of {a.name} and {b.name} is evil.", evil(a) != evil(b)))
+    for x in rng.sample(others, min(3, len(others))):
+        facts.append((f"{x.name} is on the same team as you.", R.alignment(x) == R.alignment(p)))
+    # Seats: neighbours and halves of the circle.
+    for x in rng.sample(seated, min(3, n)):
+        i = seated.index(x)
+        nb = [seated[(i - 1) % n], seated[(i + 1) % n]]
+        facts.append((f"At least one of {x.name}'s neighbours is evil.", any(evil(y) for y in nb)))
+        facts.append((f"{x.name} sits next to a Minion.", any(kind(y) == "minion" for y in nb)))
+    i = seated.index(p)
+    half = [seated[(i + k) % n] for k in range(1, (n - 1) // 2 + 1)]
+    if half:
+        names = f"the {len(half)} player{'s' if len(half) != 1 else ''} to your left (clockwise)"
+        facts.append((f"The Demon is among {names}.", any(kind(y) == "demon" for y in half)))
+        facts.append((f"A Minion is among {names}.", any(kind(y) == "minion" for y in half)))
+    nb = [seated[(i - 1) % n], seated[(i + 1) % n]]
+    facts.append(("You sit next to an evil player.", any(evil(y) for y in nb)))
+    demon = next((x for x in seated if kind(x) == "demon"), None)
     if demon and demon is not p:
         d = seat_distance(game, p, demon)
         for k in (1, 2, 3):
             facts.append((f"The Demon sits within {k} seat{'s' if k > 1 else ''} of you.", d <= k))
+    # The script.
+    outsiders = sum(1 for x in seated if kind(x) == "outsider")
+    for k in range(0, 4):
+        facts.append((f"There {'is' if k == 1 else 'are'} {k} Outsider{'s' if k != 1 else ''} in play.",
+                      k == outsiders))
     for r in rng.sample(list(R.roles.values()), 6):
         facts.append((f"The {r.name} is in play.", any(x.role == r.id for x in seated)))
+    # The dead.
+    dead = [x for x in seated if x not in living]
+    if dead:
+        facts.append(("At least one dead player is evil.", any(evil(y) for y in dead)))
+        for x in rng.sample(dead, min(2, len(dead))):
+            facts.append((f"{x.name}, who is dead, was a Townsfolk.", kind(x) == "townsfolk"))
+    # Today's nominations.
+    noms = [game.p(x) for x in game.nominators_today if x in game.players]
+    if noms:
+        facts.append(("An evil player has nominated today.", any(evil(y) for y in noms)))
+        facts.append(("A Minion has nominated today.", any(kind(y) == "minion" for y in noms)))
     return facts
 
 

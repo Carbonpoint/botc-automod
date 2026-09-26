@@ -102,6 +102,18 @@ Read README.md first.
 - Themes (`narrator.THEMES`, `Game.theme`, lobby "Theme" card): "default"
   (Ravenswood Bluff) and "jojo" (Jo Jo's Mid-Autumn Festival: his rainy
   apartment in Ames, Iowa). The theme picks the narrator's story lines.
+- Savant: `savant_facts` has many more kinds (exactly one evil of two,
+  same team as you, neighbours, Minion/Demon in your clockwise half,
+  Outsider count, the dead, today's nominators). Truth is always from the
+  true state. With a human storyteller the request carries a suggested pair.
+- Helpful narrator (`helper.py`, setting `helper`: 0 off, 1 learners the
+  host marks, 2 everyone). One tip per player per day, by day only: a wiki
+  tip for the believed character, a public-facts tip, and "speak with X"
+  (good team: a sober good Townsfolk with chance 10% + 5% per karma,
+  clamped 5-30%; evil: always random). With a chat-capable model
+  (`Translator.chat`, not the packaged one) the player may add a question;
+  the model sees only the player's own knowledge with other names hidden,
+  and an answer that names a player is dropped. Tips go into the notebook.
 
 ## Known simplifications
 

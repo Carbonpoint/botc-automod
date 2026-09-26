@@ -3,6 +3,8 @@ name = "botc-automod"
 version = "0.1.0"
 description = "Self-hosted Blood on the Clocktower server with an automated storyteller"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "carbonpoint", email = "carbonpoint@users.noreply.github.com" }
 ]

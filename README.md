@@ -357,6 +357,14 @@ sheet.
 uv run pytest -q
 ```
 
-Blood on the Clocktower is a game by The Pandemonium Institute. Character
-text comes from the official wiki (wiki.bloodontheclocktower.com). This
-project is a private, unofficial tool for playing at home.
+## License
+
+The code in this repository is under the MIT License (see `LICENSE`).
+
+Blood on the Clocktower is a game by The Pandemonium Institute. The game,
+its name, and its character names, abilities, rules and wiki text belong
+to them. They are not covered by the MIT License, and this project does
+not give you any rights to them. Character text and tips come from the
+official wiki (wiki.bloodontheclocktower.com). This is an unofficial fan
+tool for playing at home with friends. It is not made or endorsed by The
+Pandemonium Institute.

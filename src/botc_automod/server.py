@@ -26,7 +26,7 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-from . import archive
+from . import archive, helper
 from .editions import EDITIONS
 from .game import Game, GameError, NameTaken, Player, new_code
 
@@ -66,6 +66,7 @@ def adopt(g: Game) -> None:
     for p in g.players.values():
         p.connected = False
     g.artist_ready = ARTIST is not None
+    g.helper_llm = bool(ARTIST is not None and ARTIST.can_chat)
     g.pause()
     games[g.code] = g
 
@@ -363,6 +364,7 @@ async def create_game(request: Request) -> JSONResponse:
         raise HTTPException(400, "Unknown edition.")
     g = Game(new_code(set(games)), edition)
     g.artist_ready = ARTIST is not None
+    g.helper_llm = bool(ARTIST is not None and ARTIST.can_chat)
     try:
         p = g.join(name, is_host=True)
     except GameError as e:
@@ -488,6 +490,10 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.new_story(pid)
         case "annoy":
             g.annoy(pid)
+        case "learner":
+            if not me.is_host:
+                raise GameError("Only the host can do that.")
+            g.set_learner(msg["player"], bool(msg.get("on")))
         case "theme":
             if not me.is_host:
                 raise GameError("Only the host can do that.")
@@ -585,6 +591,29 @@ async def artist_preview(ws: WebSocket, g: Game, p, text: str) -> None:
                         "reading": render(query, world, p.name) if ok else ""})
 
 
+async def give_tip(g: Game, p: Player, question: str) -> None:
+    """Today's tip from the helpful narrator, into the player's notebook (see helper.py)."""
+    lines, team = g.take_tip(p.id)
+    answer = None
+    if question.strip() and g.helper_llm:
+        system, user = helper.llm_prompt(g, p, team, question)
+        try:
+            raw = await asyncio.wait_for(asyncio.to_thread(ARTIST.chat, system, user), timeout=45)
+            answer = helper.safe_answer(g, p, raw)
+        except Exception:
+            log.exception("helpful narrator: the model failed")
+    if answer:
+        p.note(g.label(), f"Narrator's tip, to your question “{question.strip()}”: {answer}")
+        for line in lines:
+            if line.startswith("I suggest"):                 # keep the "speak with" nudge
+                p.note(g.label(), f"Narrator's tip: {line}")
+    else:
+        if question.strip():
+            lines = ["The narrator cannot answer that, but here is a tip."] + lines
+        for line in lines:
+            p.note(g.label(), f"Narrator's tip: {line}")
+
+
 async def ws_endpoint(ws: WebSocket) -> None:
     await ws.accept()
     g, p = _find(ws.path_params["code"], ws.query_params.get("token", ""))
@@ -612,6 +641,14 @@ async def ws_endpoint(ws: WebSocket) -> None:
                     continue
                 await pause_game(g)
                 return
+            if msg.get("type") == "tip":
+                try:
+                    await give_tip(g, p, str(msg.get("question", ""))[:helper.MAX_QUESTION])
+                except GameError as e:
+                    await ws.send_json({"type": "error", "message": str(e)})
+                    continue
+                await broadcast(g)
+                continue
             if msg.get("type") == "artist_preview":
                 await artist_preview(ws, g, p, str(msg.get("text", ""))[:300])
                 continue

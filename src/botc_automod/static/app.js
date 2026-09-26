@@ -152,9 +152,9 @@ function connect() {
   ws.onopen = () => { wsOpen = true; wsTries = 0; render(); };
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
-    if (m.type === "state") { onState(m.state); }
+    if (m.type === "state") { ui.tipBusy = false; onState(m.state); }
     else if (m.type === "timer") { if (S) { const was = S.game.timer; S.game.timer = m.timer; S.game.paused = m.paused; drawTimer(); timerCue(was, m.timer); } }
-    else if (m.type === "error") { ui.artistBusy = false; toast(m.message); render(); }
+    else if (m.type === "error") { ui.artistBusy = false; ui.tipBusy = false; toast(m.message); render(); }
     else if (m.type === "artist_preview") { ui.artistBusy = false; ui.artistPreview = m; render(); }
     else if (m.type === "gone") { session.clear(); S = null; toast("That game no longer exists."); render(); }
     else if (m.type === "paused") { session.clear(); S = null; toast("The host paused the game. It is in Archive, Paused.", "info"); render(); }
@@ -428,7 +428,8 @@ function lobbyView() {
     html += `<div class="card stack"><h3>Options</h3>
       ${tog("demon_bluffs", "Demon bluffs in small games", "The Demon always learns 3 good characters that are safe to claim. Off follows the official rule: no evil info with 5 or 6 players.")}
       ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}
-      ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`;
+      ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`
+      + helperCard();
   }
   if (me.is_host) html += `<div class="card stack"><h3>Storyteller</h3>
     ${seg("mode", [["auto", "Automated"], ["human", "Human (me)"]], g.mode)}
@@ -454,6 +455,32 @@ function lobbyView() {
   html += `<button class="danger" data-act="leave">Leave this game</button>`;
   return html;
 }
+// The host's helpful narrator controls: who gets tips, and who is learning.
+function helperCard() {
+  const h = S.host, m = h.settings.helper ?? 0;
+  const b = (v, l) => `<button class="${m === v ? "sel" : ""}" data-act="helper" data-v="${v}">${l}</button>`;
+  const people = S.players.filter(p => p.seat != null || S.game.phase === "lobby");
+  return `<div class="card stack"><h3>Helpful narrator</h3>
+    <div class="seg">${b(0, "Off")}${b(1, "Learners")}${b(2, "Everyone")}</div>
+    <p class="small muted">Once a day, a player can ask the narrator for a small tip: help with their
+      character, a hint from public facts, and someone to talk to.
+      Tips never tell who is evil. Good karma makes the "talk to" hint a little better.</p>
+    ${m === 1 ? `<p>Tap the players who are learning:</p><div class="choice">${people.map(p =>
+      `<button class="${h.learners.includes(p.id) ? "sel" : ""}" data-act="learner" data-pid="${p.id}"
+        data-v="${h.learners.includes(p.id) ? 0 : 1}">${esc(p.name)}</button>`).join("")}</div>` : ""}</div>`;
+}
+function tipCard() {
+  const t = S.me.tip;
+  if (!t || !t.on || S.me.seat == null || S.game.phase === "lobby" || S.game.phase === "ended") return "";
+  if (!t.can) return `<div class="card"><h3>Helpful narrator</h3><p class="small muted">${
+    ["day", "nominations", "defense", "vote"].includes(S.game.phase)
+      ? "You have had today's tip. It is in your notebook below." : "The narrator gives tips by day."}</p></div>`;
+  return `<div class="card stack"><h3>Helpful narrator</h3>
+    <p class="small">Once a day, the narrator can give you a small tip. It goes into your notebook.</p>
+    ${t.ask ? `<textarea id="tip-q" rows="2" maxlength="200" placeholder="Your question (optional), e.g. How should I use my info today?"></textarea>` : ""}
+    <button class="primary" data-act="tip"${ui.tipBusy ? " disabled" : ""}>${ui.tipBusy ? "The narrator is thinking..." : "Ask the narrator for a tip"}</button></div>`;
+}
+
 function seg(name, options, value) {
   return `<div class="seg">${options.map(([v, l]) =>
     `<button class="${v === value ? "sel" : ""}" data-act="pref" data-k="${name}" data-v="${v}">${l}</button>`).join("")}</div>`;
@@ -531,6 +558,7 @@ function meView() {
   html += `<div class="card"><p>You are <b>${me.alive ? "alive" : "dead"}</b>.
     ${me.karma != null ? `Karma: <b>${me.karma > 0 ? "+" : ""}${me.karma}</b>.` : ""}
     ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
+  html += tipCard();
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
     <ul class="log">${[...me.log].reverse().map(e => `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul></div>`;
   return html + feelCard();
@@ -659,6 +687,7 @@ function hostView() {
       ${set("night_max", "Night stage, maximum")}
       <h3>Storyteller chances (0 to 1)</h3>${set("misregister", "Spy/Recluse misregister")}${set("mayor_bounce", "Mayor redirects a kill")}
       <p class="small muted">Changes save when you leave the field. They apply from the next timer.</p></div>
+    ${g.phase !== "ended" ? helperCard() : ""}
     ${g.phase !== "ended" ? `<div class="card stack"><h3>Save the game</h3>
       <p class="small muted">The server saves the game after every change, so it survives a crash.
         Export gives you a copy of that file. Pause stops the game for everyone; resume it later from Archive, Paused.</p>
@@ -839,6 +868,12 @@ app.addEventListener("click", async ev => {
       case "narrationdone": send({ type: "narration_done" }); return;
       case "newstory": send({ type: "new_story" }); return;
       case "annoy": send({ type: "annoy" }); return;
+      case "helper": send({ type: "setting", key: "helper", value: +d.v }); return;
+      case "learner": send({ type: "learner", player: d.pid, on: d.v === "1" }); return;
+      case "tip": {
+        const q = document.getElementById("tip-q")?.value || "";
+        ui.tipBusy = true; render(); send({ type: "tip", question: q }); return;
+      }
       case "feel": feel.set(d.k, d.v === "1"); if (d.v === "1" && d.k === "sound") { unlockAudio(); setTimeout(() => cue("day"), 50); } render(); return;
       case "pausegame":
         if (await ask("Pause the game? Everyone goes back to the start page. Resume it from Archive, Paused.")) send({ type: "pause_game" });

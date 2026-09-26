@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 
 from . import seating
 from .decoys import decoy_task
+from . import helper
 from .narrator import THEMES, story
 from .editions import EDITIONS, Edition
 
@@ -46,6 +47,7 @@ DEFAULT_SETTINGS = {
     "demon_bluffs": 1,       # 1: the Demon gets 3 safe bluffs even with fewer than 7 players
     "karma": 1,              # 1: karma from night questions tilts the automod's random choices
     "narrator": 1,           # 1: at dawn a random player reads a story of the night before the day starts
+    "helper": 0,             # helpful narrator: 0 off, 1 players marked as learning, 2 everyone (helper.py)
 }
 TOGGLES = {"demon_bluffs", "karma", "narrator"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
@@ -127,6 +129,7 @@ class Game:
     mode = "auto"          # class defaults keep older saved games loadable
     theme = "default"      # the narrator's setting (narrator.THEMES)
     artist_ready = False   # the server has a question translator for the Artist
+    helper_llm = False     # the server has a language model that can write tips (helper.py)
     pending: dict | None = None
 
     def __init__(self, code: str, edition_id: str = "tb", seed: int | None = None):
@@ -736,6 +739,25 @@ class Game:
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
         self.set_timer(self.settings["discussion"])
 
+    # Helpful narrator (helper.py) ------------------------------------------------------
+    def set_learner(self, pid: str, on: bool) -> None:
+        """The host marks a player as learning the game (or not)."""
+        self.p(pid)
+        learners = self.estate.setdefault("learners", [])
+        if on and pid not in learners:
+            learners.append(pid)
+        elif not on and pid in learners:
+            learners.remove(pid)
+
+    def take_tip(self, pid: str) -> tuple[list[str], str]:
+        """Use today's tip. Returns the offline tip lines and the team the player believes in."""
+        p = self.p(pid)
+        if not helper.can_tip(self, p):
+            raise GameError("The narrator has no tip for you right now.")
+        self.estate.setdefault("tips", {})[pid] = self.day
+        team = self._believed_team(p)
+        return helper.offline_tip(self, p, team), team
+
     # Easter egg: Emma can quietly poison Tommy for the rest of the game ----------------
     # The poison is a normal status, so every rule treats Tommy as poisoned. Two
     # exceptions keep it hidden: the Spy's Grimoire does not show it, and it pauses
@@ -982,6 +1004,9 @@ class Game:
         if key in TOGGLES:
             if value not in (0, 1):
                 raise GameError("This option is on (1) or off (0).")
+        elif key == "helper":
+            if value not in (helper.OFF, helper.LEARNERS, helper.EVERYONE):
+                raise GameError("The helpful narrator is off (0), for learners (1) or for everyone (2).")
         elif key in CHANCES:
             if not 0 <= value <= 1:
                 raise GameError("A chance is between 0 and 1.")
@@ -1047,7 +1072,10 @@ class Game:
                    "last_answer": self._last_answer(me),
                    "bluffs": ed.bluffs_for(self, me) if self.phase not in ("lobby", "setup") else [],
                    "night_done": self.phase == "night" and task is None,
-                   "annoy": self.can_annoy(pid)},
+                   "annoy": self.can_annoy(pid),
+                   "tip": {"can": helper.can_tip(self, me), "ask": self.helper_llm,
+                           "on": helper.mode(self) == helper.EVERYONE
+                           or (helper.mode(self) == helper.LEARNERS and helper.is_learner(self, pid))}},
             "task": task,
             "room": self.room, "layout": self.layout,
             "players": [{"id": p.id, "name": p.name, "seat": p.seat, "alive": self._public_alive(p),
@@ -1065,7 +1093,8 @@ class Game:
                    and (me.is_host or self.p(v["pid"]).is_host)]
         view["rejoins"] = rejoins
         if me.is_host:
-            view["host"] = {"script": self.script[-40:], "settings": self.settings}
+            view["host"] = {"script": self.script[-40:], "settings": self.settings,
+                            "learners": list(self.estate.get("learners", []))}
         n = self.estate.get("narration") if self.stage == "narration" else None
         if n:
             view["narration"] = {"narrator": n["pid"]}
