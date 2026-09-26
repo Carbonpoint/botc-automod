@@ -59,6 +59,9 @@ def download(url: str, dest: Path, label: str) -> None:
 
 
 def server_binary(root: Path) -> Path:
+    bundled = os.environ.get("BOTC_LLAMA_DIR")  # the Android app ships llama-server as a native library
+    if bundled and (Path(bundled) / "libllama-server-exec.so").exists():
+        return Path(bundled) / "libllama-server-exec.so"
     home = root / f"llama-{LLAMA_TAG}"
     exe = "llama-server.exe" if sys.platform == "win32" else "llama-server"
     found = next(home.rglob(exe), None) if home.exists() else None

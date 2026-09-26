@@ -18,13 +18,12 @@ _thread: threading.Thread | None = None
 _url = ""
 
 
-def start(data_dir: str, port: int = 8000, public_url: str = "") -> str:
+def start(data_dir: str, port: int = 8000, public_url: str = "", native_dir: str = "") -> str:
     """Start the game server in a background thread. Returns the join address."""
     global _server, _thread, _url
     if _thread and _thread.is_alive():
         return _url
-    os.environ["BOTC_DATA"] = data_dir
-    os.environ.setdefault("XDG_CONFIG_HOME", os.path.join(data_dir, "config"))
+    _env(data_dir, native_dir)
     if public_url:
         os.environ["BOTC_PUBLIC_URL"] = public_url
     import uvicorn
@@ -44,6 +43,41 @@ def start(data_dir: str, port: int = 8000, public_url: str = "") -> str:
         time.sleep(0.1)
     _url = detect(port)
     return _url
+
+
+def _env(data_dir: str, native_dir: str = "") -> None:
+    os.environ["BOTC_DATA"] = data_dir
+    os.environ["XDG_CONFIG_HOME"] = os.path.join(data_dir, "config")
+    if native_dir:
+        os.environ["BOTC_LLAMA_DIR"] = native_dir
+
+
+def get_artist(data_dir: str) -> str:
+    """The saved Artist model settings as JSON (the API key is left out)."""
+    import json
+
+    from .artist import config
+
+    _env(data_dir)
+    cfg = dict(config.load() or {"kind": "none"})
+    cfg["has_key"] = bool(cfg.pop("api_key", ""))
+    return json.dumps(cfg)
+
+
+def set_artist(data_dir: str, settings_json: str) -> str:
+    """Save the Artist model settings from the app screen. An empty key keeps the saved one."""
+    import json
+
+    from .artist import config
+
+    _env(data_dir)
+    new = json.loads(settings_json)
+    old = config.load() or {}
+    if not new.get("api_key") and new.get("kind") == old.get("kind"):
+        new["api_key"] = old.get("api_key", "")
+    new = {k: v for k, v in new.items() if v not in ("", None)}
+    config.save(new)
+    return config.describe(new)
 
 
 def stop() -> None:

@@ -14,7 +14,8 @@ sits in the same room and plays on their phone's web browser.
     night choice, and edits the night results before players get them.
 
 **Install:** [on a fresh computer](#install-on-a-fresh-computer) (Windows, macOS, Linux) ·
-[with Docker](#docker) · [Artist question model](#artist-question-model)
+[with Docker](#docker) · [Android phone as the server](#android-host-app) ·
+[Artist question model](#artist-question-model)
 
 ## Run it
 
@@ -179,6 +180,42 @@ uses it. Games, karma, settings and downloaded models live in the
 `botc-data` volume. The Artist model is set with environment variables
 (see [Artist question model](#artist-question-model)); `compose.yaml`
 lists them. Podman runs the same files (`podman build`, `podman run`).
+
+## Android host app
+
+The `android/` folder builds **Clocktower Host**, an app that runs the game
+server on an Android phone (Android 8 or newer, 64-bit). The host taps
+*Turn the server on*; the app shows the QR code and address, and *Open the
+game in my browser* takes the host into the game like everyone else. The
+server keeps running in the background (a notification with a Stop
+button), so the host can play in the browser on the same phone. Players
+join on the same Wi-Fi, or on the phone's own hotspot.
+
+The server is the same Python code as on a computer, run by Chaquopy.
+The app's *Artist questions* section offers the same choices as the
+desktop: no model, the packaged model on the phone (llama.cpp is built
+into the app), an Ollama server on the network, or a cloud service with
+an API key.
+
+**Install on a phone:** copy `app-debug.apk` to the phone, open it, and
+allow installs from that source when Android asks. Or, with USB debugging
+on: `adb install app-debug.apk`.
+
+**Build the APK** (Linux or macOS):
+
+1. Install JDK 21 and the Android command-line tools; with `sdkmanager`
+   install `platform-tools`, `platforms;android-36` and (optional, to strip
+   native libraries) an `ndk`.
+2. Have a Python 3.12 on the build machine (`uv python install 3.12`) and
+   point `BOTC_BUILD_PYTHON` at it.
+3. Build:
+   ```sh
+   cd android
+   echo "sdk.dir=$HOME/android-sdk" > local.properties
+   ./fetch_llama.sh                 # llama.cpp for the packaged model (about 26 MB)
+   BOTC_BUILD_PYTHON=$(uv python find 3.12) ./gradlew assembleDebug
+   ```
+   The APK is `app/build/outputs/apk/debug/app-debug.apk` (about 34 MB).
 
 ## Artist question model
 

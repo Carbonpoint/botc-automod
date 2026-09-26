@@ -13,7 +13,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.text.InputType;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
+
+import org.json.JSONObject;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -29,7 +43,16 @@ public class MainActivity extends Activity {
     private static final int TEXT = Color.rgb(0xec, 0xe6, 0xf5);
     private static final int MUTED = Color.rgb(0xa8, 0x9f, 0xb8);
 
-    private TextView status, address;
+    private static final String[] KINDS = {"none", "packaged", "ollama", "cloud"};
+    private static final String[] PROVIDERS = {"anthropic", "openai", "gemini", "openrouter", "custom"};
+    private static final String[] PROVIDER_NAMES = {"Anthropic (Claude)", "OpenAI", "Google Gemini", "OpenRouter",
+            "Other OpenAI-compatible server"};
+
+    private TextView status, address, artistNow;
+    private RadioGroup kind;
+    private Spinner provider;
+    private EditText url, model, key;
+    private View ollamaBox, cloudBox;
     private ImageView qr;
     private Button toggle, open;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -90,6 +113,7 @@ public class MainActivity extends Activity {
 
         col.addView(text("The server keeps running while you play in the browser. Turn it off here or "
                 + "from the notification when the game is over.", 13, MUTED));
+        col.addView(artistSection());
 
         ScrollView scroll = new ScrollView(this);
         scroll.setBackgroundColor(BG);
@@ -112,6 +136,124 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         handler.removeCallbacks(tick);
+    }
+
+    /** The Artist's question model: the phone version of the desktop's first-run questions. */
+    private View artistSection() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(0, dp(28), 0, 0);
+        TextView h = text("Artist questions", 20, TEXT);
+        h.setTypeface(Typeface.DEFAULT_BOLD);
+        box.addView(h);
+        box.addView(text("An automated game needs a language model to read the Artist's yes/no question. "
+                + "The game engine, not the model, decides the answer.", 13, MUTED));
+        artistNow = text("", 14, GOLD);
+        box.addView(artistNow);
+
+        kind = new RadioGroup(this);
+        String[] labels = {"No model (no Artist in automated games)", "Packaged model (runs on this phone)",
+                "An Ollama server on this network", "A cloud AI service (needs an API key)"};
+        for (int i = 0; i < labels.length; i++) {
+            RadioButton rb = new RadioButton(this);
+            rb.setId(1000 + i);
+            rb.setText(labels[i]);
+            rb.setTextColor(TEXT);
+            kind.addView(rb);
+        }
+        box.addView(kind);
+
+        LinearLayout ob = new LinearLayout(this);
+        ob.setOrientation(LinearLayout.VERTICAL);
+        url = field("Ollama address, e.g. http://192.168.1.20:11434", InputType.TYPE_TEXT_VARIATION_URI);
+        ob.addView(url);
+        ollamaBox = ob;
+        box.addView(ob);
+
+        LinearLayout cb = new LinearLayout(this);
+        cb.setOrientation(LinearLayout.VERTICAL);
+        provider = new Spinner(this);
+        provider.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, PROVIDER_NAMES));
+        cb.addView(provider);
+        key = field("API key (leave empty to keep the saved one)",
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        cb.addView(key);
+        cloudBox = cb;
+        box.addView(cb);
+
+        model = field("Model name (empty for the default)", InputType.TYPE_CLASS_TEXT);
+        box.addView(model);
+        kind.setOnCheckedChangeListener((g, id) -> showFields());
+
+        Button save = button();
+        save.setText("Save the Artist setting");
+        save.setOnClickListener(v -> saveArtist());
+        box.addView(save);
+        loadArtist();
+        return box;
+    }
+
+    private EditText field(String hint, int type) {
+        EditText e = new EditText(this);
+        e.setHint(hint);
+        e.setHintTextColor(MUTED);
+        e.setTextColor(TEXT);
+        e.setInputType(type | (type == InputType.TYPE_TEXT_VARIATION_URI ? InputType.TYPE_CLASS_TEXT : 0));
+        e.setSingleLine(true);
+        return e;
+    }
+
+    private void showFields() {
+        int k = kind.getCheckedRadioButtonId() - 1000;
+        ollamaBox.setVisibility(k == 2 ? View.VISIBLE : View.GONE);
+        cloudBox.setVisibility(k == 3 ? View.VISIBLE : View.GONE);
+        model.setVisibility(k >= 2 ? View.VISIBLE : View.GONE);
+    }
+
+    private PyObject py() {
+        if (!Python.isStarted()) Python.start(new AndroidPlatform(getApplicationContext()));
+        return Python.getInstance().getModule("botc_automod.android");
+    }
+
+    private String dataDir() {
+        return getFilesDir().getAbsolutePath() + "/data";
+    }
+
+    private void loadArtist() {
+        try {
+            JSONObject c = new JSONObject(py().callAttr("get_artist", dataDir()).toString());
+            String k = c.optString("kind", "none");
+            int i = 0;
+            for (int j = 0; j < PROVIDERS.length; j++) {
+                if (PROVIDERS[j].equals(k)) { i = 3; provider.setSelection(j); }
+            }
+            if (k.equals("packaged")) i = 1;
+            if (k.equals("ollama")) i = 2;
+            kind.check(1000 + i);
+            url.setText(c.optString("url", ""));
+            model.setText(c.optString("model", ""));
+            artistNow.setText(c.optBoolean("has_key") ? "An API key is saved." : "");
+        } catch (Exception e) {
+            kind.check(1000);
+        }
+        showFields();
+    }
+
+    private void saveArtist() {
+        try {
+            int k = kind.getCheckedRadioButtonId() - 1000;
+            JSONObject c = new JSONObject();
+            c.put("kind", k == 3 ? PROVIDERS[provider.getSelectedItemPosition()] : KINDS[k]);
+            if (k == 2) c.put("url", url.getText().toString().trim());
+            if (k >= 2) c.put("model", model.getText().toString().trim());
+            if (k == 3) c.put("api_key", key.getText().toString().trim());
+            String said = py().callAttr("set_artist", dataDir(), c.toString()).toString();
+            key.setText("");
+            artistNow.setText("Saved: " + said);
+            Toast.makeText(this, "Saved. Turn the server off and on to use it.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Could not save: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void refresh() {

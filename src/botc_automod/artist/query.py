@@ -217,7 +217,9 @@ def render(q: dict, world: World, asker: str) -> str:
 def schema(world: World) -> dict:
     """JSON schema for constrained decoding. Names and character ids are enums."""
     names = [s.name for s in world.seats]
-    refs = {"type": "string"}   # names, me, cw:/ccw: - checked by validate()
+    # Only real player references are allowed, so a model cannot invent a name.
+    bases = ["me", *names]
+    refs = {"type": "string", "enum": [*bases, *(f"cw:{b}" for b in bases), *(f"ccw:{b}" for b in bases)]}
     role = {"type": "string", "enum": sorted(world.roles)}
     atom_variants = [
         {"type": "object", "properties": {"op": {"const": "is_role"}, "player": refs, "role": role},

@@ -18,6 +18,13 @@ android {
         }
     }
 
+    // llama-server (from fetch_llama.sh) must be unpacked on install so it can be run.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

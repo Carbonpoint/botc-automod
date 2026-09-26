@@ -26,6 +26,34 @@ NAMES_TEST = """Aria Blake Cyrus Delia Ezra Flora Gideon Hazel Isaac Juno Kai Li
 Rhys Selma Tobias Una Vince Wren Yasmin Zeke Amara Boris Clara Dmitri Esme Felix Gwen Hiro Ingrid Jasper
 Kenji Leona Mateo Noor Otis Paula Ravi Sofia Tariq Ursula Viktor Willa""".split()
 
+MORE_NAMES = """Abby Abdul Ada Adele Adrian Agnes Ahmed Aileen Akira Alba Aldo Alfie Alice Alma Amir Ana Anders
+Andre Angus Anika Anton Archie Ari Arlo Asha Astrid Atticus Ava Axel Bao Barney Basil Bella Benji Bianca Bjorn Bo
+Brenda Brooke Caleb Camila Carmen Cedric Celia Chiara Chidi Chloe Cleo Colm Connor Cora Cruz Dafne Dalia Dana Dante
+Darius Dawn Deepa Dexter Diego Dina Dong Duc Duncan Ebony Eddie Edith Eero Elena Eli Eliza Elsa Emeka Enzo Erik
+Esther Eun Fabio Farah Fatima Felipe Fiona Finn Freya Gaia Gareth Gemma Gina Goran Grace Gus Hamza Harriet Heidi
+Helga Henri Hoa Holly Ian Ida Igor Ilse Imani Iris Ismail Ivan Jada Jake Jana Jiro Joao Jonas Josie Joy Julia
+Jun Kamal Karin Kasia Kate Keanu Kemal Kiri Koji Lana Lars Laszlo Leila Leo Levi Liam Lin Lior Liv Lotte Luis
+Lulu Mabel Magnus Mala Mara Marek Maya Mehmet Mia Mika Miles Mina Moira Musa Nadine Nasser Nell Nico Nils Nina
+Noah Nora Odile Ola Olive Omid Oona Oscar Owen Paco Pedro Petra Pia Pierre Quincy Rafa Rana Reza Rhea Rico Rita
+Rohan Roisin Ruby Rui Ruth Saba Sami Sana Santi Sasha Seb Selim Seo Shira Silas Simon Sina Siobhan Sol Stella Suki
+Sven Tamar Tao Tess Thea Tomas Toni Ulrich Uriel Valo Vesna Vito Wale Wanda Wendy Xavi Xiu Yael Yoko Yosef Yuki
+Zain Zelda Zhen Zola Zuri""".split()
+
+
+def invented_names(rng: random.Random, n: int) -> list[str]:
+    """Made-up names, so the model learns to copy names instead of recalling them."""
+    onset = ["b", "br", "c", "ch", "d", "dr", "f", "g", "gr", "h", "j", "k", "kl", "l", "m", "n", "p", "pr", "q",
+             "r", "s", "sh", "st", "t", "tr", "v", "w", "y", "z", ""]
+    vowel = ["a", "e", "i", "o", "u", "ae", "ia", "ou", "ei", "y"]
+    coda = ["", "", "n", "r", "l", "s", "x", "th", "k", "m", "nd", "rt"]
+    out = set()
+    while len(out) < n:
+        name = "".join(rng.choice(onset) + rng.choice(vowel) for _ in range(rng.randint(1, 3))) + rng.choice(coda)
+        if 3 <= len(name) <= 10:
+            out.add(name.capitalize())
+    return sorted(out)
+
+
 # Casual names for characters and types, as players say them.
 ROLE_ALIASES = {"fortuneteller": ["FT", "fortune teller"], "scarletwoman": ["SW", "scarlet woman"],
                 "devilsadvocate": ["DA", "devil's advocate"], "snakecharmer": ["snake charmer"],
@@ -73,7 +101,20 @@ T = {
         "neighbours": ["Is either of my neighbours evil?", "Is one of my neighbours evil?",
                        "Are any of my neighbours evil?"],
         "their_left": ["Is {p}'s left neighbour {type}?", "Is the player to the left of {p} {type}?"],
-        "unanswerable": ["Who is the demon?", "What character is {p}?", "Will good win?",
+        "type_or": ["Is {p} {type} or {type2}?", "is {p} either {type} or {type2}"],
+        "neither_demon": ["Is neither {p} nor {q} the demon?", "neither {p} nor {q} is the demon, right?"],
+        "lying_good": ["Is {p} lying about being good?", "Is {p} only pretending to be good?"],
+        "next_to_demon": ["Am I next to the demon?", "Is the demon sitting beside me?", "is the demon right next to me"],
+        "next_to_p_demon": ["Is the demon next to {p}?", "Is the demon sitting beside {p}?"],
+        "beside_evil": ["Is one of the people beside me evil?", "Is either person next to me evil?",
+                        "any evil player beside me?"],
+        "count_gt": ["Are there more than {n} {plural}?", "Is it over {n} {plural}?"],
+        "count_lt": ["Are there fewer than {n} {plural}?", "Are there less than {n} {plural}?"],
+        "demon_alive": ["Is the demon alive?", "Is the Demon still alive?", "is the demon still in the game alive"],
+        "slang_team": ["Is {p} one of the {slang}?", "{p} is a {slang1}?", "Is {p} a {slang1}?"],
+        "trust": ["Can I trust {p}?", "can i trust {p}", "Is {p} trustworthy?"],
+        "unanswerable": ["Who is the demon?", "What character is {p}?", "Will good win?", "hello", "hi there",
+                         "test", "??", "asdf", "ok", "thanks storyteller", "I have a question", "what?",
                          "Should we execute {p}?", "What is the weather like?", "Who killed {p}?",
                          "How many minions are there?", "Which player is the {role}?",
                          "Is {p} going to die tonight?", "What should I do?", "Tell me who is evil.",
@@ -142,8 +183,25 @@ def role_word(rng, world: World, rid: str) -> str:
     return rng.choice(options)
 
 
+_POOLS: dict[str, list[str]] = {}
+
+
+def name_pool(split: str) -> list[str]:
+    """Training draws from thousands of names; the test pool stays small, fixed and disjoint."""
+    if split not in _POOLS:
+        if split == "train":
+            from .data import natural
+
+            banned = {n.lower() for n in NAMES_TEST + natural.PLAYERS}
+            pool = NAMES_TRAIN + MORE_NAMES + invented_names(random.Random(11), 3000)
+            _POOLS[split] = sorted({n for n in pool if n.lower() not in banned})
+        else:
+            _POOLS[split] = NAMES_TEST
+    return _POOLS[split]
+
+
 def make_example(rng: random.Random, split: str) -> dict:
-    names = NAMES_TRAIN if split == "train" else NAMES_TEST
+    names = name_pool(split)
     w = random_world(rng, names)
     asker = rng.choice(w.seats).name
     others = [s.name for s in w.seats if s.name != asker]
@@ -155,13 +213,19 @@ def make_example(rng: random.Random, split: str) -> dict:
     team = rng.choice(["good", "evil"])
     n = rng.randint(1, 4)
     of = rng.choice(["good", "evil", "minion", "outsider", "townsfolk"])
+    ty2 = rng.choice([t for t in ("townsfolk", "outsider", "minion", "demon") if t != ty])
+    slang_team = rng.choice(["good", "evil"])
     intent = rng.choice(list(T[split]))
     if split == "train" and rng.random() < 0.08:
         intent = "unanswerable"  # about 12% of training questions are unanswerable
     tpl = rng.choice(T[split][intent])
     fill = {"p": p, "q": q, "r": r, "role": role_word(rng, w, role), "type": rng.choice(TYPE_WORDS[ty]),
             "team": team, "n": n, "plural": rng.choice(PLURAL[of]),
-            "plural_type": rng.choice(PLURAL[ty] if ty != "demon" else ["demons"])}
+            "plural_type": rng.choice(PLURAL[ty] if ty != "demon" else ["demons"]),
+            "type2": rng.choice(TYPE_WORDS[ty2]),
+            "slang": rng.choice(["bad guys", "baddies", "evil team"] if slang_team == "evil"
+                                else ["good guys", "goodies", "good team"]),
+            "slang1": rng.choice(["bad guy", "baddie"] if slang_team == "evil" else ["good guy", "goodie"])}
     gold: dict
     if intent == "is_role":
         gold = {"op": "is_role", "player": p, "role": role}
@@ -203,6 +267,30 @@ def make_example(rng: random.Random, split: str) -> dict:
         gold = {"op": "or", "args": [{"op": "is_team", "player": f"{d}:me", "team": "evil"} for d in ("cw", "ccw")]}
     elif intent == "their_left":
         gold = {"op": "is_type", "player": f"cw:{p}", "type": ty}
+    elif intent == "type_or":
+        gold = {"op": "or", "args": [{"op": "is_type", "player": p, "type": ty},
+                                     {"op": "is_type", "player": p, "type": ty2}]}
+    elif intent == "neither_demon":
+        gold = {"op": "and", "args": [{"op": "not", "arg": {"op": "is_type", "player": x, "type": "demon"}}
+                                      for x in (p, q)]}
+    elif intent == "lying_good":
+        gold = {"op": "is_team", "player": p, "team": "evil"}
+    elif intent == "next_to_demon":
+        gold = {"op": "or", "args": [{"op": "is_type", "player": f"{d}:me", "type": "demon"} for d in ("cw", "ccw")]}
+    elif intent == "next_to_p_demon":
+        gold = {"op": "or", "args": [{"op": "is_type", "player": f"{d}:{p}", "type": "demon"} for d in ("cw", "ccw")]}
+    elif intent == "beside_evil":
+        gold = {"op": "or", "args": [{"op": "is_team", "player": f"{d}:me", "team": "evil"} for d in ("cw", "ccw")]}
+    elif intent == "count_gt":
+        gold = {"op": "count", "of": of, "alive_only": False, "cmp": ">", "n": n}
+    elif intent == "count_lt":
+        gold = {"op": "count", "of": of, "alive_only": False, "cmp": "<", "n": n}
+    elif intent == "demon_alive":
+        gold = {"op": "count", "of": "demon", "alive_only": True, "cmp": ">=", "n": 1}
+    elif intent == "slang_team":
+        gold = {"op": "is_team", "player": p, "team": slang_team}
+    elif intent == "trust":
+        gold = {"op": "is_team", "player": p, "team": "good"}
     else:
         gold = {"op": "unanswerable"}
     text = tpl.format(**fill)

@@ -71,7 +71,8 @@ public class ServerService extends Service {
                 String ip = lanAddress();
                 String pub = ip == null ? "" : "http://" + ip + ":" + PORT + "/";
                 String dataDir = getFilesDir().getAbsolutePath() + "/data";
-                url = mod.callAttr("start", dataDir, PORT, pub).toString();
+                String nativeDir = getApplicationInfo().nativeLibraryDir;
+                url = mod.callAttr("start", dataDir, PORT, pub, nativeDir).toString();
                 byte[] png = mod.callAttr("qr_png", url).toJava(byte[].class);
                 qr = BitmapFactory.decodeByteArray(png, 0, png.length);
                 state = "running";
