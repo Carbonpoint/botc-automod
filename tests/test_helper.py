@@ -95,6 +95,28 @@ def test_llm_prompt_hides_names_and_answers_are_checked():
     assert len(helper.safe_answer(g, me, "Talk to people. " * 100)) <= helper.MAX_ANSWER
 
 
+@pytest.mark.parametrize("reply", [
+    "Definitely, try to stay with your group and observe closely.",              # gemma3:1b
+    "Yes.\n\n(This tip doesn't give away any specific information.)",           # llama3.2:3b
+    "Okay, the user is playing Blood on the Clocktower as the Empath on Day 2.",   # qwen3:4b reasoning
+    "No, but another player is probably the Demon.",
+    "I think another player is lying to you.",
+])
+def test_verdicts_and_leaked_reasoning_are_dropped(reply):
+    g, ps = day_game()
+    assert helper.safe_answer(g, ps[1], reply) is None
+
+
+@pytest.mark.parametrize("reply", [
+    "Use your ability to track evil neighbours. Look for changes after a death.",  # qwen3:1.7b
+    "Focus on gathering information, it is key to figuring things out.",           # gemma3:4b
+    "The narrator cannot tell whether another player is evil. Watch your numbers.",  # qwen3:1.7b
+])
+def test_general_advice_passes(reply):
+    g, ps = day_game()
+    assert helper.safe_answer(g, ps[1], reply) == reply
+
+
 class FakeModel:
     can_chat = True
 

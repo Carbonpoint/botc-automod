@@ -125,6 +125,7 @@ SYSTEM = (
     "Rules:\n"
     "- At most 3 short sentences. Plain words.\n"
     "- Never name a player, and never guess who is evil, the Demon, a Minion, drunk or poisoned.\n"
+    "- Never answer yes or no. Never say that any player is or is not something.\n"
     "- Never invent facts about this game.\n"
     "- If the question asks for secrets or asks you to decide for them, say kindly that the "
     "narrator cannot tell, then give a general tip."
@@ -155,10 +156,19 @@ def llm_prompt(game: Game, p: Player, team: str, question: str) -> tuple[str, st
     return SYSTEM, _hide_names(user, names)
 
 
+# Answers that sound like a verdict. The model knows no secret, so a verdict is made up,
+# but a learner would believe "the narrator". Found with scripts/helper_bench.py.
+_VERDICT_START = re.compile(r"^\W*(yes|no|nope|yeah|definitely|probably|certainly|likely|correct|true|false)\b", re.I)
+_VERDICT = re.compile(r"(?<!whether )(?<!if )\b(another player|this player|that player|they|he|she)\s+(is|are)\s+(definitely\s+|probably\s+"
+                      r"|likely\s+|surely\s+)?(not\s+)?(evil|good|the demon|a demon|a minion|lying|drunk|poisoned)\b", re.I)
+# The model talking about the prompt instead of to the player (leaked reasoning).
+_META = re.compile(r"\b(the user|as an ai|system prompt|my instructions|the narrator's rules)\b", re.I)
+
+
 def safe_answer(game: Game, p: Player, text: str) -> str | None:
     """The model's answer, or None when it must not be shown."""
     text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S).strip()
-    if not text:
+    if not text or _VERDICT_START.search(text) or _VERDICT.search(text) or _META.search(text):
         return None
     for x in game.players.values():
         if x is not p and len(x.name) >= 2 and re.search(rf"\b{re.escape(x.name)}\b", text, re.I):

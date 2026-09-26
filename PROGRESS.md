@@ -114,6 +114,14 @@ Read README.md first.
   (`Translator.chat`, not the packaged one) the player may add a question;
   the model sees only the player's own knowledge with other names hidden,
   and an answer that names a player is dropped. Tips go into the notebook.
+- Tip models (`scripts/helper_bench.py` on stalker, 6 questions incl. 4
+  prying ones): with no checks, gemma3:1b and llama3.2:3b answered "Is Eve
+  evil?" with "Definitely"/"Yes." (made up, but a learner would trust it),
+  and qwen3:4b returned its reasoning as text. `safe_answer` now also drops
+  answers that start with yes/no, state a verdict about a player, or talk
+  about "the user". After that no answer was unsafe. Best: qwen3:1.7b
+  (0.7-0.9 s, refuses politely). The packaged model cannot chat: offline
+  tips only. No tip model was trained.
 
 ## Known simplifications
 
