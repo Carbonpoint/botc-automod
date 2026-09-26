@@ -26,7 +26,7 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-from . import archive, helper
+from . import archive, helper, keywords
 from .editions import EDITIONS
 from .game import Game, GameError, NameTaken, Player, new_code
 
@@ -486,7 +486,7 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.leave(pid)
         case "chat":
             to = msg.get("to")
-            g.send_chat(pid, msg.get("text", ""), to if isinstance(to, str) else None)
+            g.send_chat(pid, msg.get("text", ""), to if isinstance(to, str) else None, anon=bool(msg.get("anon")))
         case "narration_done":
             g.finish_narration(pid)
         case "new_story":
@@ -644,6 +644,15 @@ async def ws_endpoint(ws: WebSocket) -> None:
                     continue
                 await pause_game(g)
                 return
+            if msg.get("type") == "keyword":
+                try:
+                    note = keywords.submit(g, p.id, str(msg.get("player", "")), str(msg.get("word", ""))[:40])
+                except GameError as e:
+                    await ws.send_json({"type": "error", "message": str(e)})
+                    continue
+                await ws.send_json({"type": "info", "message": note})
+                await broadcast(g)
+                continue
             if msg.get("type") == "tip":
                 try:
                     await give_tip(g, p, str(msg.get("question", ""))[:helper.MAX_QUESTION])

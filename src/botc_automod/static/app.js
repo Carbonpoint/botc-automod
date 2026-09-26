@@ -163,10 +163,10 @@ function chatCues(prev) {
   }
   const f = feel.get();
   for (const m of msgs.filter(m => m.id > (ui.chatTop || 0) && m.from !== S.me.id)) {
-    const thread = m.to ? m.from : "";
+    const thread = threadOf(m);
     if (ui.tab === "chat" && (ui.thread || "") === thread) continue;   // already on screen
     if (!m.to) {
-      if (f.popups) popup(`${nameOf(m.from)}: ${m.text}`, "");
+      if (f.popups) popup(`${sender(m)}: ${m.text}`, "");
       cue("chat");
     } else {
       if (f.popups) popup("New private message", thread);
@@ -188,6 +188,7 @@ function connect() {
     if (m.type === "state") { ui.tipBusy = false; onState(m.state); }
     else if (m.type === "timer") { if (S) { const was = S.game.timer; S.game.timer = m.timer; S.game.paused = m.paused; drawTimer(); timerCue(was, m.timer); } }
     else if (m.type === "error") { ui.artistBusy = false; ui.tipBusy = false; toast(m.message); render(); }
+    else if (m.type === "info") { toast(m.message, "info"); }
     else if (m.type === "artist_preview") { ui.artistBusy = false; ui.artistPreview = m; render(); }
     else if (m.type === "gone") { session.clear(); S = null; toast("That game no longer exists."); render(); }
     else if (m.type === "paused") { session.clear(); S = null; toast("The host paused the game. It is in Archive, Paused.", "info"); render(); }
@@ -458,13 +459,15 @@ function lobbyView() {
   } else html += `<div class="card"><p>Edition: <b>${esc(g.edition.name)}</b></p>
       <p>Theme: <b>${esc(g.theme.name)}</b></p></div>`;
   if (me.is_host && S.host) {
-    const st = S.host.settings, on = k => st[k] ?? 1, tog = (k, label, help) => `<div class="stack"><p>${label}</p>
+    const st = S.host.settings, on = k => st[k] ?? (["irl_tasks", "anon_chat"].includes(k) ? 0 : 1), tog = (k, label, help) => `<div class="stack"><p>${label}</p>
       <div class="seg"><button class="${on(k) ? "sel" : ""}" data-act="toggle" data-k="${k}" data-v="1">On</button>
       <button class="${on(k) ? "" : "sel"}" data-act="toggle" data-k="${k}" data-v="0">Off</button></div>
       <p class="small muted">${help}</p></div>`;
     html += `<div class="card stack"><h3>Options</h3>
       ${tog("demon_bluffs", "Demon bluffs in small games", "The Demon always learns 3 good characters that are safe to claim. Off follows the official rule: no evil info with 5 or 6 players.")}
       ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}
+      ${tog("anon_chat", "Anonymous messages", "Players may send chat messages, to the group or to one player, without their name. Nobody can see who sent them.")}
+      ${tog("irl_tasks", "Keyword tasks", "Each day every player gets a secret keyword and must meet another player in person to get theirs. Right keyword: karma +2. Missed: −1. Finding someone else's: +1 for you, −1 for them. Needs karma on.")}
       ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`
       + helperCard();
   }
@@ -506,6 +509,26 @@ function helperCard() {
       `<button class="${h.learners.includes(p.id) ? "sel" : ""}" data-act="learner" data-pid="${p.id}"
         data-v="${h.learners.includes(p.id) ? 0 : 1}">${esc(p.name)}</button>`).join("")}</div>` : ""}</div>`;
 }
+// Keyword task: meet a player in person and enter their keyword (keywords.py).
+function keywordCard() {
+  const k = S.me.irl;
+  if (!k) return "";
+  const day = ["day", "nominations", "defense", "vote"].includes(S.game.phase) && S.game.stage !== "narration";
+  const others = k.players.filter(id => id !== k.target && !k.found.includes(id));
+  return `<div class="card stack keyword"><h3>Keyword task</h3>
+    <p>Your keyword: <b class="code">${esc(k.word.toUpperCase())}</b>. Tell it only to <b>${esc(nameOf(k.give_to))}</b>, in person.</p>
+    ${k.done ? `<p>✓ You got ${esc(nameOf(k.target))}'s keyword.</p>`
+      : `<p>Your task: meet <b>${esc(nameOf(k.target))}</b> and get their keyword.</p>`}
+    ${!day ? "" : k.left <= 0 ? `<p class="muted">No tries left today.</p>` : k.done
+      ? (others.length ? `<p class="small">Know someone else's keyword? Each one you find gives you karma,
+          and costs its owner and the player meant to get it.</p>
+          <div class="row"><select id="kw-p">${others.map(id => `<option value="${id}">${esc(nameOf(id))}</option>`).join("")}</select>
+          <input id="kw-w" class="grow" maxlength="40" placeholder="Their keyword"><button data-act="keyword" data-extra="1">Try</button></div>` : "")
+      : `<div class="row"><input id="kw-w" class="grow" maxlength="40" placeholder="${esc(nameOf(k.target))}'s keyword">
+          <button class="primary" data-act="keyword">Enter</button></div>`}
+    ${day && k.left > 0 ? `<p class="small muted">${k.left} ${k.left === 1 ? "try" : "tries"} left today.</p>` : ""}</div>`;
+}
+
 function tipCard() {
   const t = S.me.tip;
   if (!t || !t.on || S.me.seat == null || S.game.phase === "lobby" || S.game.phase === "ended") return "";
@@ -597,7 +620,7 @@ function meView() {
   html += `<div class="card"><p>You are <b>${me.alive ? "alive" : "dead"}</b>.
     ${me.karma != null ? `Karma: <b>${me.karma > 0 ? "+" : ""}${me.karma}</b>.` : ""}
     ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
-  html += tipCard();
+  html += keywordCard() + tipCard();
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
     <ul class="log">${[...me.log].reverse().map(e => `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul></div>`;
   return html + feelCard();
@@ -840,7 +863,8 @@ function nightView() {
 
 // ---------- chat ----------
 // ui.thread: "" for everyone, or the other player's id. ui.read: thread -> last message id read.
-function threadOf(m) { return m.to ? (m.from === S.me.id ? m.to : m.from) : ""; }
+function threadOf(m) { return m.to ? (m.from === S.me.id ? m.to : m.from || "anon") : ""; }
+const sender = m => m.from === S.me.id ? (m.anon ? "You (anonymous)" : "You") : m.from ? nameOf(m.from) : "Anonymous";
 function unread() {
   const read = ui.read || {}, out = { total: 0 };
   for (const m of S.chat || []) {
@@ -854,18 +878,22 @@ function chatView() {
   const t = ui.thread || "", msgs = (S.chat || []).filter(m => threadOf(m) === t);
   ui.read = { ...(ui.read || {}), [t]: msgs.length ? msgs[msgs.length - 1].id : (ui.read || {})[t] || 0 };
   const u = unread(), people = S.players.filter(p => p.id !== S.me.id);
+  const anonIn = (S.chat || []).some(m => m.to && !m.from);
   const chip = (id, label) => `<button class="${t === id ? "sel" : ""}" data-act="thread" data-v="${id}">${esc(label)}${
     u[id] ? ` <span class="count">${u[id]}</span>` : ""}</button>`;
   const night = S.game.phase === "night";
   return `<div class="card stack"><h3>Chat</h3>
-    <div class="threads">${chip("", "Everyone")}${people.map(p => chip(p.id, p.name + (p.agent ? " (agent)" : ""))).join("")}</div>
-    <p class="small muted">${t ? `Private with ${esc(nameOf(t))}. Nobody else sees these messages.` : "Everyone in the game sees these messages."}</p>
+    <div class="threads">${chip("", "Everyone")}${anonIn ? chip("anon", "Anonymous") : ""}${people.map(p => chip(p.id, p.name + (p.agent ? " (agent)" : ""))).join("")}</div>
+    <p class="small muted">${t === "anon" ? "Private messages sent to you without a name. You cannot reply."
+      : t ? `Private with ${esc(nameOf(t))}. Nobody else sees these messages.` : "Everyone in the game sees these messages."}</p>
     <div class="msgs" id="msgs">${msgs.length ? msgs.map(m => `<div class="msg${m.from === S.me.id ? " mine" : ""}">
-      <span class="lbl">${esc(m.from === S.me.id ? "You" : nameOf(m.from))} · ${esc(m.label)}</span>${esc(m.text)}</div>`).join("")
+      <span class="lbl">${esc(sender(m))} · ${esc(m.label)}</span>${esc(m.text)}</div>`).join("")
       : `<p class="muted small">No messages yet.</p>`}</div>
-    ${night ? `<p class="muted">Chat is closed at night. Talk again at dawn.</p>`
+    ${night ? `<p class="muted">Chat is closed at night. Talk again at dawn.</p>` : t === "anon" ? ""
       : `<div class="row"><input id="chat-text" class="grow" maxlength="300" placeholder="${t ? "Private message" : "Message everyone"}"
-          value="${esc(ui.form["chat-text"] || "")}"><button class="primary" data-act="sendchat">Send</button></div>`}</div>`
+          value="${esc(ui.form["chat-text"] || "")}"><button class="primary" data-act="sendchat">Send</button></div>
+        ${S.game.anon_chat ? `<label class="row small"><input type="checkbox" id="chat-anon" ${ui.anon ? "checked" : ""}
+          style="width:auto"> Send without my name</label>` : ""}`}</div>`
     + feelCard();
 }
 
@@ -937,10 +965,15 @@ app.addEventListener("click", async ev => {
       }
       case "narrationdone": send({ type: "narration_done" }); return;
       case "thread": ui.thread = d.v; render(); return;
+      case "keyword": {
+        const k = S.me.irl, word = document.getElementById("kw-w")?.value.trim();
+        if (!word) return toast("Type the keyword first.");
+        send({ type: "keyword", player: d.extra ? document.getElementById("kw-p").value : k.target, word }); return;
+      }
       case "sendchat": {
         const el = document.getElementById("chat-text"), text = el?.value.trim();
         if (!text) return;
-        send({ type: "chat", text, to: ui.thread || null });
+        send({ type: "chat", text, to: ui.thread || null, anon: !!(S.game.anon_chat && ui.anon) });
         ui.form["chat-text"] = ""; el.value = ""; return;
       }
       case "newstory": send({ type: "new_story" }); return;
@@ -1058,6 +1091,7 @@ app.addEventListener("click", async ev => {
 app.addEventListener("input", ev => {
   if (ev.target.id === "name") ui.name = ev.target.value;
   if (ev.target.id === "chat-text") ui.form["chat-text"] = ev.target.value;
+  if (ev.target.id === "chat-anon") ui.anon = ev.target.checked;
 });
 app.addEventListener("change", async ev => {
   const el = ev.target, d = el.dataset;

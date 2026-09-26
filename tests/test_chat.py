@@ -44,3 +44,26 @@ def test_closed_at_night():
         g.advance()
     with pytest.raises(GameError, match="night"):
         g.send_chat(ps[0].id, "anyone awake?")
+
+
+def test_anonymous_messages_hide_the_sender():
+    g, ps = day_game()
+    a, b, c = ps[0], ps[1], ps[2]
+    with pytest.raises(GameError, match="turned off"):
+        g.send_chat(a.id, "boo", anon=True, now=1)
+    g.set_setting("anon_chat", 1)
+    g.send_chat(a.id, "someone here is lying", anon=True, now=2)
+    g.send_chat(a.id, "watch your back", to=b.id, anon=True, now=4)
+    for viewer in (b, c):
+        for m in g.view_for(viewer.id)["chat"]:
+            assert m["from"] is None and m["anon"]
+    assert all(m["from"] == a.id for m in g.view_for(a.id)["chat"])   # the sender sees their own
+    assert [m["text"] for m in g.view_for(c.id)["chat"]] == ["someone here is lying"]
+    assert g.estate["chat"][0]["from"] == a.id                        # the server still knows
+
+
+def test_keywords_never_travel_through_chat():
+    g, ps = day_game()
+    g.estate["irl"] = {"day": g.day, "words": {ps[0].id: "lantern"}}
+    g.send_chat(ps[1].id, "Her word is Lantern, trust me", now=1)
+    assert g.estate["chat"][-1]["text"] == "Her word is •••, trust me"

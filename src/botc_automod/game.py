@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 
 from . import seating
 from .decoys import decoy_task
-from . import helper
+from . import helper, keywords
 from .narrator import THEMES, story
 from .editions import EDITIONS, Edition
 
@@ -48,9 +48,11 @@ DEFAULT_SETTINGS = {
     "demon_bluffs": 1,       # 1: the Demon gets 3 safe bluffs even with fewer than 7 players
     "karma": 1,              # 1: karma from night questions tilts the automod's random choices
     "narrator": 1,           # 1: at dawn a random player reads a story of the night before the day starts
+    "anon_chat": 0,          # 1: players may send chat messages without their name
+    "irl_tasks": 0,          # 1: keyword tasks each day: meet another player in person (keywords.py)
     "helper": 0,             # helpful narrator: 0 off, 1 players marked as learning, 2 everyone (helper.py)
 }
-TOGGLES = {"demon_bluffs", "karma", "narrator"}
+TOGGLES = {"demon_bluffs", "karma", "narrator", "irl_tasks", "anon_chat"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
 SCHEMA = 2  # bump when saved games from older versions cannot load
 
@@ -426,6 +428,7 @@ class Game:
 
     # Night -----------------------------------------------------------------------
     def begin_night(self) -> None:
+        keywords.close(self)
         self.phase = "night"
         self.night += 1
         self.tonight_deaths = []
@@ -739,6 +742,7 @@ class Game:
         self.stage = ""
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
         self.set_timer(self.settings["discussion"])
+        keywords.assign(self)
 
     # Chat ----------------------------------------------------------------------------
     # Messages live in estate["chat"]. A message has "to": None for everyone, or one
@@ -746,8 +750,11 @@ class Game:
     CHAT_TEXT = 300
     CHAT_KEEP = 500
 
-    def send_chat(self, pid: str, text: str, to: str | None = None, now: float | None = None) -> dict:
+    def send_chat(self, pid: str, text: str, to: str | None = None, now: float | None = None,
+                  anon: bool = False) -> dict:
         p = self.p(pid)
+        if anon and not self.settings.get("anon_chat", 0):
+            raise GameError("The host has turned off anonymous messages.")
         if self.phase == "night":
             raise GameError("Chat is closed at night. Talk again at dawn.")
         text = " ".join(str(text).split())[:self.CHAT_TEXT]
@@ -762,7 +769,7 @@ class Game:
         last[pid] = now
         chat = self.estate.setdefault("chat", [])
         msg = {"id": (chat[-1]["id"] + 1) if chat else 1, "from": p.id, "to": to,
-               "text": self.hide_keywords(text), "label": self.label()}
+               "text": self.hide_keywords(text), "label": self.label(), "anon": bool(anon)}
         chat.append(msg)
         del chat[:-self.CHAT_KEEP]
         return msg
@@ -774,7 +781,12 @@ class Game:
         return text
 
     def chat_for(self, pid: str) -> list[dict]:
-        return [m for m in self.estate.get("chat", []) if m["to"] is None or pid in (m["to"], m["from"])][-200:]
+        """The messages pid may see. An anonymous message loses its sender, except for the sender."""
+        out = []
+        for m in self.estate.get("chat", []):
+            if m["to"] is None or pid in (m["to"], m["from"]):
+                out.append({**m, "from": None} if m.get("anon") and m["from"] != pid else m)
+        return out[-200:]
 
     # Helpful narrator (helper.py) ------------------------------------------------------
     def set_learner(self, pid: str, on: bool) -> None:
@@ -1089,6 +1101,7 @@ class Game:
         remaining = self.remaining()
         view = {
             "game": {"code": self.code, "edition": {"id": ed.id, "name": ed.name},
+                     "anon_chat": bool(self.settings.get("anon_chat", 0)),
                      "theme": {"id": self.theme, "name": THEMES.get(self.theme, THEMES["default"])["name"]},
                      "mode": self.mode, "phase": self.phase, "artist_ready": self.artist_ready, "stage": self.stage, "label": self.label(),
                      "night": self.night, "day": self.day,
@@ -1110,6 +1123,7 @@ class Game:
                    "bluffs": ed.bluffs_for(self, me) if self.phase not in ("lobby", "setup") else [],
                    "night_done": self.phase == "night" and task is None,
                    "annoy": self.can_annoy(pid),
+                   "irl": keywords.view(self, pid),
                    "tip": {"can": helper.can_tip(self, me), "ask": self.helper_llm,
                            "on": helper.mode(self) == helper.EVERYONE
                            or (helper.mode(self) == helper.LEARNERS and helper.is_learner(self, pid))}},
