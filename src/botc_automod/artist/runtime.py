@@ -23,9 +23,20 @@ from pathlib import Path
 
 LLAMA_TAG = "b11193"
 LLAMA_URL = "https://github.com/ggml-org/llama.cpp/releases/download/{tag}/llama-{tag}-bin-{asset}"
-# Set when the model is published; BOTC_ARTIST_MODEL may point at another URL or a local .gguf file.
-PACKAGED_MODEL_URL = os.environ.get("BOTC_PACKAGED_MODEL_URL", "")
+# Where the published model lives (a Hugging Face repository). Empty until it is published.
+# BOTC_PACKAGED_MODEL_URL overrides it with a URL or a local .gguf file.
+PACKAGED_REPO = ""   # e.g. "https://huggingface.co/OWNER/botc-artist/resolve/main"
 MODEL_FILE = "botc-artist.gguf"
+
+
+def default_model_url() -> str:
+    """Phones get the 4-bit file (271 MB), computers the 8-bit one (386 MB)."""
+    if os.environ.get("BOTC_PACKAGED_MODEL_URL"):
+        return os.environ["BOTC_PACKAGED_MODEL_URL"]
+    if not PACKAGED_REPO:
+        return ""
+    small = "ANDROID_ROOT" in os.environ or hasattr(sys, "getandroidapilevel")
+    return f"{PACKAGED_REPO}/botc-artist-{'q4' if small else 'q8'}.gguf"
 PORT = 8779
 
 
@@ -85,7 +96,7 @@ def server_binary(root: Path) -> Path:
 
 
 def model_file(root: Path, source: str = "") -> Path:
-    source = source or PACKAGED_MODEL_URL
+    source = source or default_model_url()
     if source and Path(source).expanduser().is_file():
         return Path(source).expanduser()
     path = root / MODEL_FILE

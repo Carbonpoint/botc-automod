@@ -198,7 +198,8 @@ def make_translator(cfg: dict) -> Translator | None:
     if kind == "ollama":
         return OllamaTranslator(cfg["url"], cfg["model"], compact=cfg.get("compact", False))
     if kind == "packaged":
-        return OpenAITranslator(cfg.get("url", "http://127.0.0.1:8779/v1"), "packaged", compact=True)
+        return OpenAITranslator(cfg.get("url", "http://127.0.0.1:8779/v1"), "packaged", compact=True,
+                                use_schema=False)
     if kind == "anthropic":
         return AnthropicTranslator(cfg.get("api_key", ""), cfg.get("model") or "claude-opus-5")
     if kind in OPENAI_PROVIDERS or kind == "custom":

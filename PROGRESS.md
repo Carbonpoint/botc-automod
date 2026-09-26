@@ -45,6 +45,26 @@ Read README.md first.
   commit message for counts); browser checks of all editions, the human
   storyteller, and rejoin, with no page errors.
 
+## 2026-09-26 (later): Artist model, Docker, Android
+
+- Artist: query language evaluated by the engine; translator backends
+  (Ollama, OpenAI-compatible, Anthropic); first-run questions; confirm
+  step in the page. Benchmarks of 14 off-the-shelf models and fine-tuned
+  runs: see docs/artist-llm.md. Chosen: SmolLM2 360M run 3 (91% / 95%
+  right, 0.7 to 2.3 s on a 4-core CPU, 271 MB at 4-bit).
+- Model files live on stalker: `~/botc-train/runs/smol-360m-v3/model-{Q8_0,Q4_K_M}.gguf`.
+  NOT PUBLISHED YET: needs the user's approval and a Hugging Face write
+  token; then run scripts/publish_model.sh and set PACKAGED_REPO in
+  artist/runtime.py.
+- Server moved from FastAPI to Starlette (pure Python, runs on Android).
+- Docker: Dockerfile + compose.yaml, tested with Podman.
+- Android: android/ Java + Chaquopy app (foreground service, QR, browser
+  link, Artist settings, bundled llama.cpp). Tested in an Android 11
+  emulator on stalker (no KVM there, very slow): the server ran in the
+  foreground service and 7 bots played night 1 through it. The emulator
+  crashes on this Fedora host. Not yet run on a real phone.
+- Seat maps draw one path with arrows through the seats in order.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

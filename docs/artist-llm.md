@@ -50,7 +50,7 @@ Scripts: `scripts/artist_bench.py` (any Ollama or OpenAI-compatible
 server), `scripts/train_artist.py` (LoRA fine-tune), `scripts/export_artist.sh`
 (GGUF export, quantise, CPU benchmark with llama-server).
 
-## Results so far (2026-09-26)
+## Results (2026-09-26)
 
 Off-the-shelf models through Ollama, full prompt with examples, schema-
 constrained, GPU (RTX 2080 Ti):
@@ -75,22 +75,44 @@ constrained, GPU (RTX 2080 Ti):
 General small models are not good enough: even at 4B, about one reading in
 five is wrong.
 
-Fine-tuned (LoRA, 30,000 generated examples, 2 epochs, compact prompt):
+Fine-tuned (LoRA rank 64, 30,000 generated examples, 2 epochs, compact
+prompt, one RTX 2080 Ti, about 50 to 70 minutes per run):
 
-| Model | Setting | test right | natural right | dangerous (test / natural) |
-|---|---|---|---|---|
-| Qwen2.5 0.5B, run 1 | plain decoding | 63% | 71% | 4.0% / 8.7% |
-| Qwen2.5 0.5B, run 1 | llama.cpp, schema, CPU, 8-bit | 88% | 84% | 11% / 17% |
-| SmolLM2 360M, run 1 | plain decoding | 88% | 86% | 1.3% / 6.8% |
+| Model | Run | Decoding | test right | natural right | misread (test / natural) |
+|---|---|---|---|---|---|
+| Qwen2.5 0.5B | 1: 72 names | plain, GPU | 63% | 71% | 4.0% / 8.7% |
+| Qwen2.5 0.5B | 1 | schema, CPU 8-bit | 88% | 84% | 11% / 17% |
+| SmolLM2 360M | 1 | plain, GPU | 88% | 86% | 1.3% / 6.8% |
+| Qwen2.5 0.5B | 2: 3,288 names | plain, GPU | 92% | 86% | 4.0% / 8.7% |
+| Qwen2.5 0.5B | 2 | schema, CPU 8-bit | 91% | 85% | 9.3% / 15% |
+| Qwen2.5 0.5B | 2 | plain, CPU 8-bit | 89% | 87% | 4.3% / 7.8% |
+| **SmolLM2 360M** | **3: + new question families** | **plain, CPU 8-bit** | **91%** | **95%** | **6.7% / 3.9%** |
+| SmolLM2 360M | 3 | plain, CPU 4-bit | 90% | 93% | 6.7% / 3.9% |
 
-Run 1 used only 72 training names, and the models learned the names
-instead of copying them from the question ("Rosa" for "Rowan"). Runs 2 and
-3 use 3,288 names (real and invented) and add question families the
-hand-written set showed were missing (neighbours, slang, comparisons,
-"still alive", neither/nor, greetings to refuse).
+What the runs taught:
 
-On a 4-core laptop-class CPU, the 8-bit SmolLM2 model (386 MB; 271 MB at
-4-bit) reads a question in 0.5 to 1.1 seconds through llama-server.
+- **Names.** With 72 training names, models learned the names instead of
+  copying them ("Rosa" for "Rowan"). 3,288 real and invented names fixed
+  it (Qwen 63% to 92% on the test set).
+- **Schema or not.** Forcing the output schema turns the fine-tuned
+  model's uncertain answers into confident wrong ones: misreads doubled.
+  The packaged model therefore uses plain decoding; the engine's
+  validation turns bad output into "ask another question". General models
+  (Ollama, cloud) keep the schema, which helps them.
+- **Coverage.** Families the hand-written set exposed (neighbours, slang,
+  "still alive", comparisons, neither/nor, greetings) were added as new
+  training templates in run 3. The questions themselves were not copied,
+  but the hand-written set is less independent from run 3 on; the
+  generated test set remains fully independent.
+- **Remaining errors** (run 3): "One of X and Y is the demon" read as
+  *and*; "my right" sometimes read as left; "zero" read as "at least 0".
+  Each is a template to add in a next round. The confirmation step shows
+  the wrong reading to the player before anything is spent.
+
+**Chosen packaged model:** SmolLM2 360M run 3. The 4-bit file is 271 MB
+(phones), the 8-bit file 386 MB (computers). On a 4-core laptop-class CPU
+it reads a question in 0.7 to 2.3 seconds (longer for 15-player tables with
+the long character lists).
 
 ## Running it
 

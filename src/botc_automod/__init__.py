@@ -40,7 +40,8 @@ def setup_artist(force: bool, data_dir):
 
             server = LocalServer(data_dir / "llm", cfg.get("model", ""))
             server.start()
-            translator = OpenAITranslator(server.url, "packaged", compact=True)
+            # Plain decoding: forcing the schema makes the fine-tuned model guess instead of refusing.
+            translator = OpenAITranslator(server.url, "packaged", compact=True, use_schema=False)
         else:
             translator = make_translator(cfg)
         world = World([Seat(n, "chef", "townsfolk", "good", True, False) for n in ("Ann", "Ben", "Cat", "Dan", "Eve")],

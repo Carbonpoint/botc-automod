@@ -232,7 +232,7 @@ The first time the server starts, it asks which model to use:
 | Choice | What you need |
 |---|---|
 | No model | Nothing. The Artist is dealt only when a human storyteller runs the game. |
-| Local: packaged model | Nothing. It downloads llama.cpp (about 20 MB) and the model once, then runs on the CPU. |
+| Local: packaged model | Nothing. It downloads llama.cpp (about 16 MB) and the model (386 MB; 271 MB on phones) once, then runs on the CPU, 1 to 2 seconds per question. *Not downloadable until the model is published; meanwhile set `BOTC_PACKAGED_MODEL_URL` to a local `.gguf` file.* |
 | Local: Ollama | An Ollama server. You give its address and pick a model from its list. |
 | Cloud | A provider (Anthropic, OpenAI, Google Gemini, OpenRouter, or any OpenAI-compatible server), an API key, and a model name. |
 
@@ -244,6 +244,11 @@ API keys are asked in the terminal, never on the web page. The Anthropic
 backend needs the cloud extra: `uv run --extra cloud botc-automod`.
 With the default model (`claude-opus-5`), it turns on Anthropic's
 server-side fallback, which retries a declined request on another model.
+
+The packaged model is SmolLM2 360M fine-tuned for this task. It reads
+91% of unseen generated questions and 95% of hand-written ones correctly;
+general 4B models reach about 80%. Details, all measurements and the
+training pipeline: [docs/artist-llm.md](docs/artist-llm.md).
 
 Environment variables override the file (for Docker):
 `BOTC_ARTIST` (`none`, `packaged`, `ollama`, `anthropic`, `openai`,

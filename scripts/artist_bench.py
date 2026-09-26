@@ -76,11 +76,12 @@ def main():
     ap.add_argument("--key", default="")
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--compact", action="store_true")
+    ap.add_argument("--no-schema", action="store_true", help="plain decoding, no constrained output")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     t = (OllamaTranslator(a.url, a.model, compact=a.compact) if a.backend == "ollama"
-         else OpenAITranslator(a.url, a.model, a.key, compact=a.compact))
+         else OpenAITranslator(a.url, a.model, a.key, compact=a.compact, use_schema=not a.no_schema))
     sets = {"test": dataset.generate(a.n, "test", seed=99), "natural": natural_items(random.Random(3))}
     report = {"model": a.model, "backend": a.backend, "compact": a.compact, "when": time.strftime("%F %T")}
     for name, items in sets.items():
