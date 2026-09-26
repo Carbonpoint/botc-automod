@@ -13,6 +13,10 @@ STYLE_WEIGHT = 1.0
 
 
 def _fit(pref: dict, team: str, style: str) -> float:
+    return _raw_fit(pref, team, style) * pref.get("_w", 1.0)
+
+
+def _raw_fit(pref: dict, team: str, style: str) -> float:
     score = 0.0
     t = pref.get("team", "any")
     if t in ("good", "evil"):
@@ -24,14 +28,18 @@ def _fit(pref: dict, team: str, style: str) -> float:
 
 
 def deal(prefs: list[dict], slots: list[tuple[str, str]], rng: random.Random,
-         iterations: int = 3000) -> list[int]:
+         iterations: int = 3000, weights: list[float] | None = None) -> list[int]:
     """Match players to character slots.
 
     prefs[i] is player i's preference dict. slots[j] is (team, style) of
-    character j. Returns perm where player i gets slot perm[i].
+    character j. weights[i] (karma favour, 1.0 is neutral) makes player i's
+    wishes count more or less when two players want the same thing.
+    Returns perm where player i gets slot perm[i].
     """
     n = len(prefs)
     assert len(slots) == n
+    w = weights or [1.0] * n
+    prefs = [{**p, "_w": w[i]} for i, p in enumerate(prefs)]
     perm = list(range(n))
     rng.shuffle(perm)
     if n < 2:

@@ -59,6 +59,13 @@ class Edition:
     def alignment(self, p: Player) -> str:
         return p.alignment or self.roles[p.role].team
 
+    def bluffs_for(self, game: Game, p: Player) -> list[str]:
+        """Bluff character names this player was told (the Demon)."""
+        return []
+
+    def favor(self, game: Game, p: Player) -> float:
+        return 1.0
+
     def player_notes(self, game: Game, p: Player) -> list[str]:
         """Grimoire reminders for the human storyteller."""
         return []

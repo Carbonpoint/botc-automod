@@ -37,8 +37,13 @@ during a real game.
 ## How a game goes
 
 1. **Lobby.** One player taps *Host a new game*. The host picks the
-   edition and the storyteller mode. Others scan the QR code or join with
-   the 4-letter code.
+   edition, the options (below) and the storyteller mode. Others scan the
+   QR code or join with the 4-letter code.
+
+   Coming back: in the lobby, a player who lost the page joins again with
+   the same name and gets their seat back. After the start, the host must
+   approve it (the host's own return is approved by any other player).
+   *Leave this game* in the lobby frees the name and the seat.
 2. **Room.** The host picks the room shape: circle, horseshoe, square, or
    grid. For a grid, the host sets rows and columns and taps the seat
    squares in clockwise order. Each player taps their own seat. Seat order
@@ -51,7 +56,9 @@ during a real game.
    Demon bluffs. Then they begin the first night.
 5. **Nights.** Every phone gets a task, so nobody can tell who acts.
    Characters with a night action choose players or characters. Everyone
-   else gets a quick maths or trivia question. Each night has two stages:
+   else gets a quick maths or trivia question. At the end of each night,
+   everyone gets one scored "night question" for karma. Each night has
+   two stages:
    - Stage A: all choices, and on the first night with 7+ players, the
      evil team's info and the Demon's bluffs.
    - Stage B: information, and second choices that depend on stage A (a
@@ -73,6 +80,20 @@ during a real game.
    - Forced choices when a Klutz or Moonchild learns they died.
 8. **End.** When a team wins, every phone shows the full Grimoire.
 
+## Options
+
+| Option | Default | What it does |
+|---|---|---|
+| Demon bluffs in small games | on | The Demon learns 3 good characters that are not in play, even with 5 or 6 players. Off follows the official rule (no evil info below 7 players). The bluffs also stay on the Demon's Me tab. |
+| Karma | on | A right answer to the night question gives +1 karma, a wrong one -1. Karma is kept per name across games on this server (`karma.json` in the data folder). |
+
+Karma tilts the automod's chance decisions a little: a player's "favour"
+is 1 + 0.15 x karma, kept between 0.4 and 2.5. High favour makes bad
+random outcomes less likely (being the drunk one of the Innkeeper's pair,
+the Gossip or Mayor victim, the Sweetheart's drunk, the Tinker's death)
+and good ones more likely (a Pacifist save, a Shabaloth return). It also
+gives a player's team and style wishes more weight in the deal.
+
 ## Automated storyteller decisions
 
 A human storyteller makes judgement calls. The automod uses these rules.
@@ -81,7 +102,7 @@ The chances are host settings.
 | Decision | Rule |
 |---|---|
 | Drunk or poisoned info | A random answer that differs from the true one |
-| Spy / Recluse registration | Registers falsely with chance `misregister` (0.35), once per player per night or day |
+| Spy / Recluse registration | Registers falsely with chance `misregister` (0.35), once per player per night or day. A false registration can add a false match but never hides the true one: a lone Recluse is still found by the Librarian, a lone Spy by the Investigator |
 | Mayor killed at night | Another killable player dies instead with chance `mayor_bounce` (0.5) |
 | Imp kills itself | The Scarlet Woman takes over if 5+ were alive; else a random living Minion |
 | Sailor | A chosen Townsfolk gets drunk; otherwise the Sailor does |
@@ -92,11 +113,12 @@ The chances are host settings.
 | Shabaloth | Brings back last night's victim with chance `shabaloth_regurgitate` (0.3) |
 | Godfather | The Outsider change (-1 or +1) is random |
 | Savant | Two generated statements about the game, one true and one false |
-| Artist | A question from the menu gets a true yes or no; free text gets "I don't know" |
+| Artist | Not dealt: it needs a human storyteller for now (plan: docs/artist-llm.md) |
 | Pit-Hag makes a Demon | No extra deaths |
 | Sweetheart | A random other living player becomes drunk for the rest of the game |
 | Vigormortis | Which of the two Townsfolk neighbours is poisoned is random |
 | Mutant, Cerenovus | Not dealt: judging "madness" needs a human storyteller |
+| Karma | Chance decisions above are tilted by karma (see Options) |
 
 ## Human storyteller tools
 
@@ -122,7 +144,11 @@ notes for each character.
 | `src/botc_automod/decoys.py` | Decoy night questions |
 | `src/botc_automod/server.py` | FastAPI HTTP + WebSocket server, save and reload |
 | `src/botc_automod/static/` | The phone web app (plain HTML, CSS, JS) |
-| `tests/` | Rule tests and random full games in all editions and both modes |
+| `tests/` | Rule tests, random full games in all editions and both modes, and the info audit |
+| `src/botc_automod/audit.py` | Independent checker: is every piece of night info accurate, complete and delivered? |
+| `scripts/audit_info.py` | Runs many automod games through the checker and reports problems |
+| `scripts/rejoin_check.py` | Browser check of reload, rejoin in the lobby, and approved rejoin in a game |
+| `docs/artist-llm.md` | Plan for a small local LLM to answer the Artist |
 | `scripts/fetch_wiki.py` | Refetches character text from the wiki |
 | `scripts/smoke.py` | 7 WebSocket bots play night 1 against a running server |
 | `scripts/ui_check.py` | Headless phone browsers play to a vote and save screenshots |

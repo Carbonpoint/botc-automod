@@ -24,6 +24,27 @@ Read README.md first.
 - Port 8765 on this machine is taken by another service on the Tailscale
   address. The default port is 8000. Tests used 8777.
 
+## 2026-09-26: fixes from the first real games
+
+- Librarian told "no Outsiders" with a Recluse in play: a false
+  registration could hide the only true match. Now it can only add a false
+  one. The same flaw could tell an Investigator "no Minions" (a lone Spy).
+- Demon bluffs option (on by default), bluffs on the Demon's Me tab.
+- Artist dealt only with a human storyteller. LLM plan: docs/artist-llm.md.
+- Karma from one scored night question per player per night; it tilts
+  chance decisions and the deal. Kept per name across games.
+- Rejoin by name (lobby: at once; in game: host approval); lobby Leave
+  frees the name.
+- Info audit (`src/botc_automod/audit.py`): a checker, separate from the
+  engine's info code, re-derives every message from a snapshot. It caught
+  the Librarian/Investigator flaw when the old code was put back. It also
+  found a real bug: a Philosopher's gained death-trigger ability (Sage,
+  Ravenkeeper, Klutz, Moonchild, Barber, Sweetheart, Saint) never fired.
+  Fixed. The Undertaker now learns only about an executed player who died.
+- Verified: 242 tests pass; the audit of 2,000 games per edition (see the
+  commit message for counts); browser checks of all editions, the human
+  storyteller, and rejoin, with no page errors.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

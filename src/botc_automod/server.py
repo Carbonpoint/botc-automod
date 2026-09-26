@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+import json
 import logging
 import os
 import pickle
@@ -23,7 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .editions import EDITIONS
-from .game import SCHEMA, Game, GameError, new_code
+from .game import SCHEMA, Game, GameError, NameTaken, new_code
 
 log = logging.getLogger("botc")
 STATIC = Path(__file__).parent / "static"
@@ -31,6 +32,7 @@ DATA = Path(os.environ.get("BOTC_DATA", Path.home() / ".local/share/botc-automod
 DEBUG = os.environ.get("BOTC_DEBUG") == "1"
 
 games: dict[str, Game] = {}
+karma: dict[str, int] = {}    # player name (lower case) -> karma, kept across games
 sockets: dict[str, dict[str, set[WebSocket]]] = {}   # code -> player id -> sockets
 
 
@@ -58,9 +60,32 @@ def load_all() -> None:
         games[g.code] = g
 
 
+def karma_file() -> Path:
+    return DATA / "karma.json"
+
+
+def load_karma() -> None:
+    try:
+        karma.update(json.loads(karma_file().read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        pass
+
+
+def sync_karma(game: Game) -> None:
+    changed = False
+    for p in game.players.values():
+        if karma.get(p.name.lower()) != p.karma:
+            karma[p.name.lower()] = p.karma
+            changed = True
+    if changed:
+        DATA.mkdir(parents=True, exist_ok=True)
+        karma_file().write_text(json.dumps(karma, indent=1), encoding="utf-8")
+
+
 async def broadcast(game: Game) -> None:
     game.version += 1
     save(game)
+    sync_karma(game)
     for pid, conns in list(sockets.get(game.code, {}).items()):
         if pid not in game.players:
             for ws in list(conns):
@@ -105,6 +130,7 @@ async def heartbeat() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_all()
+    load_karma()
     tasks = [asyncio.create_task(ticker()), asyncio.create_task(heartbeat())]
     yield
     for t in tasks:
@@ -155,6 +181,7 @@ async def create_game(body: NameIn) -> dict:
         p = g.join(body.name, is_host=True)
     except GameError as e:
         raise HTTPException(400, str(e)) from None
+    p.karma = karma.get(p.name.lower(), 0)
     games[g.code] = g
     save(g)
     return {"code": g.code, "token": p.token, "player": p.id}
@@ -165,10 +192,30 @@ async def join_game(code: str, body: NameIn) -> dict:
     g = _game(code)
     try:
         p = g.join(body.name)
+    except NameTaken:
+        # The name is in the game already: this is someone coming back.
+        try:
+            kind, value = g.rejoin(body.name)
+        except GameError as e:
+            raise HTTPException(400, str(e)) from None
+        await broadcast(g)
+        if kind == "pending":
+            return {"code": g.code, "pending": value}
+        return {"code": g.code, "token": value, "rejoined": True}
     except GameError as e:
         raise HTTPException(400, str(e)) from None
+    p.karma = karma.get(p.name.lower(), 0)
     await broadcast(g)
     return {"code": g.code, "token": p.token, "player": p.id}
+
+
+@app.get("/api/games/{code}/rejoin/{rid}")
+async def rejoin_status(code: str, rid: str) -> dict:
+    g = _game(code)
+    try:
+        return g.rejoin_status(rid)
+    except GameError as e:
+        raise HTTPException(404, str(e)) from None
 
 
 @app.get("/api/editions")
@@ -229,6 +276,16 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             g.vote(pid, bool(msg.get("yes")))
         case "slayer":
             g.slayer_claim(pid, msg["target"])
+        case "leave":
+            g.leave(pid)
+        case "rejoin_answer":
+            req = g.estate.get("rejoins", {}).get(msg["request"])
+            if req is None:
+                raise GameError("That request is already answered.")
+            # The host answers for players; anyone else in the game answers for the host.
+            if req["pid"] == pid or (not me.is_host and not g.p(req["pid"]).is_host):
+                raise GameError("Only the host can answer that.")
+            g.answer_rejoin(msg["request"], bool(msg.get("allow")))
         case "day_action":
             g.day_action(pid, msg["key"], msg.get("payload") or {})
         case "edition":

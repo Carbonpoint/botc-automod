@@ -254,7 +254,9 @@ class Philosopher(Char):
 
 
 class Artist(Char):
-    id, name, type, style = "artist", "Artist", "townsfolk", "think"
+    # Only dealt with a human storyteller for now: the automod cannot answer any
+    # yes/no question. See docs/artist-llm.md for the local-LLM plan.
+    id, name, type, style, auto_ok = "artist", "Artist", "townsfolk", "think", False
 
     def day_action(self, R, game, p):
         if R.used(game, p, self.id):
@@ -311,7 +313,7 @@ class Sage(Char):
     id, name, type, style = "sage", "Sage", "townsfolk", "chill"
 
     def on_death(self, R, game, p, cause, ctx):
-        if cause != "demon" or p.shown != self.id or ctx is None:
+        if cause != "demon" or not R.holds(p, self.id) or ctx is None:
             return
         demon = next((x for x in game.seated() if R.type_of(x.role) == "demon"), None)
         if not demon:
@@ -333,11 +335,11 @@ class Sweetheart(Char):
     id, name, type, style, works_dead = "sweetheart", "Sweetheart", "outsider", "chill", True
 
     def on_death(self, R, game, p, cause, ctx):
-        if p.role != self.id or R.malfunction(game, p):
+        if not R.holds(p, self.id) or R.malfunction(game, p):
             return
         pool = [x for x in R.living(game) if x.id != p.id]
         if pool:
-            R.add_status(game, game.rng.choice(pool).id, "drunk", "Sweetheart", "never")
+            R.add_status(game, R.pick_victim(game, pool).id, "drunk", "Sweetheart", "never")
 
 
 class Barber(Char):
@@ -345,7 +347,7 @@ class Barber(Char):
     other_nights = True
 
     def on_death(self, R, game, p, cause, ctx):
-        if p.role != self.id or R.malfunction(game, p):
+        if not R.holds(p, self.id) or R.malfunction(game, p):
             return
         if game.phase == "night" and ctx is not None and ctx.stage == "A":
             for d in (x for x in game.seated() if R.type_of(x.role) == "demon" and x.alive):
@@ -380,7 +382,7 @@ class Klutz(Char):
     id, name, type, style, works_dead = "klutz", "Klutz", "outsider", "chill", True
 
     def on_death(self, R, game, p, cause, ctx):
-        if p.shown != self.id:
+        if not R.holds(p, self.id):
             return
         key = "death_prompts_pending" if game.phase == "night" else "death_prompts"
         game.estate.setdefault(key, []).append(p.id)
@@ -537,7 +539,7 @@ class Vigormortis(Char):
             es.setdefault("vig_minions", []).append(t.id)
             nb = R.townsfolk_neighbours(g, t)
             if nb:
-                es.setdefault("vig_poison", {})[t.id] = g.rng.choice(nb).id
+                es.setdefault("vig_poison", {})[t.id] = R.pick_victim(g, nb).id
 
 
 class NoDashii(Char):

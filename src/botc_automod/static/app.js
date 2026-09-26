@@ -108,7 +108,8 @@ function render() {
   if (!session.get()) { app.innerHTML = homeView(); loadGames(); return; }
   if (!S) { app.innerHTML = `<div class="card">Connecting...</div>`; return; }
   const g = S.game;
-  let html = topBar();
+  const overlay = g.phase === "night" && !S.me.storyteller;  // the night screen shows its own copy
+  let html = topBar() + (overlay ? "" : rejoinBanner());
   if (g.phase === "lobby") html += lobbyView();
   else {
     if (g.phase === "ended") html += endView();
@@ -172,6 +173,26 @@ async function loadGames() {
 }
 setInterval(() => { if (!session.get()) loadGames(); }, 4000);
 
+async function waitForRejoin(code, rid) {
+  app.innerHTML = `<div class="card stack" style="margin-top:24px"><h2>Asking to rejoin</h2>
+    <p>The game has started, so the host must let you back in. Ask them to look at their phone.</p></div>`;
+  for (let i = 0; i < 150; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const r = await api(`/api/games/${code}/rejoin/${rid}`);
+      if (r.status === "approved") { session.set({ code, token: r.token }); toast("Welcome back.", "info"); connect(); return; }
+      if (r.status === "denied") { toast("The host said no."); render(); return; }
+    } catch (e) { toast(e.message); render(); return; }
+  }
+  toast("No answer from the host. Try again."); render();
+}
+
+function rejoinBanner() {
+  return (S.rejoins || []).map(r => `<div class="card read row"><span class="grow"><b>${esc(r.name)}</b> wants to rejoin on a new device.</span>
+    <button class="primary" data-act="rejoin" data-id="${r.id}" data-v="1">Let them in</button>
+    <button data-act="rejoin" data-id="${r.id}" data-v="0">No</button></div>`).join("");
+}
+
 // ---------- lobby ----------
 function seatMap(opts = {}) {
   const room = S.room, layout = S.layout;
@@ -216,6 +237,15 @@ function lobbyView() {
     html += `<div class="card stack"><h3>Edition</h3>
       ${ui.editions ? seg("edition", ui.editions.map(e => [e.id, e.name]), g.edition.id) : ""}</div>`;
   } else html += `<div class="card"><p>Edition: <b>${esc(g.edition.name)}</b></p></div>`;
+  if (me.is_host && S.host) {
+    const st = S.host.settings, tog = (k, label, help) => `<div class="stack"><p>${label}</p>
+      <div class="seg"><button class="${st[k] ? "sel" : ""}" data-act="toggle" data-k="${k}" data-v="1">On</button>
+      <button class="${st[k] ? "" : "sel"}" data-act="toggle" data-k="${k}" data-v="0">Off</button></div>
+      <p class="small muted">${help}</p></div>`;
+    html += `<div class="card stack"><h3>Options</h3>
+      ${tog("demon_bluffs", "Demon bluffs in small games", "The Demon always learns 3 good characters that are safe to claim. Off follows the official rule: no evil info with 5 or 6 players.")}
+      ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}</div>`;
+  }
   if (me.is_host) html += `<div class="card stack"><h3>Storyteller</h3>
     ${seg("mode", [["auto", "Automated"], ["human", "Human (me)"]], g.mode)}
     <p class="small muted">${g.mode === "human"
@@ -311,7 +341,10 @@ function meView() {
   if (!me.role) return `<div class="card"><p>The Storyteller is preparing the game. Your character appears here soon.</p></div>`;
   let html = forcedActions();
   html += roleCard(me.role, me.team || me.role.team).replace(/<\/div>$/, wikiDetails(me.role.id) + "</div>");
+  if (me.bluffs && me.bluffs.length) html += `<div class="card"><h3>Your bluffs</h3>
+    <p>These good characters are not in play, so they are safe to claim: <b>${me.bluffs.map(esc).join(", ")}</b>.</p></div>`;
   html += `<div class="card"><p>You are <b>${me.alive ? "alive" : "dead"}</b>.
+    ${me.karma != null ? `Karma: <b>${me.karma > 0 ? "+" : ""}${me.karma}</b>.` : ""}
     ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
     <ul class="log">${[...me.log].reverse().map(e => `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul></div>`;
@@ -480,7 +513,8 @@ function grimView() {
       </li>`).join("")}</ul></div>`;
   }
   html += `<div class="card"><h3>Grimoire</h3><ul class="log">${st.grimoire.map(p => `<li class="stack">
-    <div class="row"><b class="grow tag-${p.team}">${p.seat + 1}. ${esc(p.name)}${p.alive ? "" : " · dead"}${!p.alive && p.ghost_vote ? " ●" : ""}</b>
+    <div class="row"><b class="grow tag-${p.team}">${p.seat + 1}. ${esc(p.name)}${p.alive ? "" : " · dead"}${!p.alive && p.ghost_vote ? " ●" : ""}
+      <span class="small muted">karma ${p.karma}</span></b>
       ${p.alive ? `<button class="danger" data-act="stkill" data-pid="${p.id}">Kill</button>` : `<button data-act="strevive" data-pid="${p.id}">Revive</button>`}
       <button data-act="stmsg" data-pid="${p.id}">Message</button></div>
     <div class="row"><select class="grow" data-char="${p.id}">${roleOptions(p.role)}</select>
@@ -500,8 +534,13 @@ function grimView() {
 // ---------- night ----------
 function nightView() {
   const t = S.task;
-  if (!t) return `<div class="night"><div class="inner">${forcedActions()}<div class="done"><b>You are done.</b>
-    Put your phone face down and wait for dawn.</div></div></div>`;
+  if (!t) {
+    const me = S.me, res = me.last_answer;
+    const k = me.karma != null && res ? `<p>${res === "right" ? "Right answer: +1 karma." : "Wrong answer: −1 karma."}
+      Your karma: <b>${me.karma > 0 ? "+" : ""}${me.karma}</b></p>` : "";
+    return `<div class="night"><div class="inner">${rejoinBanner()}${forcedActions()}<div class="done"><b>You are done.</b>
+      ${k}Put your phone face down and wait for dawn.</div></div></div>`;
+  }
   let body = "";
   if (t.kind === "choose") {
     const chosen = ui.picks;
@@ -525,7 +564,7 @@ function nightView() {
       <p class="small muted">This is also saved in your notebook.</p>
       <button class="primary big" data-act="ack">Got it</button>`;
   }
-  return `<div class="night"><div class="inner">${forcedActions()}<h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
+  return `<div class="night"><div class="inner">${rejoinBanner()}${forcedActions()}<h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
 }
 
 // ---------- actions ----------
@@ -545,12 +584,18 @@ app.addEventListener("click", async ev => {
           if (!code) return toast("Enter the game code.");
           r = await api(`/api/games/${code}/join`, { name });
         }
+        if (r.pending) { waitForRejoin(r.code, r.pending); return; }
+        if (r.rejoined) toast("Welcome back.", "info");
         session.set({ code: r.code, token: r.token });
         connect(); return;
       }
       case "leave":
-        if (!confirm("Leave this game on this device?")) return;
-        session.clear(); S = null; ws?.close(); render(); return;
+        if (!confirm(S?.game.phase === "lobby" ? "Leave this game? Your seat is freed."
+                     : "Leave this game on this device? You can come back by joining with the same name.")) return;
+        if (S?.game.phase === "lobby") send({ type: "leave" });
+        setTimeout(() => { session.clear(); S = null; ws?.close(); render(); }, 150); return;
+      case "toggle": send({ type: "setting", key: d.k, value: +d.v }); return;
+      case "rejoin": send({ type: "rejoin_answer", request: d.id, allow: d.v === "1" }); return;
       case "seat": send({ type: "seat", seat: +d.seat }); return;
       case "unseat": send({ type: "seat", seat: null }); return;
       case "begin": if (confirm("Reveal characters and begin the first night?")) send({ type: "begin" }); return;

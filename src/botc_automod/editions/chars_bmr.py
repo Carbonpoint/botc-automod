@@ -129,7 +129,7 @@ class Innkeeper(Char):
             return
         for t in targets:
             R.add_status(g, t.id, "safe_all", "Innkeeper", "dawn")
-        R.add_status(g, g.rng.choice(targets).id, "drunk", "Innkeeper", "dusk")
+        R.add_status(g, R.pick_victim(g, targets).id, "drunk", "Innkeeper", "dusk")
 
 
 class Gambler(Char):
@@ -178,7 +178,7 @@ class Gossip(Char):
             return
         pool = [x for x in R.living(g) if not R.protected(g, x, "ability")]
         if pool:
-            R.die(g, g.rng.choice(pool), "gossip", None, ctx)
+            R.die(g, R.pick_victim(g, pool), "gossip", None, ctx)
 
 
 class Courtier(Char):
@@ -260,7 +260,7 @@ class Tinker(Char):
     def step(self, R, ctx):
         g = ctx.game
         for p in g.seated():
-            if R.works(g, p, self.id) and g.rng.random() < g.settings["tinker_chance"]:
+            if R.works(g, p, self.id) and R.unlucky(g, p, g.settings["tinker_chance"]):
                 R.die(g, p, "tinker", None, ctx)
 
 
@@ -269,7 +269,7 @@ class Moonchild(Char):
     works_dead = True
 
     def on_death(self, R, game, p, cause, ctx):
-        if p.shown != self.id:
+        if not R.holds(p, self.id):
             return
         key = "death_prompts_pending" if game.phase == "night" else "death_prompts"
         game.estate.setdefault(key, []).append(p.id)
@@ -454,8 +454,10 @@ class Shabaloth(Char):
         es = g.estate
         if R.works(g, p, self.id):
             last = [g.p(x) for x in es.get("shabaloth_last", []) if not g.p(x).alive]
-            if last and g.rng.random() < g.settings["shabaloth_regurgitate"]:
-                R.revive(g, g.rng.choice(last))
+            if last:
+                back = R.pick_lucky(g, last)
+                if R.lucky(g, back, g.settings["shabaloth_regurgitate"]):
+                    R.revive(g, back)
         es["shabaloth_last"] = list(ans or [])
         if not ans or demon_blocked(R, ctx, p):
             return

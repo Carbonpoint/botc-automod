@@ -139,8 +139,9 @@ class Char:
 class Ctx:
     """State for resolving one night stage."""
 
-    def __init__(self, game: Game, answers: dict[str, dict], stage: str):
+    def __init__(self, game: Game, answers: dict[str, dict], stage: str, R: ScriptEdition | None = None):
         self.game = game
+        self.R = R
         self.first = game.night == 1
         self.answers = answers
         self.stage = stage
@@ -151,6 +152,8 @@ class Ctx:
         return self.answers.get(p.id, {}).get(key)
 
     def tell(self, p: Player, title: str, lines: list[str], key: str = "") -> None:
+        if self.R is not None and self.game.estate.get("audit") is not None:
+            self.R.audit_record(self.game, p, key, lines)
         if self.stage == "A":
             self.out[p.id].append(info(key or "storyteller", title, lines))
         else:
@@ -332,6 +335,49 @@ class ScriptEdition(Edition):
             if p.id not in game.estate["abnormal"]:
                 game.estate["abnormal"].append(p.id)
 
+    # Karma ------------------------------------------------------------------------
+    def favor(self, game: Game, p: Player) -> float:
+        """How strongly chance favours p: 1.0 is neutral. Karma comes from night questions."""
+        if not game.settings.get("karma", 1):
+            return 1.0
+        return max(0.4, min(2.5, 1.0 + 0.15 * p.karma))
+
+    def pick_victim(self, game: Game, players: list[Player]) -> Player:
+        """A random pick that hurts the player: high karma makes it less likely."""
+        return game.rng.choices(players, weights=[1.0 / self.favor(game, x) for x in players])[0]
+
+    def pick_lucky(self, game: Game, players: list[Player]) -> Player:
+        """A random pick that helps the player: high karma makes it more likely."""
+        return game.rng.choices(players, weights=[self.favor(game, x) for x in players])[0]
+
+    def lucky(self, game: Game, p: Player, chance: float) -> bool:
+        """A chance of something good for p, scaled by karma."""
+        return game.rng.random() < min(1.0, chance * self.favor(game, p))
+
+    def unlucky(self, game: Game, p: Player, chance: float) -> bool:
+        """A chance of something bad for p, scaled down by karma."""
+        return game.rng.random() < chance / self.favor(game, p)
+
+    # Audit (tests and scripts/audit_info.py) --------------------------------------
+    def audit_record(self, game: Game, p: Player, key: str, lines: list[str]) -> None:
+        es = game.estate
+        es["audit"].append({
+            "night": game.night, "stage": game.stage, "pid": p.id, "key": key, "lines": list(lines),
+            "shown": p.shown, "role": p.role, "gained": list(p.gained),
+            "sober": not self.malfunction(game, p) and not (
+                self.vortox_active(game) and key in self.chars and self.chars[key].type == "townsfolk"),
+            "players": [{"id": x.id, "name": x.name, "role": x.role, "shown": x.shown,
+                         "align": self.alignment(x), "alive": x.alive, "fake_dead": x.fake_dead}
+                        for x in game.seated()],
+            "reg": {k.split(":", 1)[1]: v for k, v in es.get("reg", {}).items()
+                    if k.startswith(game.label() + ":")},
+            "red_herring": es.get("red_herring"), "grandchild": es.get("grandchild"),
+            "twins": es.get("twins"), "executed_died": es.get("executed_died"),
+            "nominators": sorted(game.nominators_today),
+            "voters": sorted({x for h in game.nom_history for x in h["yes"]}),
+            "bluffs": list(es.get("bluffs", [])),
+        })
+
     # Registration and truth -------------------------------------------------------
     def reg(self, game: Game, p: Player, asker: Player | None = None) -> dict:
         """How p registers to abilities now. The Spy and Recluse may misregister."""
@@ -412,7 +458,7 @@ class ScriptEdition(Edition):
                 s = r
             shown.append(s)
         slots = [(self.roles[r].team, self.roles[s].style) for r, s in zip(in_play, shown)]
-        perm = deal([p.prefs for p in players], slots, rng)
+        perm = deal([p.prefs for p in players], slots, rng, weights=[self.favor(game, p) for p in players])
         for p, j in zip(players, perm):
             p.role, p.shown = in_play[j], shown[j]
             p.alignment = self.roles[p.role].team
@@ -426,6 +472,7 @@ class ScriptEdition(Edition):
             "bluffs": rng.sample(bluff_pool, min(3, len(bluff_pool))),
             "red_herring": rng.choice(good).id if good else None,
             "status": [], "used": {}, "abnormal": [],
+            "lunatic_bluffs": [r.id for r in rng.sample([r for r in self.roles.values() if r.team == "good"], 3)],
         })
         for p in players:
             self.chars[p.role].setup(self, game, p)
@@ -443,6 +490,7 @@ class ScriptEdition(Edition):
         es = game.estate
         es["died_today"] = False
         es["outsider_died_today"] = False
+        es["executed_died"] = None
         lines = es.pop("dawn_lines", [])
         for pid in list(es.get("death_prompts_pending", [])):
             es.setdefault("death_prompts", []).append(pid)
@@ -468,12 +516,22 @@ class ScriptEdition(Edition):
     def abilities(self, p: Player) -> list[str]:
         return [p.shown, *p.gained]
 
+    def holds(self, p: Player, cid: str) -> bool:
+        """p has this ability: their character (true or believed) or one they gained."""
+        return cid in (p.role, p.shown) or cid in p.gained
+
     def stage_a(self, game: Game) -> dict[str, list[dict]]:
         tasks: dict[str, list[dict]] = defaultdict(list)
         first = game.night == 1
         seated = game.seated()
         if first and len(seated) >= 7:
             self._evil_info(game, tasks)
+        elif first and game.settings.get("demon_bluffs", 1):
+            self._bluffs_only(game, tasks)
+        if game.estate.get("audit") is not None:
+            for pid, ts in tasks.items():
+                for t in ts:
+                    self.audit_record(game, game.p(pid), t["key"], t["lines"])
         woke = []
         for p in seated:
             for cid in self.abilities(p):
@@ -516,14 +574,42 @@ class ScriptEdition(Edition):
             tasks[dp.id].append(info("demon_info", "Your evil team", lines))
         for lun in (p for p in seated if p.role == "lunatic"):
             fake = game.rng.sample([x for x in seated if x is not lun], min(len(minions), len(seated) - 1))
-            good = [r for r in self.roles.values() if r.team == "good"]
-            fb = ", ".join(r.name for r in game.rng.sample(good, 3))
+            fb = ", ".join(self.roles[b].name for b in game.estate.get("lunatic_bluffs", []))
             tasks[lun.id].append(info("demon_info", "Your evil team", [
                 f"Your Minions: {names(fake)}.",
                 f"These good characters are not in play, so they are safe to bluff: {fb}."]))
 
+    def _bluffs_only(self, game: Game, tasks: dict) -> None:
+        """Small games skip evil info, but the host option still gives the Demon bluffs."""
+        bluffs = ", ".join(self.roles[b].name for b in game.estate["bluffs"])
+        for dp in game.seated():
+            if self.type_of(dp.role) == "demon":
+                tasks[dp.id].append(info("demon_info", "Your bluffs", [
+                    f"These good characters are not in play, so they are safe to bluff: {bluffs}."]))
+            elif dp.role == "lunatic":
+                fb = ", ".join(self.roles[b].name for b in game.estate.get("lunatic_bluffs", []))
+                tasks[dp.id].append(info("demon_info", "Your bluffs", [
+                    f"These good characters are not in play, so they are safe to bluff: {fb}."]))
+
+    def bluffs_for(self, game: Game, p: Player) -> list[str]:
+        """The bluffs a player was told (the Demon), or believes they were told (the Lunatic)."""
+        if not p.role or game.night < 1 or (len(game.seated()) < 7 and not game.settings.get("demon_bluffs", 1)):
+            return []
+        if p.role == "lunatic":
+            return [self.roles[b].name for b in game.estate.get("lunatic_bluffs", [])]
+        if self.type_of(p.role) == "demon" and p.role == p.shown:
+            return [self.roles[b].name for b in game.estate.get("bluffs", [])]
+        return []
+
     def resolve_a(self, game: Game, answers: dict[str, dict]) -> dict[str, list[dict]]:
-        ctx = Ctx(game, answers, "A")
+        ctx = Ctx(game, answers, "A", self)
+        if game.estate.get("audit") is not None:
+            game.estate.setdefault("audit_nights", {})[game.night] = {
+                "answers": answers, "deaths": [], "demon_kills": [],
+                "executed_died": game.estate.get("executed_died"),
+                "juggler": list(game.estate.get("juggler", {})),
+                "start": [{"id": x.id, "alive": x.alive, "fake_dead": x.fake_dead, "abilities": self.abilities(x),
+                           "role": x.role} for x in game.seated()]}
         game.estate["goon_hit"] = False
         order = self.first_order if ctx.first else self.other_order
         for cid in order:
@@ -532,12 +618,17 @@ class ScriptEdition(Edition):
         return ctx.out
 
     def resolve_b(self, game: Game, answers: dict[str, dict]) -> dict[str, list[str]]:
-        ctx = Ctx(game, answers, "B")
+        ctx = Ctx(game, answers, "B", self)
         for pid, keys in answers.items():
             p = game.p(pid)
             for key, ans in keys.items():
                 if key in self.chars:
                     self.chars[key].resolve_b(self, ctx, p, ans)
+        night = game.estate.get("audit_nights", {}).get(game.night)
+        if night is not None:
+            night["deaths"] = list(game.tonight_deaths)
+            night["b_answers"] = answers
+            night["end"] = {x.id: self.abilities(x) for x in game.seated()}
         return dict(ctx.messages)
 
     def chose(self, game: Game, chooser: Player, targets: list[Player]) -> None:
@@ -585,7 +676,7 @@ class ScriptEdition(Edition):
                 return False
             if cause == "execution" and self.alignment(t) == "good" and any(
                     self.works(game, x, "pacifist") for x in game.seated()) \
-                    and game.rng.random() < game.settings["pacifist_save"]:
+                    and self.lucky(game, t, game.settings["pacifist_save"]):
                 self.abnormal(game, t)
                 return False
             if self.works(game, t, "fool") and not self.used(game, t, "fool"):
@@ -600,6 +691,9 @@ class ScriptEdition(Edition):
             return True
         before = len(self.living(game))
         game.kill(t.id, cause)
+        night = game.estate.get("audit_nights", {}).get(game.night)
+        if night is not None and game.phase == "night" and cause == "demon":
+            night["demon_kills"].append(t.id)
         self._after_death(game, t, cause, source, ctx, before)
         return True
 
@@ -682,6 +776,8 @@ class ScriptEdition(Edition):
         if not was_alive:
             game.announce(f"{player.name} is already dead.", read=False)
         died = was_alive and self.die(game, player, "execution")
+        if died and not player.fake_dead:
+            game.estate["executed_died"] = player.id
         if was_alive and not died and not player.fake_dead:
             game.announce(f"{player.name} does not die.")
         for c in self.chars.values():
@@ -699,9 +795,11 @@ class ScriptEdition(Edition):
         out = []
         es = game.estate
         if p.id in es.get("death_prompts", []):
-            c = self.chars.get(p.shown)
-            if c and getattr(c, "death_prompt", None):
-                out.append(c.death_prompt(self, game, p))
+            for cid in self.abilities(p):
+                c = self.chars.get(cid)
+                if c and getattr(c, "death_prompt", None):
+                    out.append(c.death_prompt(self, game, p))
+                    break
         if p.alive and not p.fake_dead and game.phase in ("day", "nominations"):
             for c in self.chars.values():
                 a = c.public_action(self, game)

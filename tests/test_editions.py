@@ -555,3 +555,14 @@ def test_human_mode_snv_includes_madness_characters():
         g.start()
         seen |= {p.role for p in g.seated()}
     assert {"mutant", "cerenovus"} <= seen
+
+
+def test_philosopher_with_gained_sage_learns_when_killed():
+    g = rigged(["nodashii", "oracle", "witch", "philosopher", "clockmaker", "sweetheart", "juggler"], "snv")
+    ph, nd = by(g, "philosopher"), by(g, "nodashii")
+    night(g, {"philosopher": "sage", "witch": [by(g, "juggler").id]})
+    assert "sage" in ph.gained
+    to_night(g)
+    night(g, {"nodashii": [ph.id], "witch": [by(g, "juggler").id]})
+    assert not ph.alive
+    assert any("The Demon is" in e["text"] and nd.name in e["text"] for e in ph.log)

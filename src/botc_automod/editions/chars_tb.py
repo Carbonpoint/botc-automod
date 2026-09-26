@@ -29,12 +29,15 @@ def ping(R, game, p, kind: str, cid: str) -> list[str]:
     rest = [x for x in game.seated() if x.id != p.id]
     pool = [r for r in R.roles.values() if r.type == kind]
     if R.truthful(game, p, cid):
-        hits = [x for x in rest if R.reg(game, x, p)["type"] == kind]
+        # A player of this type is always findable. The Spy or Recluse may add a false
+        # match (registering as this type), but misregistration never hides a true one.
+        hits = [x for x in rest if R.type_of(x.role) == kind or R.reg(game, x, p)["type"] == kind]
         if not hits:
             return ["There are no Outsiders in play."] if kind == "outsider" else \
                 [f"There are no {kind.capitalize()}s in play."]
         hit = rng.choice(hits)
-        role = R.roles[R.reg(game, hit, p)["role"]]
+        shown_role = hit.role if R.type_of(hit.role) == kind else R.reg(game, hit, p)["role"]
+        role = R.roles[shown_role]
         pair = [hit, rng.choice([x for x in rest if x is not hit])]
     else:
         if kind == "outsider" and any(R.type_of(x.role) == kind for x in rest) and rng.random() < 0.3:
@@ -106,9 +109,10 @@ class Undertaker(Char):
 
     def resolve(self, R, ctx, p, ans):
         g = ctx.game
-        if not p.alive or not g.executed_today:
+        executed = g.estate.get("executed_died")  # only a player who died by execution counts
+        if not p.alive or not executed:
             return
-        t = g.p(g.executed_today)
+        t = g.p(executed)
         role = R.reg(g, t, p)["role"]
         if not R.truthful(g, p, self.id):
             role = g.rng.choice([r for r in R.roles if r != role])
@@ -136,7 +140,7 @@ class Ravenkeeper(Char):
     tip = "If the Demon kills you, you get one strong piece of info."
 
     def on_death(self, R, game, p, cause, ctx):
-        if game.phase == "night" and ctx is not None and ctx.stage == "A" and p.shown == self.id:
+        if game.phase == "night" and ctx is not None and ctx.stage == "A" and R.holds(p, self.id):
             ctx.out[p.id].append(choose(self.id, self.name,
                                         "You died tonight. Choose a player: you learn their character.",
                                         1, everyone(game)))
@@ -149,7 +153,7 @@ class Ravenkeeper(Char):
         if R.malfunction(g, p) or (R.vortox_active(g)):
             R.abnormal(g, p)
             role = g.rng.choice([r for r in R.roles if r != role])
-        ctx.messages[p.id].append(f"{t.name} is the {R.roles[role].name}.")
+        ctx.tell(p, self.name, [f"{t.name} is the {R.roles[role].name}."], self.id)
 
 
 class Virgin(Char):
@@ -164,7 +168,8 @@ class Virgin(Char):
         if R.works(game, nominee, self.id) and R.reg(game, nominator)["type"] == "townsfolk":
             game.executed_today = nominator.id
             game.announce(f"{nominator.name} is executed immediately! The day is over.")
-            R.die(game, nominator, "execution")
+            if R.die(game, nominator, "execution"):
+                game.estate["executed_died"] = nominator.id
             return True
         return False
 
@@ -238,7 +243,7 @@ class Saint(Char):
     tip = "Stay off the chopping block."
 
     def on_death(self, R, game, p, cause, ctx):
-        if cause == "execution" and p.role == self.id and not R.malfunction(game, p):
+        if cause == "execution" and R.holds(p, self.id) and not R.malfunction(game, p):
             game.estate["win"] = ("evil", "The Saint was executed.")
 
 
@@ -303,10 +308,10 @@ def demon_attack(R, ctx, demon, target, cause="demon") -> bool:
     if not target.alive and not target.fake_dead:
         return False
     if R.works(g, target, "mayor") and not R.protected(g, target, cause) \
-            and g.rng.random() < g.settings["mayor_bounce"]:
+            and R.lucky(g, target, g.settings["mayor_bounce"]):
         pool = [x for x in R.living(g) if x.id not in (target.id, demon.id) and not R.protected(g, x, cause)]
         if pool:
-            target = g.rng.choice(pool)
+            target = R.pick_victim(g, pool)
     return R.die(g, target, cause, demon, ctx)
 
 

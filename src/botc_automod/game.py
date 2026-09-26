@@ -42,7 +42,10 @@ DEFAULT_SETTINGS = {
     "pacifist_save": 0.5,    # chance an executed good player survives with the Pacifist
     "tinker_chance": 0.1,    # chance per night the Tinker dies
     "shabaloth_regurgitate": 0.3,  # chance per night the Shabaloth brings back a victim
+    "demon_bluffs": 1,       # 1: the Demon gets 3 safe bluffs even with fewer than 7 players
+    "karma": 1,              # 1: karma from night questions tilts the automod's random choices
 }
+TOGGLES = {"demon_bluffs", "karma"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
 SCHEMA = 2  # bump when saved games from older versions cannot load
 
@@ -74,6 +77,7 @@ class Player:
     ghost_vote: bool = True
     connected: bool = False
     slayer_claimed: bool = False
+    karma: int = 0                # +1 per right night question, -1 per wrong one
     tasks: list = field(default_factory=list)
     log: list = field(default_factory=list)
 
@@ -83,6 +87,10 @@ class Player:
 
 class GameError(Exception):
     """A player action the rules do not allow. The message goes to the player."""
+
+
+class NameTaken(GameError):
+    """The name belongs to a player already in this game."""
 
 
 class Game:
@@ -202,16 +210,67 @@ class Game:
         name = " ".join(name.split())[:24]
         if not name:
             raise GameError("Please enter a name.")
+        if any(p.name.lower() == name.lower() for p in self.players.values()):
+            raise NameTaken("That name is taken in this game.")
         if self.phase != "lobby":
             raise GameError("This game has already started.")
-        if any(p.name.lower() == name.lower() for p in self.players.values()):
-            raise GameError("That name is taken in this game.")
         if len(self.players) >= self.edition.max_players + 1:
             raise GameError("This game is full.")
         pid = secrets.token_hex(4)
         p = Player(id=pid, name=name, token=secrets.token_urlsafe(18), is_host=is_host)
         self.players[pid] = p
         return p
+
+    def by_name(self, name: str) -> Player | None:
+        name = " ".join(name.split()).lower()
+        return next((p for p in self.players.values() if p.name.lower() == name), None)
+
+    def rejoin(self, name: str) -> tuple[str, str]:
+        """Return to the game as an existing player, for example after losing the page.
+
+        In the lobby this works at once. After the start the host must approve it,
+        because the player's private notebook is at stake. Returns ("token", token)
+        or ("pending", request id).
+        """
+        p = self.by_name(name)
+        if p is None:
+            raise GameError("There is no player with that name here.")
+        if p.connected:
+            raise GameError(f"{p.name} is connected on another device. Close the game there first.")
+        if self.phase == "lobby":
+            p.token = secrets.token_urlsafe(18)
+            return "token", p.token
+        reqs = self.estate.setdefault("rejoins", {})
+        rid = secrets.token_hex(4)
+        reqs[rid] = {"pid": p.id, "name": p.name, "status": "pending"}
+        return "pending", rid
+
+    def rejoin_status(self, rid: str) -> dict:
+        req = self.estate.get("rejoins", {}).get(rid)
+        if req is None:
+            raise GameError("Unknown request.")
+        if req["status"] == "approved":
+            p = self.p(req["pid"])
+            del self.estate["rejoins"][rid]
+            return {"status": "approved", "token": p.token}
+        return {"status": req["status"]}
+
+    def answer_rejoin(self, rid: str, allow: bool) -> None:
+        req = self.estate.get("rejoins", {}).get(rid)
+        if req is None or req["status"] != "pending":
+            raise GameError("That request is already answered.")
+        if allow:
+            p = self.p(req["pid"])
+            p.token = secrets.token_urlsafe(18)  # the old device's token stops working
+            req["status"] = "approved"
+        else:
+            req["status"] = "denied"
+
+    def leave(self, pid: str) -> None:
+        """Leave the lobby, which frees the name and the seat."""
+        p = self.p(pid)
+        if self.phase == "lobby" and not p.is_host:
+            del self.players[pid]
 
     def set_room(self, shape: str, seats: int = 0, rows: int = 0, cols: int = 0,
                  cells: list | None = None) -> None:
@@ -336,7 +395,12 @@ class Game:
         self.stage = stage
         n = 0
         for p in self.seated():
-            queue = [t for t in tasks.get(p.id, []) if self._fits(t)] or [decoy_task(self.rng)]
+            queue = [t for t in tasks.get(p.id, []) if self._fits(t)]
+            if stage == "A":
+                queue = queue or [decoy_task(self.rng)]
+            else:
+                # Everyone ends the night with one scored question: the same karma chance for all.
+                queue.append({**decoy_task(self.rng), "scored": True, "title": "Night question"})
             for t in queue:
                 n += 1
                 t.setdefault("key", t["kind"])
@@ -393,6 +457,10 @@ class Game:
             if response not in task["options"]:
                 raise GameError("Tap one of the answers.")
             task["response"] = response
+            if task.get("scored"):
+                right = response == task["answer"]
+                p.karma += 1 if right else -1
+                task["result"] = "right" if right else "wrong"
         else:
             task["response"] = True
         task["done"] = True
@@ -807,7 +875,10 @@ class Game:
         if key not in DEFAULT_SETTINGS:
             raise GameError("Unknown setting.")
         value = float(value)
-        if key in CHANCES:
+        if key in TOGGLES:
+            if value not in (0, 1):
+                raise GameError("This option is on (1) or off (0).")
+        elif key in CHANCES:
             if not 0 <= value <= 1:
                 raise GameError("A chance is between 0 and 1.")
         elif not 5 <= value <= 3600:
@@ -867,6 +938,9 @@ class Game:
                    and self.phase not in ("lobby", "setup", "ended") else [],
                    "storyteller": self.is_storyteller(pid),
                    "log": me.log, "slayer_claimed": me.slayer_claimed,
+                   "karma": me.karma if self.settings.get("karma", 1) else None,
+                   "last_answer": self._last_answer(me),
+                   "bluffs": ed.bluffs_for(self, me) if self.phase not in ("lobby", "setup") else [],
                    "night_done": self.phase == "night" and task is None},
             "task": task,
             "room": self.room, "layout": self.layout,
@@ -880,6 +954,10 @@ class Game:
                     "history": self.nom_history},
             "public_log": self.public_log[-60:],
         }
+        rejoins = [{"id": k, "name": v["name"]} for k, v in self.estate.get("rejoins", {}).items()
+                   if v["status"] == "pending" and v["pid"] != pid
+                   and (me.is_host or self.p(v["pid"]).is_host)]
+        view["rejoins"] = rejoins
         if me.is_host:
             view["host"] = {"script": self.script[-40:], "settings": self.settings}
         if self.is_storyteller(pid) and self.phase != "lobby":
@@ -887,6 +965,11 @@ class Game:
         if self.phase == "ended":
             view["grimoire"] = self.grimoire()
         return view
+
+    @staticmethod
+    def _last_answer(p: Player) -> str | None:
+        done = [t for t in p.tasks if t.get("scored") and t["done"]]
+        return done[-1].get("result") if done else None
 
     def _believed_team(self, p: Player) -> str:
         """The team the player believes they are on (a Lunatic thinks evil)."""
@@ -927,7 +1010,7 @@ class Game:
         return {
             "grimoire": [{"id": p.id, "name": p.name, "seat": p.seat, "role": p.role, "shown": p.shown,
                           "team": ed.alignment(p), "alive": p.alive, "ghost_vote": p.ghost_vote,
-                          "notes": ed.player_notes(self, p)}
+                          "notes": ed.player_notes(self, p), "karma": p.karma}
                          for p in self.seated()],
             "requests": self.estate.get("requests", []),
             "status": ed.st_status(self),

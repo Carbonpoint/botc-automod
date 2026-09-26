@@ -197,7 +197,7 @@ def test_starpass_to_scarlet_woman():
     finish_night(g)
     g.advance(); g.advance()
     imp, sw = by(g, "imp"), by(g, "scarletwoman")
-    finish_night(g, {"imp": [imp.id]})
+    finish_night(g, {"imp": [imp.id], "monk": [by(g, "chef").id]})
     assert not imp.alive
     assert sw.role == "imp" and sw.shown == "imp"
     assert g.phase == "day"
