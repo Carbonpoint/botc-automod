@@ -82,4 +82,9 @@ def public_url(port: int) -> str:
     """The address players open. BOTC_PUBLIC_URL overrides it (Docker, reverse proxies)."""
     import os
 
-    return os.environ.get("BOTC_PUBLIC_URL") or f"http://{lan_address()}:{port}/"
+    if os.environ.get("BOTC_PUBLIC_URL"):
+        return os.environ["BOTC_PUBLIC_URL"]
+    if os.path.exists("/.dockerenv") or os.path.exists("/run/.containerenv"):
+        print("  Running in a container: set BOTC_PUBLIC_URL to http://<this computer's LAN address>:<port>/ "
+              "so the QR code points players to the right place.")
+    return f"http://{lan_address()}:{port}/"

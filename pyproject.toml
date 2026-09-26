@@ -8,13 +8,19 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.141.1",
     "segno>=1.6.6",
+    "starlette>=1.7.0",
     "uvicorn[standard]>=0.54.0",
+    "websockets>=17.1",
 ]
 
 [project.scripts]
 botc-automod = "botc_automod:main"
+
+[project.optional-dependencies]
+cloud = [
+    "anthropic>=1.8.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.7,<0.13.0"]

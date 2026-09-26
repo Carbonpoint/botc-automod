@@ -1,0 +1,21 @@
+# docker compose up -d        then open the address printed by: docker compose logs
+services:
+  botc:
+    build: .
+    image: botc-automod
+    ports:
+      - "8000:8000"
+    volumes:
+      - botc-data:/data
+    environment:
+      # The address players open (your computer's LAN address). Shown as the QR code.
+      BOTC_PUBLIC_URL: ${BOTC_PUBLIC_URL:-}
+      # Artist question model: none | packaged | ollama | anthropic | openai | gemini | openrouter | custom
+      BOTC_ARTIST: ${BOTC_ARTIST:-none}
+      BOTC_ARTIST_URL: ${BOTC_ARTIST_URL:-}
+      BOTC_ARTIST_MODEL: ${BOTC_ARTIST_MODEL:-}
+      BOTC_ARTIST_KEY: ${BOTC_ARTIST_KEY:-}
+    restart: unless-stopped
+
+volumes:
+  botc-data:

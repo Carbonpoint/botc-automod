@@ -22,7 +22,8 @@ ap.add_argument("--n-train", type=int, default=30000)
 ap.add_argument("--epochs", type=float, default=2.0)
 ap.add_argument("--lr", type=float, default=2e-4)
 ap.add_argument("--rank", type=int, default=64)
-ap.add_argument("--batch", type=int, default=16)
+ap.add_argument("--batch", type=int, default=4)
+ap.add_argument("--accum", type=int, default=4)
 ap.add_argument("--full", action="store_true", help="full fine-tune instead of LoRA")
 a = ap.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
@@ -73,10 +74,10 @@ if not a.full:
                                              target_modules="all-linear", task_type="CAUSAL_LM"))
     model.print_trainable_parameters()
 
-args = TrainingArguments(output_dir=f"{a.out}/ckpt", per_device_train_batch_size=a.batch, gradient_accumulation_steps=1,
-                         num_train_epochs=a.epochs, learning_rate=a.lr, lr_scheduler_type="cosine", warmup_ratio=0.03,
-                         logging_steps=50, save_strategy="no", fp16=True, report_to=[], dataloader_num_workers=2,
-                         group_by_length=True)
+args = TrainingArguments(output_dir=f"{a.out}/ckpt", per_device_train_batch_size=a.batch, gradient_accumulation_steps=a.accum,
+                         num_train_epochs=a.epochs, learning_rate=a.lr, lr_scheduler_type="cosine",
+                         warmup_steps=int(0.03 * a.epochs * a.n_train / (a.batch * a.accum)),
+                         logging_steps=50, save_strategy="no", fp16=True, report_to="none", dataloader_num_workers=2)
 t0 = time.time()
 Trainer(model=model, args=args, train_dataset=train,
         data_collator=DataCollatorForSeq2Seq(tok, padding=True, label_pad_token_id=-100)).train()

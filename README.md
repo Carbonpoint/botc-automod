@@ -13,26 +13,31 @@ sits in the same room and plays on their phone's web browser.
     still does the work. The storyteller checks the deal, sees every
     night choice, and edits the night results before players get them.
 
+**Install:** [on a fresh computer](#install-on-a-fresh-computer) (Windows, macOS, Linux) ·
+[with Docker](#docker) · [Artist question model](#artist-question-model)
+
 ## Run it
 
 ```sh
-cd ~/botc-automod
+cd botc-automod
 uv run botc-automod              # listens on all addresses, port 8000
 uv run botc-automod --port 8080  # another port
 uv run botc-automod --no-qr      # skip the terminal QR code
+uv run botc-automod --setup      # ask again which model answers the Artist
 ```
 
 The server prints the join address and a QR code in the terminal.
 Players scan it or type the address. The host's lobby screen shows the
-same QR code. Phones must be on the same network. On Fedora, firewalld
-may block the port for other devices. Opening it needs root
-(`firewall-cmd --add-port=8000/tcp`).
+same QR code. Phones must be on the same network as the server. If
+phones cannot connect, a firewall is blocking the port (see the install
+steps for your system).
 
-Games are saved to `~/.local/share/botc-automod/` after every change and
-reload when the server restarts. Set `BOTC_DATA` to save elsewhere.
-Saves from an older format are skipped. Set `BOTC_DEBUG=1` to enable
-`/api/debug/{code}`, which shows the full Grimoire. Never enable it
-during a real game.
+Games are saved in the data folder (`~/.local/share/botc-automod/` on
+Linux and macOS, `%USERPROFILE%\.local\share\botc-automod` on Windows)
+after every change, and reload when the server restarts. Set `BOTC_DATA`
+to save elsewhere. Saves from an older format are skipped. Set
+`BOTC_DEBUG=1` to enable debug endpoints that show the full Grimoire.
+Never enable it during a real game.
 
 ## How a game goes
 
@@ -80,6 +85,134 @@ during a real game.
    - Forced choices when a Klutz or Moonchild learns they died.
 8. **End.** When a team wins, every phone shows the full Grimoire.
 
+## Install on a fresh computer
+
+You need two tools. **uv** runs the project and installs the right Python
+by itself, so you do not install Python separately. **git** downloads the
+code and its updates. The repository is private, so you must be signed in
+to a GitHub account with access. Git asks you to sign in the first time.
+
+### Windows 10 or 11
+
+1. Open **PowerShell** (Start menu, type "PowerShell").
+2. Install uv and git:
+   ```powershell
+   winget install --id=astral-sh.uv -e
+   winget install --id=Git.Git -e
+   ```
+3. Close PowerShell and open it again, so it finds the new tools.
+4. Download and start the game:
+   ```powershell
+   git clone https://github.com/Carbonpoint/botc-automod.git
+   cd botc-automod
+   uv run botc-automod
+   ```
+5. The first time, Windows Defender Firewall asks about Python. Allow it
+   on **Private networks**. Your Wi-Fi must be set as a *Private* network
+   (Settings > Network & internet > Wi-Fi > your network).
+
+No winget? Install uv with
+`powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+and git from https://git-scm.com/download/win.
+
+### macOS
+
+1. Open **Terminal** (Applications > Utilities).
+2. Install git (it comes with Apple's command-line tools) and uv:
+   ```sh
+   xcode-select --install
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+3. Close Terminal and open it again.
+4. Download and start the game:
+   ```sh
+   git clone https://github.com/Carbonpoint/botc-automod.git
+   cd botc-automod
+   uv run botc-automod
+   ```
+5. If macOS asks whether Python may accept incoming connections, click
+   **Allow**.
+
+### Linux
+
+1. Install git with your package manager, then uv:
+   ```sh
+   sudo apt install git        # Debian, Ubuntu
+   sudo dnf install git        # Fedora
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+2. Open a new terminal, then:
+   ```sh
+   git clone https://github.com/Carbonpoint/botc-automod.git
+   cd botc-automod
+   uv run botc-automod
+   ```
+3. If phones cannot connect, open the port:
+   `sudo ufw allow 8000/tcp` (Ubuntu) or
+   `sudo firewall-cmd --add-port=8000/tcp --permanent && sudo firewall-cmd --reload` (Fedora).
+
+### Updating
+
+In the `botc-automod` folder, run `git pull`, then start the game again.
+
+## Docker
+
+The image holds everything, including Python. Build it once in the
+project folder, then run it:
+
+```sh
+docker build -t botc-automod .
+docker run -d --name botc -p 8000:8000 -v botc-data:/data \
+  -e BOTC_PUBLIC_URL=http://192.168.1.20:8000/ botc-automod
+```
+
+Or with Compose (`compose.yaml` is in the project):
+
+```sh
+BOTC_PUBLIC_URL=http://192.168.1.20:8000/ docker compose up -d --build
+docker compose logs      # shows the join address and QR code
+```
+
+Replace `192.168.1.20` with your computer's address on the home
+network. A container cannot see that address by itself, and the QR code
+uses it. Games, karma, settings and downloaded models live in the
+`botc-data` volume. The Artist model is set with environment variables
+(see [Artist question model](#artist-question-model)); `compose.yaml`
+lists them. Podman runs the same files (`podman build`, `podman run`).
+
+## Artist question model
+
+The Artist asks the Storyteller any yes/no question. An automated
+storyteller needs a language model to read it. The model only
+translates the question into a small query (`artist/query.py`). The
+game engine then answers the query from the true game state, so the
+model can misread a question but cannot give a false answer. The Artist
+sees the reading ("I understood: Kofi is evil?") and confirms it before
+the ability is used.
+
+The first time the server starts, it asks which model to use:
+
+| Choice | What you need |
+|---|---|
+| No model | Nothing. The Artist is dealt only when a human storyteller runs the game. |
+| Local: packaged model | Nothing. It downloads llama.cpp (about 20 MB) and the model once, then runs on the CPU. |
+| Local: Ollama | An Ollama server. You give its address and pick a model from its list. |
+| Cloud | A provider (Anthropic, OpenAI, Google Gemini, OpenRouter, or any OpenAI-compatible server), an API key, and a model name. |
+
+The choice is saved in the settings file (`~/.config/botc-automod/config.json`,
+readable only by you, because it can hold an API key). Run
+`botc-automod --setup` to change it. The server tests the model with a
+sample question at every start; if it fails, the game runs without it.
+API keys are asked in the terminal, never on the web page. The Anthropic
+backend needs the cloud extra: `uv run --extra cloud botc-automod`.
+With the default model (`claude-opus-5`), it turns on Anthropic's
+server-side fallback, which retries a declined request on another model.
+
+Environment variables override the file (for Docker):
+`BOTC_ARTIST` (`none`, `packaged`, `ollama`, `anthropic`, `openai`,
+`gemini`, `openrouter`, `custom`), `BOTC_ARTIST_URL`, `BOTC_ARTIST_MODEL`,
+`BOTC_ARTIST_KEY`.
+
 ## Options
 
 | Option | Default | What it does |
@@ -113,7 +246,7 @@ The chances are host settings.
 | Shabaloth | Brings back last night's victim with chance `shabaloth_regurgitate` (0.3) |
 | Godfather | The Outsider change (-1 or +1) is random |
 | Savant | Two generated statements about the game, one true and one false |
-| Artist | Not dealt: it needs a human storyteller for now (plan: docs/artist-llm.md) |
+| Artist | Dealt only if a question model is set up (see [Artist question model](#artist-question-model)) |
 | Pit-Hag makes a Demon | No extra deaths |
 | Sweetheart | A random other living player becomes drunk for the rest of the game |
 | Vigormortis | Which of the two Townsfolk neighbours is poisoned is random |

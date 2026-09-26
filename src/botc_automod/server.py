@@ -1,4 +1,4 @@
-"""HTTP + WebSocket server.
+"""HTTP + WebSocket server (Starlette: pure Python, so it also runs on Android).
 
 Each player's browser holds a token. The server sends every player a
 personal view after each change, so no client ever receives another
@@ -19,10 +19,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import segno
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from starlette.applications import Starlette
+from starlette.exceptions import HTTPException
+from starlette.requests import Request
+from starlette.responses import FileResponse, JSONResponse, Response
+from starlette.routing import Mount, Route, WebSocketRoute
+from starlette.staticfiles import StaticFiles
+from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from .editions import EDITIONS
 from .game import SCHEMA, Game, GameError, NameTaken, new_code
@@ -132,7 +135,7 @@ async def heartbeat() -> None:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: Starlette):
     load_all()
     load_karma()
     tasks = [asyncio.create_task(ticker()), asyncio.create_task(heartbeat())]
@@ -141,12 +144,14 @@ async def lifespan(app: FastAPI):
         t.cancel()
 
 
-app = FastAPI(title="botc-automod", lifespan=lifespan)
-
-
-class NameIn(BaseModel):
-    name: str
-    edition: str = "tb"
+async def body_name(request: Request) -> tuple[str, str]:
+    try:
+        data = await request.json()
+    except ValueError:
+        raise HTTPException(400, "Bad request.") from None
+    if not isinstance(data, dict) or not isinstance(data.get("name"), str):
+        raise HTTPException(400, "Please enter a name.")
+    return data["name"], str(data.get("edition", "tb"))
 
 
 def _game(code: str) -> Game:
@@ -156,110 +161,109 @@ def _game(code: str) -> Game:
     return g
 
 
-@app.get("/")
-def index() -> FileResponse:
+async def index(request: Request) -> FileResponse:
     return FileResponse(STATIC / "index.html")
 
 
-@app.get("/api/info")
-def info(request: Request) -> dict:
+async def info(request: Request) -> JSONResponse:
     """The address other devices should open (the host may be on localhost)."""
     from . import public_url
     from .artist.config import describe, load
 
-    return {"join_url": public_url(request.url.port or 80),
-            "artist": describe(load()) if ARTIST is not None else "no model"}
+    return JSONResponse({"join_url": public_url(request.url.port or 80),
+                         "artist": describe(load()) if ARTIST is not None else "no model"})
 
 
-@app.get("/api/games")
-def list_games() -> list[dict]:
-    return [{"code": g.code, "edition": g.edition.name, "players": len(g.players),
-             "host": g.host.name if g.host else "", "phase": g.phase}
-            for g in sorted(games.values(), key=lambda g: -g.created) if g.phase == "lobby"]
+async def list_games(request: Request) -> JSONResponse:
+    return JSONResponse([{"code": g.code, "edition": g.edition.name, "players": len(g.players),
+                          "host": g.host.name if g.host else "", "phase": g.phase}
+                         for g in sorted(games.values(), key=lambda g: -g.created) if g.phase == "lobby"])
 
 
-@app.post("/api/games")
-async def create_game(body: NameIn) -> dict:
-    if body.edition not in EDITIONS:
+async def create_game(request: Request) -> JSONResponse:
+    name, edition = await body_name(request)
+    if edition not in EDITIONS:
         raise HTTPException(400, "Unknown edition.")
-    g = Game(new_code(set(games)), body.edition)
+    g = Game(new_code(set(games)), edition)
     g.artist_ready = ARTIST is not None
     try:
-        p = g.join(body.name, is_host=True)
+        p = g.join(name, is_host=True)
     except GameError as e:
         raise HTTPException(400, str(e)) from None
     p.karma = karma.get(p.name.lower(), 0)
     games[g.code] = g
     save(g)
-    return {"code": g.code, "token": p.token, "player": p.id}
+    return JSONResponse({"code": g.code, "token": p.token, "player": p.id})
 
 
-@app.post("/api/games/{code}/join")
-async def join_game(code: str, body: NameIn) -> dict:
-    g = _game(code)
+async def join_game(request: Request) -> JSONResponse:
+    g = _game(request.path_params["code"])
+    name, _ = await body_name(request)
     try:
-        p = g.join(body.name)
+        p = g.join(name)
     except NameTaken:
         # The name is in the game already: this is someone coming back.
         try:
-            kind, value = g.rejoin(body.name)
+            kind, value = g.rejoin(name)
         except GameError as e:
             raise HTTPException(400, str(e)) from None
         await broadcast(g)
         if kind == "pending":
-            return {"code": g.code, "pending": value}
-        return {"code": g.code, "token": value, "rejoined": True}
+            return JSONResponse({"code": g.code, "pending": value})
+        return JSONResponse({"code": g.code, "token": value, "rejoined": True})
     except GameError as e:
         raise HTTPException(400, str(e)) from None
     p.karma = karma.get(p.name.lower(), 0)
     await broadcast(g)
-    return {"code": g.code, "token": p.token, "player": p.id}
+    return JSONResponse({"code": g.code, "token": p.token, "player": p.id})
 
 
-@app.get("/api/games/{code}/rejoin/{rid}")
-async def rejoin_status(code: str, rid: str) -> dict:
-    g = _game(code)
+async def rejoin_status(request: Request) -> JSONResponse:
+    g = _game(request.path_params["code"])
     try:
-        return g.rejoin_status(rid)
+        return JSONResponse(g.rejoin_status(request.path_params["rid"]))
     except GameError as e:
         raise HTTPException(404, str(e)) from None
 
 
-@app.get("/api/editions")
-def editions() -> list[dict]:
-    return [{"id": e.id, "name": e.name} for e in EDITIONS.values()]
+async def editions(request: Request) -> JSONResponse:
+    return JSONResponse([{"id": e.id, "name": e.name} for e in EDITIONS.values()])
 
 
-@app.get("/api/editions/{eid}")
-def almanac(eid: str) -> dict:
+async def almanac(request: Request) -> JSONResponse:
+    eid = request.path_params["eid"]
     if eid not in EDITIONS:
         raise HTTPException(404, "Unknown edition.")
-    return EDITIONS[eid].almanac()
+    return JSONResponse(EDITIONS[eid].almanac())
 
 
-@app.get("/api/qr")
-def qr(url: str) -> Response:
+async def qr(request: Request) -> Response:
     buf = io.BytesIO()
-    segno.make(url, error="m").save(buf, kind="svg", scale=6, border=2, dark="#111", light="#fff")
+    segno.make(request.query_params.get("url", ""), error="m").save(
+        buf, kind="svg", scale=6, border=2, dark="#111", light="#fff")
     return Response(buf.getvalue(), media_type="image/svg+xml")
 
 
-if DEBUG:
-    @app.post("/api/debug/{code}/role")
-    async def debug_role(code: str, player: str, role: str) -> dict:
-        """Test hook: give a player a character. Only with BOTC_DEBUG=1."""
-        g = _game(code)
-        p = g.by_name(player)
-        p.role = p.shown = role
-        p.alignment = g.edition.roles[role].team
-        await broadcast(g)
-        return {"ok": True}
+async def debug_role(request: Request) -> JSONResponse:
+    """Test hook: give a player a character. Only with BOTC_DEBUG=1."""
+    g = _game(request.path_params["code"])
+    p = g.by_name(request.query_params["player"])
+    role = request.query_params["role"]
+    p.role = p.shown = role
+    p.alignment = g.edition.roles[role].team
+    await broadcast(g)
+    return JSONResponse({"ok": True})
 
-    @app.get("/api/debug/{code}")
-    def debug(code: str) -> dict:
-        g = _game(code)
-        return {"grimoire": [{"name": p.name, "role": p.role, "shown": p.shown, "alive": p.alive}
-                             for p in g.seated()], "estate": {k: v for k, v in g.estate.items() if k != "reg"}}
+
+async def debug(request: Request) -> JSONResponse:
+    g = _game(request.path_params["code"])
+    return JSONResponse({"grimoire": [{"name": p.name, "role": p.role, "shown": p.shown, "alive": p.alive}
+                                      for p in g.seated()],
+                         "estate": {k: v for k, v in g.estate.items() if k != "reg"}})
+
+
+async def http_error(request: Request, exc: HTTPException) -> JSONResponse:
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 def _find(code: str, token: str):
@@ -388,10 +392,9 @@ async def artist_preview(ws: WebSocket, g: Game, p, text: str) -> None:
                         "reading": render(query, world, p.name) if ok else ""})
 
 
-@app.websocket("/ws/{code}")
-async def ws_endpoint(ws: WebSocket, code: str, token: str) -> None:
+async def ws_endpoint(ws: WebSocket) -> None:
     await ws.accept()
-    g, p = _find(code, token)
+    g, p = _find(ws.path_params["code"], ws.query_params.get("token", ""))
     if not p:
         await ws.send_json({"type": "gone"})
         await ws.close(code=4004)
@@ -428,4 +431,20 @@ async def ws_endpoint(ws: WebSocket, code: str, token: str) -> None:
             await broadcast(g)
 
 
-app.mount("/static", StaticFiles(directory=STATIC), name="static")
+routes = [
+    Route("/", index),
+    Route("/api/info", info),
+    Route("/api/games", list_games, methods=["GET"]),
+    Route("/api/games", create_game, methods=["POST"]),
+    Route("/api/games/{code}/join", join_game, methods=["POST"]),
+    Route("/api/games/{code}/rejoin/{rid}", rejoin_status),
+    Route("/api/editions", editions),
+    Route("/api/editions/{eid}", almanac),
+    Route("/api/qr", qr),
+    WebSocketRoute("/ws/{code}", ws_endpoint),
+    Mount("/static", StaticFiles(directory=STATIC), name="static"),
+]
+if DEBUG:
+    routes[:0] = [Route("/api/debug/{code}/role", debug_role, methods=["POST"]), Route("/api/debug/{code}", debug)]
+
+app = Starlette(routes=routes, lifespan=lifespan, exception_handlers={HTTPException: http_error})
