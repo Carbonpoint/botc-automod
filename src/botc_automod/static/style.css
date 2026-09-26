@@ -145,3 +145,35 @@ textarea { resize: vertical; }
 /* Home: name, join code, then the Join and Host buttons */
 .home-actions { display: flex; flex-direction: column; align-items: center; gap: 28px; margin: 20px 0; }
 .home-actions .join { min-width: 50%; font-size: 1.1rem; padding: 14px; }
+.home-actions .linkish { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; color: var(--muted); }
+.home-actions .linkish:hover { color: var(--text); }
+
+/* Join list rows with a delete button */
+.gamerow { display: flex; gap: 8px; align-items: stretch; }
+.gamerow .grow { flex: 1; min-width: 0; }
+button.icon { display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; color: var(--muted); }
+button.icon:hover { color: #ffb3b3; border-color: var(--evil); }
+
+/* Archive */
+.archive-top { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
+.archive-top h1 { margin: 0; }
+.seg button svg { vertical-align: -5px; margin-right: 4px; }
+.path { font-family: ui-monospace, monospace; overflow-wrap: anywhere; color: var(--text); }
+input[type=file] { padding: 8px; }
+
+/* Yes/no pop-up */
+.modal { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); display: flex;
+  align-items: center; justify-content: center; padding: 16px; }
+.modal .box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px; width: 100%; max-width: 380px; }
+.modal .box p { margin: 0 0 14px; font-size: 1.05rem; }
+
+/* Dawn: the narrator's screen */
+.night.dawn { background: linear-gradient(180deg, #2a1a2e 0%, #4a2a2a 55%, #6b3f24 100%); }
+.dawn .story p { font-size: 1.2rem; line-height: 1.5; background: rgba(20, 12, 20, .55); }
+.dawn .done button { margin-top: 6px; }
+
+/* A quiet button at the very end of the Characters tab */
+.egg { text-align: right; margin: 24px 4px 0; }
+.egg button { background: none; border: 0; min-height: 0; padding: 4px; font-size: .7rem; color: var(--line); }
+.egg button:hover { color: var(--muted); }

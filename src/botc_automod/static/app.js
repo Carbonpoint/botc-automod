@@ -15,9 +15,44 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const session = {
   get() { try { return JSON.parse(localStorage.getItem("botc") || "null"); } catch { return null; } },
-  set(v) { try { localStorage.setItem("botc", JSON.stringify(v)); } catch {} },
+  set(v) { try { localStorage.setItem("botc", JSON.stringify(v)); } catch {} tokens.add(v.token); },
   clear() { try { localStorage.removeItem("botc"); } catch {} },
 };
+// Every player token this browser has held. After a pause the server knows
+// the player by it, so they go straight back to their seat.
+const tokens = {
+  all() { try { return JSON.parse(localStorage.getItem("botc-tokens") || "[]"); } catch { return []; } },
+  add(t) { try { localStorage.setItem("botc-tokens", JSON.stringify([t, ...tokens.all().filter(x => x !== t)].slice(0, 30))); } catch {} },
+};
+const ICON = {
+  trash: `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`,
+  folder: `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>`,
+};
+// A pop-up that asks a yes/no question. Resolves true for yes.
+function ask(question, yes = "Yes", no = "No") {
+  return new Promise(done => {
+    const el = document.createElement("div");
+    el.className = "modal";
+    el.innerHTML = `<div class="box" role="dialog" aria-modal="true"><p>${esc(question)}</p>
+      <div class="row"><button class="grow" data-a="0">${esc(no)}</button><button class="primary grow" data-a="1">${esc(yes)}</button></div></div>`;
+    el.addEventListener("click", ev => {
+      const b = ev.target.closest("[data-a]");
+      if (!b && ev.target !== el) return;
+      el.remove(); done(b?.dataset.a === "1");
+    });
+    document.body.appendChild(el);
+    el.querySelector('[data-a="0"]').focus();
+  });
+}
+// Save a response from the server as a file on this device.
+async function download(r) {
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || "Download failed");
+  const name = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") || "")?.[1] || "game.md";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(await r.blob()); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
 function toast(msg, kind = "") {
   toastEl.textContent = msg; toastEl.className = kind; toastEl.hidden = false;
   clearTimeout(toast.t); toast.t = setTimeout(() => (toastEl.hidden = true), 3500);
@@ -44,6 +79,70 @@ const roleSelect = (id, roles, blank = false) => `<select id="${id}">${blank ? o
 const alivePlayers = () => S.players.filter(p => p.seat != null && p.alive).map(p => p.id);
 const fmt = t => t == null ? "" : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
 
+// ---------- sound and vibration ----------
+// Short tones made in the browser (no audio files), and phone vibration.
+// Only public moments make a sound: every phone hears the same thing at the
+// same time. Night tasks only vibrate, and every player gets a night task.
+const feel = {
+  get() { try { return { sound: true, vibrate: true, ...JSON.parse(localStorage.getItem("botc-feel") || "{}") }; }
+          catch { return { sound: true, vibrate: true }; } },
+  set(k, v) { try { localStorage.setItem("botc-feel", JSON.stringify({ ...feel.get(), [k]: v })); } catch {} },
+};
+let audio = null;
+function unlockAudio() {   // browsers allow sound only after the player touches the page
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === "suspended") audio.resume();
+  } catch {}
+}
+document.addEventListener("pointerdown", unlockAudio, { capture: true });
+// Each sound: a list of [frequency Hz, start s, length s, wave, volume].
+const SOUNDS = {
+  night:       [[392, 0, .5, "sine", .25], [311, .35, .6, "sine", .25], [262, .8, 1.1, "sine", .25]],
+  dawn:        [[523, 0, .35, "triangle", .2], [659, .2, .35, "triangle", .2], [784, .4, .7, "triangle", .2]],
+  narrator:    [[784, 0, .15, "triangle", .25], [988, .15, .15, "triangle", .25], [1319, .3, .5, "triangle", .25]],
+  day:         [[659, 0, .25, "sine", .2], [880, .18, .5, "sine", .2]],
+  nominations: [[440, 0, .12, "square", .08], [554, .14, .12, "square", .08], [659, .28, .3, "square", .08]],
+  nominated:   [[196, 0, .12, "square", .12], [196, .18, .12, "square", .12]],
+  vote:        [[880, 0, .1, "square", .08], [880, .15, .1, "square", .08], [1175, .3, .3, "square", .08]],
+  warn:        [[988, 0, .12, "sine", .2], [988, .2, .12, "sine", .2]],
+  tick:        [[1400, 0, .05, "square", .06]],
+  end:         [[523, 0, 1.2, "sine", .15], [659, .1, 1.1, "sine", .15], [784, .2, 1, "sine", .15]],
+};
+const BUZZ = { night: [300], dawn: [80, 60, 80], narrator: [120, 60, 120, 60, 400], nominations: [60],
+               nominated: [150], vote: [80, 60, 80], warn: [200], tick: [30], end: [400] };
+function cue(name) {
+  const f = feel.get();
+  if (f.vibrate && BUZZ[name] && navigator.vibrate) navigator.vibrate(BUZZ[name]);
+  if (!f.sound || !audio || audio.state !== "running") return;
+  const t0 = audio.currentTime + .02;
+  for (const [hz, at, len, wave, vol] of SOUNDS[name] || []) {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = wave; o.frequency.value = hz;
+    g.gain.setValueAtTime(0, t0 + at);
+    g.gain.linearRampToValueAtTime(vol, t0 + at + .01);
+    g.gain.exponentialRampToValueAtTime(.001, t0 + at + len);
+    o.connect(g).connect(audio.destination);
+    o.start(t0 + at); o.stop(t0 + at + len + .05);
+  }
+}
+// Warnings as a day timer runs out: 30 s, 10 s, then a tick each second of the last 5 of a vote.
+function timerCue(prev, now) {
+  if (!S || prev == null || now == null || now >= prev || S.game.paused) return;
+  const ph = S.game.phase;
+  if (!["day", "nominations", "defense", "vote"].includes(ph) || S.game.stage === "narration") return;
+  if ((prev > 30 && now <= 30 && ph !== "vote" && ph !== "defense") || (prev > 10 && now <= 10)) cue("warn");
+  else if (ph === "vote" && now <= 5 && now >= 1) cue("tick");
+}
+function feelCard() {
+  const f = feel.get(), b = (k, on) => `<button class="${f[k] === on ? "sel" : ""}" data-act="feel" data-k="${k}" data-v="${on ? 1 : 0}">${on ? "On" : "Off"}</button>`;
+  return `<div class="card stack"><h3>On this phone</h3>
+    <div class="row"><span class="grow">Sounds</span><div class="seg">${b("sound", true)}${b("sound", false)}</div></div>
+    <div class="row"><span class="grow">Vibration</span><div class="seg">${b("vibrate", true)}${b("vibrate", false)}</div></div>
+    <p class="small muted">Sounds mark night, dawn, nominations and votes, and warn when time runs low.
+      iPhones do not vibrate from a web page, and their silent switch mutes the sounds.</p></div>`;
+}
+
 // ---------- connection ----------
 function connect() {
   const s = session.get();
@@ -54,14 +153,15 @@ function connect() {
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type === "state") { onState(m.state); }
-    else if (m.type === "timer") { if (S) { S.game.timer = m.timer; S.game.paused = m.paused; drawTimer(); } }
+    else if (m.type === "timer") { if (S) { const was = S.game.timer; S.game.timer = m.timer; S.game.paused = m.paused; drawTimer(); timerCue(was, m.timer); } }
     else if (m.type === "error") { ui.artistBusy = false; toast(m.message); render(); }
     else if (m.type === "artist_preview") { ui.artistBusy = false; ui.artistPreview = m; render(); }
     else if (m.type === "gone") { session.clear(); S = null; toast("That game no longer exists."); render(); }
+    else if (m.type === "paused") { session.clear(); S = null; toast("The host paused the game. It is in Archive, Paused.", "info"); render(); }
   };
   ws.onclose = ev => {
     wsOpen = false;
-    if (ev.code === 4004 || ev.code === 4001) { session.clear(); S = null; render(); return; }
+    if (ev.code === 4004 || ev.code === 4001 || ev.code === 4005) { session.clear(); S = null; render(); return; }
     render();
     setTimeout(connect, Math.min(8000, 500 * 2 ** wsTries++));
   };
@@ -76,11 +176,22 @@ function onState(state) {
   const task = S.task;
   if (task && task.id !== ui.seenTask) {
     ui.seenTask = task.id; ui.picks = [];
-    if (navigator.vibrate) navigator.vibrate(120);
+    if (navigator.vibrate && feel.get().vibrate) navigator.vibrate(120);
   }
-  if (prev && prev.game.phase !== S.game.phase) {
-    ui.nominate = null;
-    if (S.game.phase === "vote" && navigator.vibrate) navigator.vibrate([80, 60, 80]);
+  if (prev && prev.game.phase !== S.game.phase) ui.nominate = null;
+  if (prev) {
+    const was = prev.game.phase + "/" + prev.game.stage, now = S.game.phase + "/" + S.game.stage;
+    if (was !== now) {
+      const ph = S.game.phase;
+      if (ph === "night" && prev.game.phase !== "night") cue("night");
+      else if (ph === "day" && S.game.stage === "narration") cue(S.narration?.narrator === S.me.id ? "narrator" : "dawn");
+      else if (ph === "day" && prev.game.phase !== "day") cue("dawn");
+      else if (ph === "day") cue("day");
+      else if (ph === "nominations" && prev.game.phase !== "nominations") cue("nominations");
+      else if (ph === "defense") cue("nominated");
+      else if (ph === "vote") cue("vote");
+      else if (ph === "ended") cue("end");
+    }
   }
   if (prev?.game.phase === "lobby" && S.game.phase !== "lobby") { ui.tab = S.me.storyteller ? "grim" : "me"; keepAwake(); }
   if (!prev && S.me.storyteller && ui.tab === "me") ui.tab = "grim";
@@ -106,10 +217,13 @@ function render() {
     ui.pendingRender = true; return;
   }
   ui.pendingRender = false;
-  if (!session.get()) { app.innerHTML = homeView(); loadGames(); return; }
+  if (!session.get()) {
+    if (ui.view === "archive") { app.innerHTML = archiveView(); return; }
+    app.innerHTML = homeView(); loadGames(); return;
+  }
   if (!S) { app.innerHTML = `<div class="card">Connecting...</div>`; return; }
   const g = S.game;
-  const overlay = g.phase === "night" && !S.me.storyteller;  // the night screen shows its own copy
+  const overlay = (g.phase === "night" && !S.me.storyteller) || g.stage === "narration";  // those screens show their own copy
   let html = topBar() + (overlay ? "" : rejoinBanner());
   if (g.phase === "lobby") html += lobbyView();
   else {
@@ -117,6 +231,7 @@ function render() {
     html += ({ me: meView, grim: grimView, town: townView, almanac: almanacView, log: logView, host: hostView }[ui.tab] || meView)();
     html += tabsView();
     if (g.phase === "night" && !S.me.storyteller) html += nightView();
+    if (g.phase === "day" && g.stage === "narration" && S.narration) html += dawnView();
   }
   app.innerHTML = html;
   drawTimer();
@@ -152,7 +267,7 @@ function homeView() {
   <p class="muted">Blood on the Clocktower with an automatic storyteller. Everyone plays; one player hosts.</p>
   <div class="card stack">
     <h3><label for="name">Your name</label></h3>
-    <input id="name" maxlength="24" autocomplete="nickname" placeholder="Name shown to the table">
+    <input id="name" maxlength="24" autocomplete="nickname" placeholder="Name shown to the table" value="${esc(ui.name || "")}">
   </div>
   <div class="card stack">
     <h3><label for="code">Join a game</label></h3>
@@ -162,6 +277,7 @@ function homeView() {
   <div class="home-actions">
     <button class="primary join" data-act="joincode">Join</button>
     <button class="big" data-act="host">Host a new game</button>
+    <button class="linkish" data-act="archive">${ICON.folder}<span>Archive</span></button>
   </div>`;
 }
 async function loadGames() {
@@ -169,13 +285,55 @@ async function loadGames() {
     const list = await api("/api/games");
     const el = document.getElementById("games");
     if (!el) return;
-    el.innerHTML = list.length ? list.map(g => `<button class="big" data-act="join" data-code="${esc(g.code)}">
-      Join ${esc(g.host)}'s game <span class="code">${esc(g.code)}</span>
-      <span class="muted small">· ${g.players} player${g.players === 1 ? "" : "s"}</span></button>`).join("")
-      : `<p class="muted small">No open games on this server yet.</p>`;
+    const players = g => `${g.players} player${g.players === 1 ? "" : "s"}`;
+    const open = list.filter(g => g.phase === "lobby"), playing = list.filter(g => g.phase !== "lobby");
+    el.innerHTML = (open.length ? open.map(g => `<div class="gamerow">
+      <button class="big grow" data-act="join" data-code="${esc(g.code)}">
+        Join ${esc(g.host)}'s game <span class="code">${esc(g.code)}</span>
+        <span class="muted small">· ${players(g)}</span></button>
+      <button class="icon" data-act="delgame" data-code="${esc(g.code)}" data-host="${esc(g.host)}"
+        aria-label="Delete ${esc(g.host)}'s game" title="Delete this game">${ICON.trash}</button></div>`).join("")
+      : `<p class="muted small">No open games on this server yet.</p>`)
+      + (playing.length ? `<p class="muted small">Games in play. Rejoin with the name you played with.</p>` + playing.map(g =>
+      `<button class="big" data-act="join" data-code="${esc(g.code)}">
+        Rejoin ${esc(g.host)}'s game <span class="code">${esc(g.code)}</span>
+        <span class="muted small">· ${esc(g.where)} · ${players(g)}</span></button>`).join("") : "");
   } catch {}
 }
-setInterval(() => { if (!session.get()) loadGames(); }, 4000);
+setInterval(() => { if (!session.get() && ui.view !== "archive") loadGames(); }, 4000);
+
+// ---------- archive ----------
+async function openArchive() {
+  ui.view = "archive"; ui.archive = null; render();
+  try { ui.archive = await api("/api/archive"); } catch (e) { toast(e.message); ui.archive = { completed: [], paused: [], path: "" }; }
+  render();
+}
+function archiveView() {
+  const a = ui.archive, sub = ui.archiveTab || "completed";
+  const back = `<button data-act="home">← Back</button>`;
+  if (!a) return `<div class="archive-top">${back}<h1>Archive</h1></div><div class="card">Loading...</div>`;
+  const rows = a[sub];
+  const row = f => `<div class="card stack">
+      <div><b>${esc(f.edition)}</b> <span class="code">${esc(f.code)}</span></div>
+      <div class="muted small">${esc(f.started)} · host ${esc(f.host)} · ${esc(f.players)} players</div>
+      <div>${sub === "completed" ? esc(f.winner === "nobody" ? "Nobody won" : `${f.winner || "?"} won`.replace(/^./, c => c.toUpperCase()))
+                                 : `Paused at ${esc(f.where)}`}</div>
+      <div class="row">
+        ${sub === "paused" ? `<button class="primary" data-act="resumegame" data-file="${esc(f.file)}" data-host="${esc(f.host)}">Resume</button>` : ""}
+        <button data-act="exportfile" data-file="${esc(f.file)}">Export as Markdown</button></div></div>`;
+  return `<div class="archive-top">${back}<h1>Archive</h1></div>
+    <div class="seg">
+      <button class="${sub === "completed" ? "sel" : ""}" data-act="archivetab" data-v="completed">${ICON.folder} Completed (${a.completed.length})</button>
+      <button class="${sub === "paused" ? "sel" : ""}" data-act="archivetab" data-v="paused">${ICON.folder} Paused (${a.paused.length})</button></div>
+    ${rows.length ? rows.map(row).join("") : `<p class="muted">No ${sub} games.</p>`}
+    <div class="card stack"><h3>Import a game</h3>
+      <p class="small">Choose a game file (.md) from another server or from an export. A game in play goes to Paused; a finished game goes to Completed.</p>
+      <input type="file" id="importfile" accept=".md,text/markdown,text/plain">
+      ${a.path ? `<p class="small muted">The game files on this server are in <span class="path">${esc(a.path)}</span>,
+        in the folders running, paused and completed. To move games to another server, copy the .md files
+        into the same folders there. A server reads running/ when it starts; paused/ and completed/ show here at once.</p>` : ""}
+    </div>`;
+}
 
 async function waitForRejoin(code, rid) {
   app.innerHTML = `<div class="card stack" style="margin-top:24px"><h2>Asking to rejoin</h2>
@@ -254,16 +412,23 @@ function lobbyView() {
   if (me.is_host) {
     if (!ui.editions) api("/api/editions").then(e => { ui.editions = e; render(); }).catch(() => {});
     html += `<div class="card stack"><h3>Edition</h3>
-      ${ui.editions ? seg("edition", ui.editions.map(e => [e.id, e.name]), g.edition.id) : ""}</div>`;
-  } else html += `<div class="card"><p>Edition: <b>${esc(g.edition.name)}</b></p></div>`;
+      ${ui.editions ? seg("edition", ui.editions.map(e => [e.id, e.name]), g.edition.id) : ""}</div>
+      <div class="card stack"><h3>Theme</h3>
+      ${seg("theme", [["default", "Default"], ["jojo", "Jo Jo's Mid-Autumn Festival"]], g.theme.id)}
+      <p class="small muted">${g.theme.id === "jojo"
+        ? "A rainy, cold fall night at Jo Jo's apartment in Ames, Iowa. The morning stories happen there."
+        : "Ravenswood Bluff, the classic Clocktower town. The morning stories happen there."}</p></div>`;
+  } else html += `<div class="card"><p>Edition: <b>${esc(g.edition.name)}</b></p>
+      <p>Theme: <b>${esc(g.theme.name)}</b></p></div>`;
   if (me.is_host && S.host) {
-    const st = S.host.settings, tog = (k, label, help) => `<div class="stack"><p>${label}</p>
-      <div class="seg"><button class="${st[k] ? "sel" : ""}" data-act="toggle" data-k="${k}" data-v="1">On</button>
-      <button class="${st[k] ? "" : "sel"}" data-act="toggle" data-k="${k}" data-v="0">Off</button></div>
+    const st = S.host.settings, on = k => st[k] ?? 1, tog = (k, label, help) => `<div class="stack"><p>${label}</p>
+      <div class="seg"><button class="${on(k) ? "sel" : ""}" data-act="toggle" data-k="${k}" data-v="1">On</button>
+      <button class="${on(k) ? "" : "sel"}" data-act="toggle" data-k="${k}" data-v="0">Off</button></div>
       <p class="small muted">${help}</p></div>`;
     html += `<div class="card stack"><h3>Options</h3>
       ${tog("demon_bluffs", "Demon bluffs in small games", "The Demon always learns 3 good characters that are safe to claim. Off follows the official rule: no evil info with 5 or 6 players.")}
-      ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}</div>`;
+      ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}
+      ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`;
   }
   if (me.is_host) html += `<div class="card stack"><h3>Storyteller</h3>
     ${seg("mode", [["auto", "Automated"], ["human", "Human (me)"]], g.mode)}
@@ -285,6 +450,7 @@ function lobbyView() {
     ${me.is_host && !p.is_host ? `<button class="danger" data-act="kick" data-pid="${p.id}">Remove</button>` : ""}</li>`).join("")}</ul></div>`;
   if (me.is_host) html += hostLobby(seated);
   else html += `<p class="muted">Waiting for the host to start the game.</p>`;
+  html += feelCard();
   html += `<button class="danger" data-act="leave">Leave this game</button>`;
   return html;
 }
@@ -367,7 +533,7 @@ function meView() {
     ${me.alive ? "" : me.ghost_vote ? "You still have your one ghost vote." : "You have used your ghost vote."}</p></div>`;
   html += `<div class="card"><h3>Your notebook</h3><p class="small muted">Everything the storyteller has told you in private.</p>
     <ul class="log">${[...me.log].reverse().map(e => `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul></div>`;
-  return html;
+  return html + feelCard();
 }
 
 function townView() {
@@ -464,7 +630,8 @@ function almanacView() {
   const groups = ["townsfolk", "outsider", "minion", "demon"];
   return groups.map(t => `<div class="card"><h3>${t === "townsfolk" ? "Townsfolk" : t[0].toUpperCase() + t.slice(1) + "s"}</h3>
     ${almanac.roles.filter(r => r.type === t).map(r => `<div class="alm"><b class="tag-${r.team}">${esc(r.name)}</b>
-    <span>${esc(r.ability)}</span>${wikiDetails(r.id)}</div>`).join("")}</div>`).join("");
+    <span>${esc(r.ability)}</span>${wikiDetails(r.id)}</div>`).join("")}</div>`).join("")
+    + (S.me.annoy ? `<p class="egg"><button data-act="annoy">Annoy Tommy?</button></p>` : "");
 }
 
 function logView() {
@@ -482,7 +649,7 @@ function hostView() {
       `<li><span class="lbl">${esc(e.label)}</span>${esc(e.text)}</li>`).join("")}</ul>
     <p class="small muted">You know no more than the other players. These lines contain only public facts.</p></div>
     <div class="card stack"><h3>Timer</h3><div class="row">
-      ${g.paused ? `<button class="primary" data-act="resume">Resume</button>` : `<button data-act="pause">Pause</button>`}
+      ${g.paused ? `<button class="primary" data-act="resume">Resume timer</button>` : `<button data-act="pause">Pause timer</button>`}
       <button data-act="addtime" data-v="-30">−30 s</button><button data-act="addtime" data-v="30">+30 s</button>
       <button data-act="addtime" data-v="120">+2 min</button></div>
       ${next ? `<button class="big" data-act="advance">${next}</button>` : ""}</div>
@@ -492,7 +659,12 @@ function hostView() {
       ${set("night_max", "Night stage, maximum")}
       <h3>Storyteller chances (0 to 1)</h3>${set("misregister", "Spy/Recluse misregister")}${set("mayor_bounce", "Mayor redirects a kill")}
       <p class="small muted">Changes save when you leave the field. They apply from the next timer.</p></div>
-    ${g.phase !== "ended" ? `<button class="danger" data-act="end">End the game now</button>` : ""}`;
+    ${g.phase !== "ended" ? `<div class="card stack"><h3>Save the game</h3>
+      <p class="small muted">The server saves the game after every change, so it survives a crash.
+        Export gives you a copy of that file. Pause stops the game for everyone; resume it later from Archive, Paused.</p>
+      <div class="row"><button class="grow" data-act="exportgame">Export as Markdown</button>
+        <button class="grow" data-act="pausegame">Pause the game</button></div></div>
+    <button class="danger" data-act="end">End the game now</button>` : ""}`;
 }
 
 function endView() {
@@ -598,6 +770,27 @@ function nightView() {
   return `<div class="night"><div class="inner">${rejoinBanner()}${forcedActions()}<h3>${esc(S.game.label)}</h3><h2>${esc(t.title)}</h2>${body}</div></div>`;
 }
 
+// ---------- dawn: the narrator tells the story of the night ----------
+function dawnView() {
+  const n = S.narration, mine = n.narrator === S.me.id;
+  let body;
+  if (mine) {
+    body = `<h2>You are the narrator</h2>
+      <p>Read this story aloud to the town, or tell your own version. Only the deaths are true.
+        The rest is made up, and its names are picked at random.</p>
+      <div class="lines story">${n.story.map(l => `<p>${esc(l)}</p>`).join("")}</div>
+      ${n.facts.length ? `<h3>Then announce</h3><div class="lines">${n.facts.map(l => `<p><b>${esc(l)}</b></p>`).join("")}</div>` : ""}
+      <div class="stack"><button data-act="newstory">Give me another story</button>
+        <button class="primary big" data-act="narrationdone">Morning announcement done</button></div>`;
+  } else {
+    body = `<div class="done"><b>${esc(nameOf(n.narrator))} is the narrator</b>
+      Put your phone down and listen to the story of the night.</div>
+      ${S.me.is_host ? `<p class="small muted" style="text-align:center">If ${esc(nameOf(n.narrator))} cannot read it,
+        <button data-act="narrationdone">start the day without the story</button></p>` : ""}`;
+  }
+  return `<div class="night dawn"><div class="inner">${rejoinBanner()}${forcedActions()}<h3>Dawn, day ${S.game.day}</h3>${body}</div></div>`;
+}
+
 // ---------- actions ----------
 app.addEventListener("click", async ev => {
   const b = ev.target.closest("[data-act]");
@@ -607,19 +800,49 @@ app.addEventListener("click", async ev => {
     switch (act) {
       case "host": case "joincode": case "join": {
         const name = document.getElementById("name")?.value.trim();
-        if (!name) { toast("Enter your name first."); document.getElementById("name")?.focus(); return; }
+        const back = act === "join" && tokens.all().length;   // this browser may hold a seat in that game
+        if (!name && !back) { toast("Enter your name first."); document.getElementById("name")?.focus(); return; }
         let r;
         if (act === "host") r = await api("/api/games", { name });
         else {
           const code = act === "join" ? d.code : document.getElementById("code").value.trim().toUpperCase();
           if (!code) return toast("Enter the game code.");
-          r = await api(`/api/games/${code}/join`, { name });
+          r = await api(`/api/games/${code}/join`, { name, tokens: tokens.all() });
         }
         if (r.pending) { waitForRejoin(r.code, r.pending); return; }
         if (r.rejoined) toast("Welcome back.", "info");
         session.set({ code: r.code, token: r.token });
         connect(); return;
       }
+      case "delgame": {
+        if (!await ask(`Delete ${d.host}'s game ${d.code}? Everyone in its lobby goes back to the start page.`)) return;
+        await api(`/api/games/${d.code}/delete`, {}); toast("Game deleted.", "info"); loadGames(); return;
+      }
+      case "archive": openArchive(); return;
+      case "home": ui.view = null; render(); return;
+      case "archivetab": ui.archiveTab = d.v; render(); return;
+      case "exportfile": {
+        const sub = ui.archiveTab || "completed";
+        await download(await fetch(`/api/archive/${sub}/${encodeURIComponent(d.file)}`)); return;
+      }
+      case "resumegame": {
+        if (!await ask(`Resume ${d.host}'s game? It goes back into play, and the players can rejoin.`)) return;
+        const r = await api(`/api/archive/paused/${encodeURIComponent(d.file)}/resume`, { name: ui.name || "", tokens: tokens.all() });
+        ui.view = null; session.set({ code: r.code, token: r.token }); toast("The game is back. Its timer waits for you.", "info");
+        connect(); return;
+      }
+      case "exportgame": {
+        const s = session.get();
+        await download(await fetch(`/api/games/${s.code}/export`, { method: "POST", headers: { "Content-Type": "application/json" },
+                                                                    body: JSON.stringify({ token: s.token }) })); return;
+      }
+      case "narrationdone": send({ type: "narration_done" }); return;
+      case "newstory": send({ type: "new_story" }); return;
+      case "annoy": send({ type: "annoy" }); return;
+      case "feel": feel.set(d.k, d.v === "1"); if (d.v === "1" && d.k === "sound") { unlockAudio(); setTimeout(() => cue("day"), 50); } render(); return;
+      case "pausegame":
+        if (await ask("Pause the game? Everyone goes back to the start page. Resume it from Archive, Paused.")) send({ type: "pause_game" });
+        return;
       case "leave":
         if (!confirm(S?.game.phase === "lobby" ? "Leave this game? Your seat is freed."
                      : "Leave this game on this device? You can come back by joining with the same name.")) return;
@@ -642,6 +865,7 @@ app.addEventListener("click", async ev => {
       case "pref": {
         if (d.k === "mode") { send({ type: "mode", mode: d.v }); return; }
         if (d.k === "edition") { send({ type: "edition", edition: d.v }); return; }
+        if (d.k === "theme") { send({ type: "theme", theme: d.v }); return; }
         const p = { ...S.me.prefs, [d.k]: d.v };
         send({ type: "prefs", team: p.team, style: p.style }); return;
       }
@@ -719,8 +943,17 @@ app.addEventListener("click", async ev => {
     }
   } catch (e) { toast(e.message); }
 });
-app.addEventListener("change", ev => {
+app.addEventListener("input", ev => { if (ev.target.id === "name") ui.name = ev.target.value; });
+app.addEventListener("change", async ev => {
   const el = ev.target, d = el.dataset;
+  if (el.id === "importfile" && el.files[0]) {
+    try {
+      const r = await api("/api/archive/import", { text: await el.files[0].text() });
+      toast(`Imported to ${r.folder === "paused" ? "Paused" : "Completed"}.`, "info");
+      ui.archiveTab = r.folder; openArchive();
+    } catch (e) { toast(e.message); el.value = ""; }
+    return;
+  }
   if (el.id && (el.id.startsWith("da-") || el.id.startsWith("nt-"))) {
     ui.form[el.id] = el.value;
     if (el.tagName === "SELECT") render();  // a dropdown can change the form; text boxes must not redraw mid-click

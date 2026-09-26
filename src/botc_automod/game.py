@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 
 from . import seating
 from .decoys import decoy_task
+from .narrator import THEMES, story
 from .editions import EDITIONS, Edition
 
 DEFAULT_SETTINGS = {
@@ -44,12 +45,41 @@ DEFAULT_SETTINGS = {
     "shabaloth_regurgitate": 0.3,  # chance per night the Shabaloth brings back a victim
     "demon_bluffs": 1,       # 1: the Demon gets 3 safe bluffs even with fewer than 7 players
     "karma": 1,              # 1: karma from night questions tilts the automod's random choices
+    "narrator": 1,           # 1: at dawn a random player reads a story of the night before the day starts
 }
-TOGGLES = {"demon_bluffs", "karma"}
+TOGGLES = {"demon_bluffs", "karma", "narrator"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
 SCHEMA = 2  # bump when saved games from older versions cannot load
 
 LOBBY_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+
+def _first_word(name: str) -> str:
+    word = (name.split() or [""])[0].lower()
+    return "".join(c for c in word if c.isalpha())
+
+
+def _near(a: str, b: str) -> bool:
+    """One letter added, dropped or changed."""
+    if abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b)) <= 1
+    short, long = sorted((a, b), key=len)
+    return any(long[:i] + long[i + 1:] == short for i in range(len(long)))
+
+
+def _like(name: str, target: str, also: set[str]) -> bool:
+    w = _first_word(name)
+    return w in also or (w[:2] == target[:2] and _near(w, target))
+
+
+def is_emma(name: str) -> bool:
+    return _like(name, "emma", {"em", "emmy", "emmie", "emmi", "ems", "emms"})
+
+
+def is_tommy(name: str) -> bool:
+    return _like(name, "tommy", {"tom", "thomas", "tomas", "thom", "tommie", "tommi", "tomm", "tomy"})
 
 
 def new_code(taken: set[str]) -> str:
@@ -95,6 +125,7 @@ class NameTaken(GameError):
 
 class Game:
     mode = "auto"          # class defaults keep older saved games loadable
+    theme = "default"      # the narrator's setting (narrator.THEMES)
     artist_ready = False   # the server has a question translator for the Artist
     pending: dict | None = None
 
@@ -110,6 +141,7 @@ class Game:
         self.layout = seating.layout("circle", seats=8)
         self.phase = "lobby"
         self.mode = "auto"
+        self.theme = "default"
         self.pending = None                  # night results the storyteller is reviewing
         self.stage = ""
         self.night = 0
@@ -304,6 +336,13 @@ class Game:
         if edition_id not in EDITIONS:
             raise GameError("Unknown edition.")
         self.edition_id = edition_id
+
+    def set_theme(self, theme: str) -> None:
+        if self.phase != "lobby":
+            raise GameError("The theme is fixed once the game starts.")
+        if theme not in THEMES:
+            raise GameError("Unknown theme.")
+        self.theme = theme
 
     def set_mode(self, mode: str) -> None:
         if self.phase != "lobby":
@@ -677,16 +716,78 @@ class Game:
         deaths = [self.p(x).name for x in self.tonight_deaths]
         self.tonight_deaths = []
         self.say("Dawn breaks. Everyone, put your phone down and open your eyes.")
+        facts = []
         if deaths:
-            self.announce(" and ".join(deaths) + " died in the night.")
+            facts.append(" and ".join(deaths) + " died in the night.")
         elif self.night > 1:
-            self.announce("Nobody died last night.")
-        for line in self.edition.on_dawn(self):
+            facts.append("Nobody died last night.")
+        facts += self.edition.on_dawn(self)
+        for line in facts:
             self.announce(line)
         if self._check_win():
             return
+        if self.settings.get("narrator", 1) and self.seated():
+            self._start_narration(deaths, facts)
+            return
+        self._start_day()
+
+    def _start_day(self) -> None:
+        self.stage = ""
         self.say(f"Day {self.day} begins. Talk freely. Nominations open when the timer ends.")
         self.set_timer(self.settings["discussion"])
+
+    # Easter egg: Emma can quietly poison Tommy for the rest of the game ----------------
+    # The poison is a normal status, so every rule treats Tommy as poisoned. Two
+    # exceptions keep it hidden: the Spy's Grimoire does not show it, and it pauses
+    # while Tommy is a Demon (a Demon whose kills always fail is easy to notice).
+    def can_annoy(self, pid: str) -> bool:
+        if self.estate.get("annoyed") or self.phase not in ("day", "nominations", "defense", "vote"):
+            return False
+        if not hasattr(self.edition, "add_status") or not is_emma(self.p(pid).name):
+            return False
+        return any(is_tommy(p.name) and p.id != pid for p in self.seated())
+
+    def annoy(self, pid: str) -> None:
+        if not self.can_annoy(pid):
+            raise GameError("You cannot do that now.")
+        for t in self.seated():
+            if is_tommy(t.name) and t.id != pid:
+                self.edition.add_status(self, t.id, "poisoned", "Emma", "never")
+                self.estate["status"][-1]["prank"] = True
+        self.estate["annoyed"] = True
+
+    # Narration: a random player tells the story of the night -----------------------
+    def _start_narration(self, deaths: list[str], facts: list[str]) -> None:
+        seated = self.seated()
+        pool = [p for p in seated if p.connected] or seated
+        narrator = secrets.choice(pool)   # not self.rng: the pick must say nothing and change nothing
+        self.stage = "narration"
+        self.estate["narration"] = {"pid": narrator.id, "deaths": deaths, "facts": facts,
+                                    "story": self._story(deaths)}
+        self.set_timer(None)
+        self.say(f"{narrator.name} tells the story of the night. Listen.")
+
+    def _story(self, deaths: list[str]) -> list[str]:
+        return story(deaths, [p.name for p in self.seated() if self.living(p)], self.night, self.theme)
+
+    def _need_narration(self, pid: str, host_may: bool) -> dict:
+        n = self.estate.get("narration")
+        if self.phase != "day" or self.stage != "narration" or n is None:
+            raise GameError("The morning story is over.")
+        if pid != n["pid"] and not (host_may and self.p(pid).is_host):
+            raise GameError("Only the narrator can do that.")
+        return n
+
+    def new_story(self, pid: str) -> None:
+        n = self._need_narration(pid, host_may=False)
+        n["story"] = self._story(n["deaths"])
+
+    def finish_narration(self, pid: str | None = None) -> None:
+        """The narrator is done (or the host skips the story). The day starts."""
+        if pid is not None:
+            self._need_narration(pid, host_may=True)
+        self.estate.pop("narration", None)
+        self._start_day()
 
     # Day ---------------------------------------------------------------------------
     def open_nominations(self) -> None:
@@ -847,6 +948,8 @@ class Game:
                 self.send_pending()
             else:
                 self._finish_stage()
+        elif self.phase == "day" and self.stage == "narration":
+            self.finish_narration()
         elif self.phase == "day":
             self.open_nominations()
         elif self.phase == "nominations":
@@ -924,6 +1027,7 @@ class Game:
         remaining = self.remaining()
         view = {
             "game": {"code": self.code, "edition": {"id": ed.id, "name": ed.name},
+                     "theme": {"id": self.theme, "name": THEMES.get(self.theme, THEMES["default"])["name"]},
                      "mode": self.mode, "phase": self.phase, "artist_ready": self.artist_ready, "stage": self.stage, "label": self.label(),
                      "night": self.night, "day": self.day,
                      "timer": None if remaining is None else round(remaining),
@@ -942,7 +1046,8 @@ class Game:
                    "karma": me.karma if self.settings.get("karma", 1) else None,
                    "last_answer": self._last_answer(me),
                    "bluffs": ed.bluffs_for(self, me) if self.phase not in ("lobby", "setup") else [],
-                   "night_done": self.phase == "night" and task is None},
+                   "night_done": self.phase == "night" and task is None,
+                   "annoy": self.can_annoy(pid)},
             "task": task,
             "room": self.room, "layout": self.layout,
             "players": [{"id": p.id, "name": p.name, "seat": p.seat, "alive": self._public_alive(p),
@@ -961,6 +1066,11 @@ class Game:
         view["rejoins"] = rejoins
         if me.is_host:
             view["host"] = {"script": self.script[-40:], "settings": self.settings}
+        n = self.estate.get("narration") if self.stage == "narration" else None
+        if n:
+            view["narration"] = {"narrator": n["pid"]}
+            if n["pid"] == pid:
+                view["narration"].update(story=n["story"], facts=n["facts"])
         if self.is_storyteller(pid) and self.phase != "lobby":
             view["st"] = self._storyteller_view()
         if self.phase == "ended":

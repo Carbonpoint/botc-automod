@@ -35,8 +35,21 @@ steps for your system).
 
 Games are saved in the data folder (`~/.local/share/botc-automod/` on
 Linux and macOS, `%USERPROFILE%\.local\share\botc-automod` on Windows)
-after every change, and reload when the server restarts. Set `BOTC_DATA`
-to save elsewhere. Saves from an older format are skipped. Set
+after every change. Set `BOTC_DATA` to save elsewhere. Each game is one
+Markdown file in `games/`:
+
+- `games/running/`: games in play. The server reloads them when it
+  starts, so a game survives a crash. The timer waits for the host.
+- `games/paused/`: games the host paused (Host tab, "Pause the game").
+- `games/completed/`: games that ended.
+
+The Archive button on the start page shows paused and completed games.
+There you can resume a paused game, export any game as Markdown, and
+import a game file. To move games to another server, copy the `.md`
+files into the same folders there. A file shows public facts only until
+the game ends; then it shows the Grimoire and every notebook. The save
+block at the end of the file holds the full game (compressed, not
+encrypted). Saves from an older format are skipped. Set
 `BOTC_DEBUG=1` to enable debug endpoints that show the full Grimoire.
 Never enable it during a real game.
 

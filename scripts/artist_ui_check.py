@@ -85,7 +85,7 @@ async def main():
                 if not await host.locator(".night").count():
                     break
                 for pg in pages:
-                    for sel in ('[data-act="decoy"]', '[data-act="ack"]', '[data-act="none"]', '[data-act="submitchar"]'):
+                    for sel in ('[data-act="decoy"]', '[data-act="ack"]', '[data-act="none"]', '[data-act="submitchar"]', '[data-act="narrationdone"]'):
                         if await pg.locator(sel).count():
                             await pg.locator(sel).first.click()
                             break

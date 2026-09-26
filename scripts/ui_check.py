@@ -75,7 +75,12 @@ async def main():
                     continue
                 all_day = False
                 picks = pg.locator('[data-act="pick"]')
-                if await picks.count():
+                if await pg.locator('[data-act="narrationdone"].primary').count():   # this phone is the narrator
+                    await pg.screenshot(path=f"{OUT}/05b_dawn_narrator.png", full_page=True)
+                    listener = pages[(i + 1) % len(pages)]
+                    await listener.screenshot(path=f"{OUT}/05c_dawn_listener.png")
+                    await pg.click('[data-act="narrationdone"].primary')
+                elif await picks.count():
                     if not shot_choose:
                         await pg.screenshot(path=f"{OUT}/04_night_choose.png")
                         shot_choose = True

@@ -243,6 +243,8 @@ class ScriptEdition(Edition):
         for s in game.estate.get("status", []):
             if s["pid"] != pid:
                 continue
+            if s.get("prank") and self.type_of(game.p(pid).role) == "demon":
+                continue   # see Game.annoy
             src = s.get("src")
             if src and (src in _seen or self.malfunction(game, game.p(src), _seen | {pid})
                         or not game.p(src).alive):
@@ -334,6 +336,8 @@ class ScriptEdition(Edition):
         return found
 
     def abnormal(self, game: Game, p: Player | None) -> None:
+        if p is not None and self._prank_only(game, p) and not self.vortox_active(game):
+            return   # no character caused it, so the Mathematician must not count it (Game.annoy)
         if p is not None:
             game.estate.setdefault("abnormal", [])
             if p.id not in game.estate["abnormal"]:
@@ -803,7 +807,7 @@ class ScriptEdition(Edition):
                 if c and getattr(c, "death_prompt", None):
                     out.append(c.death_prompt(self, game, p))
                     break
-        if p.alive and not p.fake_dead and game.phase in ("day", "nominations"):
+        if p.alive and not p.fake_dead and game.phase in ("day", "nominations") and game.stage != "narration":
             for c in self.chars.values():
                 a = c.public_action(self, game)
                 if a and a["key"] not in es.get("claimed", {}).get(p.id, []):
@@ -895,9 +899,9 @@ class ScriptEdition(Edition):
             rows.append({"label": "Grandchild", "value": name(es["grandchild"])})
         return rows
 
-    def player_notes(self, game: Game, p: Player) -> list[str]:
+    def player_notes(self, game: Game, p: Player, spy: bool = False) -> list[str]:
         notes = []
-        if self.malfunction(game, p):
+        if self.malfunction(game, p) and not (spy and self._prank_only(game, p)):
             notes.append("drunk or poisoned")
         for s in self.statuses(game, p.id):
             if s["kind"] not in ("poisoned", "drunk"):
@@ -909,6 +913,17 @@ class ScriptEdition(Edition):
         if self.alignment(p) != self.roles[p.role].team:
             notes.append(f"alignment {self.alignment(p)}")
         return notes
+
+    def _prank_only(self, game: Game, p: Player) -> bool:
+        """Only Emma's hidden poison (Game.annoy) makes p malfunction."""
+        every = game.estate.get("status", [])
+        if not any(s.get("prank") and s["pid"] == p.id for s in every):
+            return False
+        game.estate["status"] = [s for s in every if not s.get("prank")]
+        try:
+            return not self.malfunction(game, p)
+        finally:
+            game.estate["status"] = every
 
     def st_set(self, game: Game, key: str, value) -> None:
         from ..game import GameError

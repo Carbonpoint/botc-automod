@@ -284,7 +284,7 @@ class Spy(Char):
                 tags.append(f"thinks they are the {R.roles[x.shown].name}")
             if not x.alive:
                 tags.append("dead")
-            tags += [n for n in R.player_notes(g, x) if n != "registers as dead"]
+            tags += [n for n in R.player_notes(g, x, spy=True) if n != "registers as dead"]
             if g.estate.get("red_herring") == x.id and "fortuneteller" in R.chars:
                 tags.append("Fortune Teller red herring")
             lines.append(f"{x.name}: {name}" + (f" ({', '.join(tags)})" if tags else ""))

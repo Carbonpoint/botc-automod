@@ -64,6 +64,45 @@ Read README.md first.
   crashes on this Fedora host. Not yet run on a real phone.
 - Seat maps draw one path with arrows through the seats in order.
 
+## 2026-09-26 (evening): landing page, archive, pause, game files
+
+- Landing page from the user's sketch: name card, join card, Join,
+  Host a new game, Archive.
+- Games are Markdown files (`src/botc_automod/archive.py`) in
+  `DATA/games/{running,paused,completed}/`; old `*.pkl` saves move into
+  `running/` at start. The save block is a zlib + base64 pickle, loaded by
+  an unpickler that allows only `Game`, `Player` and `random.Random`.
+- Join list: a trash button deletes a lobby (yes/no pop-up). Games in play
+  are listed too, to rejoin. A browser keeps every token it held
+  (`botc-tokens`), so after a pause or resume players go straight back.
+- Host tab: Export as Markdown, Pause the game. The timer buttons are now
+  "Pause timer" / "Resume timer". After a resume or a restart the timer
+  waits for the host.
+- Resume needs a token of a player in that game, or the host's name.
+  Deleting a lobby and exporting archive files need no login (home LAN).
+- Verified: 295 tests; `scripts/archive_check.py` (16 browser checks:
+  delete, pause, resume, rejoin, crash restart, end, export, import);
+  ui_check (auto and human) and rejoin_check with no page errors.
+- The host tab is under the night screen, so the host pauses in the day.
+- Morning narrator (setting `narrator`, on by default): at dawn the game
+  stays in phase "day" with stage "narration" and no timer. A random seated
+  player (`secrets`, not the game rng) gets a story from `narrator.py`;
+  others see "listen". The narrator taps done (or the host skips, or the
+  host's advance) and the day timer starts. Public day actions wait.
+  Stories use only the victims' names; other names are random living players.
+  Test builders set `narrator` to 0; half the random games turn it on.
+- Sounds and vibration (`cue()` in app.js): Web Audio tones, no files.
+  Night falls, dawn, narrator chosen, day, nominations, nominated, vote,
+  end; day-timer warnings at 30 s and 10 s, ticks in a vote's last 5 s.
+  No sound for night tasks (they only vibrate, as before). Per-phone
+  on/off in the lobby and the Me tab (`botc-feel`).
+- Verified: 300 tests; audit of 100 games per edition, 0 problems;
+  ui_check (auto, human snv), rejoin_check, archive_check with no page
+  errors. Sounds not heard by a person yet; vibration not felt on a phone.
+- Themes (`narrator.THEMES`, `Game.theme`, lobby "Theme" card): "default"
+  (Ravenswood Bluff) and "jojo" (Jo Jo's Mid-Autumn Festival: his rainy
+  apartment in Ames, Iowa). The theme picks the narrator's story lines.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

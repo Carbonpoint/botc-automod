@@ -14,6 +14,7 @@ NAMES = "Ann Ben Cat Dan Eve Fay Gus Hal Ivy Jon Kim Lee Max Ned Oli".split()
 def lobby(n: int, seed: int = 1) -> Game:
     g = Game("TEST", seed=seed)
     g.set_room("circle", seats=max(n, 5))
+    g.settings["narrator"] = 0   # tests go straight from night to day; see test_narrator.py
     for i in range(n):
         p = g.join(NAMES[i], is_host=(i == 0))
         g.claim_seat(p.id, i)
@@ -354,6 +355,7 @@ def test_night_hides_deaths_until_dawn():
 def human_lobby(n: int, seed: int = 1) -> tuple[Game, str]:
     g = Game("TEST", seed=seed)
     g.set_room("circle", seats=max(n, 5))
+    g.settings["narrator"] = 0   # tests go straight from night to day; see test_narrator.py
     st = g.join("Storyteller", is_host=True)
     g.set_mode("human")
     for i in range(n):

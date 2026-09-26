@@ -14,6 +14,7 @@ NAMES = "Ann Ben Cat Dan Eve Fay Gus Hal Ivy Jon Kim Lee Max Ned Oli".split()
 def lobby(n, edition, seed=1, mode="auto"):
     g = Game("TEST", edition_id=edition, seed=seed)
     g.set_room("circle", seats=max(n, 5))
+    g.settings["narrator"] = 0   # tests go straight from night to day; see test_narrator.py
     if mode == "human":
         g.join("Storyteller", is_host=True)
         g.set_mode("human")
@@ -160,7 +161,7 @@ def test_random_games_finish(edition, seed):
     mode = "human" if seed % 4 == 0 else "auto"
     g = lobby(n, edition, seed, mode)
     g.settings.update({"misregister": 0.5, "tinker_chance": 0.2, "pacifist_save": 0.5,
-                       "shabaloth_regurgitate": 0.5})
+                       "shabaloth_regurgitate": 0.5, "narrator": seed % 2})
     g.start()
     play(g, rng)
     assert g.phase == "ended", f"stuck in {g.phase} {g.stage} day {g.day}"
