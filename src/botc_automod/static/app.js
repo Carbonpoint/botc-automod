@@ -26,6 +26,7 @@ const tokens = {
 };
 const ICON = {
   trash: `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`,
+  star: `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>`,
   folder: `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>`,
 };
 // A pop-up that asks a yes/no question. Resolves true for yes.
@@ -254,6 +255,7 @@ function render() {
   ui.pendingRender = false;
   if (!session.get()) {
     if (ui.view === "archive") { app.innerHTML = archiveView(); return; }
+    if (ui.view === "arcade") { Arcade.render(); return; }
     app.innerHTML = homeView(); loadGames(); return;
   }
   if (!S) { app.innerHTML = `<div class="card">Connecting...</div>`; return; }
@@ -315,7 +317,9 @@ function homeView() {
   <div class="home-actions">
     <button class="primary join" data-act="joincode">Join</button>
     <button class="big" data-act="host">Host a new game</button>
-    <button class="linkish" data-act="archive">${ICON.folder}<span>Archive</span></button>
+    <div class="row home-links">
+      <button class="linkish" data-act="archive">${ICON.folder}<span>Archive</span></button>
+      <button class="linkish" data-act="arcade">${ICON.star}<span>Karma arcade</span></button></div>
   </div>`;
 }
 async function loadGames() {
@@ -338,7 +342,7 @@ async function loadGames() {
         <span class="muted small">· ${esc(g.where)} · ${players(g)}</span></button>`).join("") : "");
   } catch {}
 }
-setInterval(() => { if (!session.get() && ui.view !== "archive") loadGames(); }, 4000);
+setInterval(() => { if (!session.get() && !ui.view) loadGames(); }, 4000);
 
 // ---------- archive ----------
 async function openArchive() {
@@ -955,7 +959,8 @@ app.addEventListener("click", async ev => {
         await api(`/api/games/${d.code}/delete`, {}); toast("Game deleted.", "info"); loadGames(); return;
       }
       case "archive": openArchive(); return;
-      case "home": ui.view = null; render(); return;
+      case "arcade": Arcade.open(); return;
+      case "home": Arcade.stop(); ui.view = null; render(); return;
       case "archivetab": ui.archiveTab = d.v; render(); return;
       case "exportfile": {
         const sub = ui.archiveTab || "completed";

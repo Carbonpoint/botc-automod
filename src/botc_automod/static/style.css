@@ -193,3 +193,21 @@ input[type=file] { padding: 8px; }
   text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tabs.many button { font-size: .78rem; padding: 12px 2px; }
 .seat.agent { border-style: dotted; }
+
+/* Karma arcade */
+.home-links { justify-content: center; gap: 16px; }
+.arc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.arc-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 14px; }
+.arc-card b { font-size: 1.1rem; }
+.arc-best { color: var(--gold); }
+.arc-score { margin-left: auto; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gold); }
+.arc-stage { display: flex; justify-content: center; margin: 8px 0; }
+.arc-stage canvas { border-radius: 10px; touch-action: none; user-select: none; -webkit-user-select: none; border: 1px solid var(--line); }
+.arc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 360px; margin: 0 auto; }
+.arc-pad button { font-size: 1.4rem; min-height: 56px; touch-action: manipulation; }
+.arc-board { margin: 0; padding-left: 24px; }
+.arc-board li { padding: 2px 0; }
+.arc-board li span { display: inline-block; min-width: 60%; }
+.arc-board li.me { color: var(--gold); }
+.arc-over h2 { margin: 0; }
+.arc-pool-status { text-align: center; min-height: 2.6em; }

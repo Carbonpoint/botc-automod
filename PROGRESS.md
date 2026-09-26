@@ -141,6 +141,30 @@ Read README.md first.
   dropped). Tested with qwen3:1.7b on stalker: no secrets given away.
   Agents take no part in keyword tasks or tips, and no human can rejoin as one.
 
+## 2026-09-26 (night): karma arcade
+
+- Start page link "Karma arcade" (`static/arcade.js`, `arcade.py`, data in
+  `DATA/arcade.json`). Games: Flappy Bat, Night Runner (the dinosaur game),
+  2047 (2048 with odd tiles 2^n-1; a+a -> 2a+1), Blocks (small Tetris with
+  a button pad), Snake, Town Pool.
+- Karma per name per day: +1 first real game (a minimum score per game),
+  +1 a new record on a game's board, +1 per 3 pool balls; cap 3 a day.
+  `server.add_karma` also updates a seat in a live game, so `sync_karma`
+  does not write the old value back.
+- Scores come from the browser. The server refuses a score too high for
+  the round's time (rate + slack per game). No other anti-cheat (home LAN).
+- Town Pool: one shared table. Server physics (`arcade.simulate`, 0.03 s a
+  shot); the frames of the last shot go to every phone for playback. A
+  shot names the table version; the last shooter waits 20 s unless someone
+  else shoots. Pocketed ball +1 point, cue ball -1 and back on the spot,
+  empty table -> new rack. Stroke: thumb down, pull back (power), slide
+  forward past the start; drift off the line bends the angle. Portrait
+  phones see the table turned on its side.
+- Verified: 13 new tests (394 in all pass, 1 skipped); `scripts/arcade_check.py`
+  (every game ends, a pool shot, karma, no page errors) at 390x844.
+  Not played by a person on a real phone yet: the feel of the pool stroke
+  and game speeds are untuned.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it

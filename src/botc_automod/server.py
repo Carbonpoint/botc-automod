@@ -27,7 +27,7 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-from . import agents, archive, helper, keywords
+from . import agents, arcade, archive, helper, keywords
 from .editions import EDITIONS
 from .game import Game, GameError, NameTaken, Player, new_code
 
@@ -42,6 +42,7 @@ previews: dict[tuple[str, str], dict] = {}   # (game code, player id) -> the las
 karma: dict[str, int] = {}    # player name (lower case) -> karma, kept across games
 sockets: dict[str, dict[str, set[WebSocket]]] = {}   # code -> player id -> sockets
 completed: dict[str, Path] = {}   # code -> file in completed/, for games that ended while the server ran
+ARCADE: arcade.Arcade | None = None   # the karma arcade, set when the server starts
 
 
 def running_path(code: str) -> Path:
@@ -117,8 +118,25 @@ def sync_karma(game: Game) -> None:
             karma[p.name.lower()] = p.karma
             changed = True
     if changed:
-        DATA.mkdir(parents=True, exist_ok=True)
-        karma_file().write_text(json.dumps(karma, indent=1), encoding="utf-8")
+        write_karma()
+
+
+def write_karma() -> None:
+    DATA.mkdir(parents=True, exist_ok=True)
+    karma_file().write_text(json.dumps(karma, indent=1), encoding="utf-8")
+
+
+def add_karma(name: str, delta: int) -> int:
+    """Karma from outside a game (the arcade). A seat in a live game gets it too,
+    or the next sync_karma would write the old value back."""
+    key = name.lower()
+    karma[key] = karma.get(key, 0) + delta
+    for g in games.values():
+        for p in g.players.values():
+            if p.name.lower() == key:
+                p.karma += delta
+    write_karma()
+    return karma[key]
 
 
 async def broadcast(game: Game) -> None:
@@ -195,8 +213,10 @@ async def heartbeat() -> None:
 
 @asynccontextmanager
 async def lifespan(app: Starlette):
+    global ARCADE
     load_all()
     load_karma()
+    ARCADE = arcade.Arcade(DATA / "arcade.json")
     tasks = [asyncio.create_task(ticker()), asyncio.create_task(heartbeat())]
     yield
     for t in tasks:
@@ -437,6 +457,52 @@ async def rejoin_status(request: Request) -> JSONResponse:
         return JSONResponse(g.rejoin_status(request.path_params["rid"]))
     except GameError as e:
         raise HTTPException(404, str(e)) from None
+
+
+def _arcade() -> arcade.Arcade:
+    global ARCADE
+    if ARCADE is None:
+        ARCADE = arcade.Arcade(DATA / "arcade.json")
+    return ARCADE
+
+
+def arcade_reply(name: str, r: dict) -> JSONResponse:
+    if r["karma"]:
+        add_karma(arcade.clean(name), r["karma"])
+    return JSONResponse({**r, "total": karma.get(arcade.clean(name).lower(), 0)})
+
+
+async def arcade_info(request: Request) -> JSONResponse:
+    """Boards, and the karma this name has from the arcade today."""
+    a = _arcade()
+    name = request.query_params.get("name", "")
+    return JSONResponse({"games": {g: {"name": v[0], "real_try": v[1], "board": a.boards[g]} for g, v in arcade.GAMES.items()},
+                         "total": karma.get(" ".join(name.split())[:24].lower(), 0) if name.strip() else None,
+                         **a.summary(name)})
+
+
+async def arcade_score(request: Request) -> JSONResponse:
+    data = await body(request)
+    try:
+        return arcade_reply(data.get("name"), _arcade().submit(data.get("name"), data.get("game"), data.get("score"), data.get("secs")))
+    except arcade.ArcadeError as e:
+        raise HTTPException(400, str(e)) from None
+
+
+async def pool_state(request: Request) -> JSONResponse:
+    try:
+        since = int(request.query_params.get("since", "-1"))
+    except ValueError:
+        since = -1
+    return JSONResponse(_arcade().pool_view(since))
+
+
+async def pool_shot(request: Request) -> JSONResponse:
+    data = await body(request)
+    try:
+        return arcade_reply(data.get("name"), _arcade().shoot(data.get("name"), data.get("version"), data.get("angle"), data.get("power")))
+    except arcade.ArcadeError as e:
+        raise HTTPException(400, str(e)) from None
 
 
 async def editions(request: Request) -> JSONResponse:
@@ -729,6 +795,10 @@ routes = [
     Route("/api/archive/import", archive_import, methods=["POST"]),
     Route("/api/archive/{folder}/{file}", archive_file),
     Route("/api/archive/{folder}/{file}/resume", archive_resume, methods=["POST"]),
+    Route("/api/arcade", arcade_info),
+    Route("/api/arcade/score", arcade_score, methods=["POST"]),
+    Route("/api/arcade/pool", pool_state),
+    Route("/api/arcade/pool/shot", pool_shot, methods=["POST"]),
     Route("/api/editions", editions),
     Route("/api/editions/{eid}", almanac),
     Route("/api/qr", qr),
