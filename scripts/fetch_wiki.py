@@ -105,7 +105,7 @@ def main() -> None:
             data["characters"][rid] = parse(t, wikitext(t))
             print(f"{t:15} {data['characters'][rid]['ability'][:70]}")
             time.sleep(0.5)
-        (OUT / f"{edition}.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
+        (OUT / f"{edition}.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

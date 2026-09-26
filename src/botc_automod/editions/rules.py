@@ -46,7 +46,7 @@ INFO_KEYS = ("minion_info", "demon_info", "storyteller", "new_character")
 
 def load_wiki(name: str) -> dict:
     f = DATA / f"{name}.json"
-    return json.loads(f.read_text())["characters"] if f.exists() else {}
+    return json.loads(f.read_text(encoding="utf-8"))["characters"] if f.exists() else {}
 
 
 # ---------------------------------------------------------------------------
