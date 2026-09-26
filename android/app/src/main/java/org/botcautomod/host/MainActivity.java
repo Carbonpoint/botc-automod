@@ -120,6 +120,11 @@ public class MainActivity extends Activity {
         scroll.addView(col);
         setContentView(scroll);
 
+        // Tests: "adb shell am start -n org.botcautomod.host/.MainActivity --ez autostart true"
+        if (getIntent().getBooleanExtra("autostart", false) && "stopped".equals(ServerService.state)) {
+            startForegroundService(new Intent(this, ServerService.class));
+        }
+
         if (Build.VERSION.SDK_INT >= 33
                 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);

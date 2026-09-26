@@ -215,7 +215,8 @@ function seatMap(opts = {}) {
     const label = p ? `${esc(p.name)}${p.is_host ? " ★" : ""}${!p.alive && p.ghost_vote ? ' <span class="ghost">●</span>' : ""}`
                     : (opts.lobby ? "Sit here" : "");
     const act = opts.act && (p ? opts.act !== "seat" : opts.act === "seat") ? `data-act="${opts.act}" data-seat="${s.index}" data-pid="${p?.id ?? ""}"` : "";
-    return `<button class="${cls.join(" ")}" style="left:${s.x * 100}%;top:${s.y * 100}%" ${act}>
+    const w = room.shape === "grid" && room.cols ? `width:${Math.min(22, 72 / room.cols).toFixed(1)}%;` : "";
+    return `<button class="${cls.join(" ")}" style="left:${s.x * 100}%;top:${s.y * 100}%;${w}" ${act}>
       <span class="n">${s.index + 1}</span>${label}</button>`;
   }).join("");
   // One continuous path through the seats in order, with arrows for the direction.

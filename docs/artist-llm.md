@@ -1,94 +1,101 @@
-# A small local LLM for the Artist
+# A small language model for the Artist
 
-Status: plan only. The Artist is dealt only with a human storyteller until
-this exists.
+## The design: the model translates, the engine answers
 
-## The idea: the model translates, the engine answers
-
-The Artist asks "any yes/no question" and must get a true answer. A small
-model that answers from its own reading of the game will sometimes be
-wrong, and a wrong answer breaks the game. So the model never decides the
-answer. It only translates the question into a small query language. The
-engine then evaluates the query against the true game state.
+The Artist asks the Storyteller any yes/no question and must get a true
+answer. A small model that answers from its own reading of the game would
+sometimes be wrong. So the model never answers. It translates the question
+into one query in a small language (`src/botc_automod/artist/query.py`), and
+the game engine evaluates that query against the true game state.
 
 ```
-"Is the guy next to me evil?"
-    -> model -> {"q": "is_alignment", "player": "seat_left_of:Jess", "team": "evil"}
-    -> engine -> true -> "Yes."
+"is the guy on my left evil?"
+   -> model -> {"op": "is_team", "player": "cw:me", "team": "evil"}
+   -> engine -> true -> "Yes."
 ```
 
-If the model's output does not parse, or the question is outside the
-language ("Will good win?"), the Artist hears "Please ask a different
-question" and keeps their ability. The page also echoes the model's
-reading ("I understood: Is Kofi evil?"), so the player can catch a
-misunderstanding before the answer counts.
+Three guards keep a misread from costing the player:
 
-With this split, a wrong answer can only come from a wrong translation
-that still parses. Constrained decoding (a JSON schema or GBNF grammar in
-llama.cpp) makes every output parse, so the risk moves to picking the
-wrong query. That risk is what we measure.
+1. **Structured output.** Every backend asks for JSON that fits a schema.
+   The schema lists the real player names (plus `me`, `cw:NAME`,
+   `ccw:NAME`), the real characters, the types and the teams, so the model
+   cannot invent a name or a character.
+2. **Validation.** Anything that does not parse or validate becomes "ask a
+   different question", and the ability is not used.
+3. **Confirmation.** The Artist sees the engine's plain reading ("I
+   understood: the player on your left (Ben) is evil?") and must tap *Ask
+   this*. A misread question can be rephrased at no cost.
 
-The model needs only the player names and the character list, never the
+The model only needs player names and the character list, never the
 Grimoire, so it cannot leak secrets.
 
-## The query language (first draft)
+## The test sets
 
-| Query | Example question |
-|---|---|
-| `is_role(player, character)` | Is Ann the Fortune Teller? |
-| `is_type(player, type)` | Is Ben a Minion? |
-| `is_alignment(player, team)` | Is Cat evil? |
-| `in_play(character)` | Is the Vortox in play? |
-| `any_of(players, predicate)` | Is the Demon one of Ann, Ben or Cat? |
-| `count(predicate) op n` | Are there 2 or more evil players alive? |
-| `was_malfunctioning(player, day)` | Was Dan drunk or poisoned yesterday? |
-| `voted(player, day)`, `nominated(player, day)` | Did a Minion nominate today? |
-| seat references | "my left neighbour", "the player opposite me" |
+- **test** (300 questions): generated from templates the model never sees
+  in training, with player names that never appear in training.
+- **natural** (103 questions, `artist/data/natural.py`): written by hand,
+  in casual table talk, with typos, nicknames ("FT"), slang ("bad guys"),
+  several sentences, and 20 questions that must be refused. Its names are
+  in no other set.
 
-The engine already evaluates the first four (`statement_true` in
-`editions/rules.py`). The rest are small additions.
+A prediction is **right** when it gives the same answer as the gold query
+on the real world and on 24 reshuffled copies of it (so two queries that
+mean the same thing both count). **Refused** means "ask another question"
+for an answerable question: safe but annoying. **Misread** (a valid query
+with another meaning) and **false_ok** (a query for an unanswerable
+question) are the dangerous outcomes; the confirmation step exists for
+them.
 
-## Which model
+Scripts: `scripts/artist_bench.py` (any Ollama or OpenAI-compatible
+server), `scripts/train_artist.py` (LoRA fine-tune), `scripts/export_artist.sh`
+(GGUF export, quantise, CPU benchmark with llama-server).
 
-Candidates, smallest first (check for newer releases before starting;
-this list is from mid-2026): Qwen3 0.6B and 1.7B, Gemma 3 1B, Llama 3.2
-1B, SmolLM 1.7B/3B, then Qwen3 4B, Phi-4-mini and Gemma 3 4B.
+## Results so far (2026-09-26)
 
-Expectation: with grammar-constrained output, a 1.5 to 2B model should
-parse most plain questions. A 0.6B model probably needs fine-tuning. At
-4-bit quantisation a 1.7B model needs about 1.2 GB of RAM and answers in a
-few seconds on a laptop CPU, which is fine for an ability used once per
-game. The lab already has llama.cpp servers that fit (the hub Arc A750,
-and Ollama on stalker).
+Off-the-shelf models through Ollama, full prompt with examples, schema-
+constrained, GPU (RTX 2080 Ti):
 
-## How to choose: a benchmark first
+| Model | Size | test right | natural right | dangerous (test / natural) |
+|---|---|---|---|---|
+| gemma3 270m | 0.27B | 13% | 17% | 69% / 84% |
+| SmolLM2 360m | 0.36B | 10% | 25% | 54% / 60% |
+| qwen2.5 0.5b | 0.5B | 28% | 31% | 67% / 51% |
+| qwen3 0.6b | 0.6B | 56% | 52% | 40% / 42% |
+| llama3.2 1b | 1.2B | 24% | 25% | 72% / 72% |
+| gemma3 1b | 1B | 34% | 40% | 60% / 54% |
+| qwen2.5 1.5b | 1.5B | 47% | 52% | 53% / 46% |
+| qwen3 1.7b | 1.7B | 61% | 66% | 36% / 30% |
+| SmolLM2 1.7b | 1.7B | 37% | 35% | 59% / 55% |
+| granite3.3 2b | 2B | 63% | 68% | 35% / 30% |
+| llama3.2 3b | 3.2B | 70% | 67% | 30% / 32% |
+| qwen2.5 3b | 3B | 73% | 66% | 27% / 32% |
+| qwen3 4b | 4B | 81% | 81% | 18% / 19% |
+| gemma3 4b | 4B | 81% | 76% | 19% / 24% |
 
-1. Generate game states from the simulator (names, seats, characters).
-2. For each state, write questions from templates, and have a large
-   model paraphrase them into casual table talk ("is the lady across
-   from me sus?"). Label each with its gold query. Label unanswerable
-   questions as "ask another".
-3. Execute every gold query against its state, so labels are checked by
-   the engine, not by trust.
-4. Score each candidate model on: exact query match; **wrong-answer
-   rate** (a parsed query whose truth differs from the gold query's
-   truth); and refusal rate on answerable questions.
-5. Pick the smallest model with a wrong-answer rate near 0 (target below
-   0.5%) and an acceptable refusal rate.
+General small models are not good enough: even at 4B, about one reading in
+five is wrong.
 
-## Distilling a purpose-built model
+Fine-tuned (LoRA, 30,000 generated examples, 2 epochs, compact prompt):
 
-If no small model passes, fine-tune one (LoRA on a 0.5B to 1.7B base).
+| Model | Setting | test right | natural right | dangerous (test / natural) |
+|---|---|---|---|---|
+| Qwen2.5 0.5B, run 1 | plain decoding | 63% | 71% | 4.0% / 8.7% |
+| Qwen2.5 0.5B, run 1 | llama.cpp, schema, CPU, 8-bit | 88% | 84% | 11% / 17% |
+| SmolLM2 360M, run 1 | plain decoding | 88% | 86% | 1.3% / 6.8% |
 
-- Training pairs: (question + names + character list) -> query, produced
-  as in the benchmark, at a scale of 10k to 50k pairs.
-- The wiki helps with vocabulary: character names, and table slang such
-  as "ping", "registers", "3-for-3" and "outed". The model does not need
-  to learn game strategy, because it only translates.
-- Simulated games supply realistic contexts and let the engine verify
-  every label. Their outcomes are not needed as training targets.
-- Keep a held-out set of human-written questions from real games; it is
-  the honest test.
+Run 1 used only 72 training names, and the models learned the names
+instead of copying them from the question ("Rosa" for "Rowan"). Runs 2 and
+3 use 3,288 names (real and invented) and add question families the
+hand-written set showed were missing (neighbours, slang, comparisons,
+"still alive", neither/nor, greetings to refuse).
 
-The same translator could later judge free-text Gossip statements and
-build Savant statements.
+On a 4-core laptop-class CPU, the 8-bit SmolLM2 model (386 MB; 271 MB at
+4-bit) reads a question in 0.5 to 1.1 seconds through llama-server.
+
+## Running it
+
+The server asks at first start (`botc-automod --setup` to change). The
+packaged model downloads llama.cpp (pinned `b11193`) and the model file
+once, then runs on the CPU. On Android the app bundles llama.cpp's Android
+build, so the packaged model runs on the phone. The model file needs a
+public home for downloads (a Hugging Face repository is planned).
