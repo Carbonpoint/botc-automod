@@ -254,31 +254,40 @@ class Philosopher(Char):
 
 
 class Artist(Char):
-    # Only dealt with a human storyteller for now: the automod cannot answer any
-    # yes/no question. See docs/artist-llm.md for the local-LLM plan.
-    id, name, type, style, auto_ok = "artist", "Artist", "townsfolk", "think", False
+    """Automated games need a question translator (see artist/); otherwise a human storyteller answers."""
+    id, name, type, style = "artist", "Artist", "townsfolk", "think"
+
+    def available(self, game) -> bool:
+        return game.mode == "human" or getattr(game, "artist_ready", False)
 
     def day_action(self, R, game, p):
         if R.used(game, p, self.id):
             return None
         return {"key": "artist", "label": "Ask the Storyteller a yes/no question (Artist)", "kind": "question",
-                "public": False, "help": "Once per game. The answer is private."}
+                "public": False, "free_text": game.mode == "human" or getattr(game, "artist_ready", False),
+                "help": "Once per game. Only you see the answer."}
 
     def do_action(self, R, game, p, payload):
-        R.use(game, p, self.id)
-        text = R.statement_text(game, payload)
+        from ..artist.query import World, evaluate, render
+
+        text = str(payload.get("text", "")).strip()
         if game.mode == "human":
-            R.request(game, p, "Artist", f"asks: “{text}?”")
+            R.use(game, p, self.id)
+            R.request(game, p, "Artist", f"asks: \u201c{text or R.statement_text(game, payload)}\u201d")
             return
-        truth = R.statement_true(game, payload)
-        if truth is None:
-            answer = "I don't know."
-        else:
-            if R.malfunction(game, p):
-                R.abnormal(game, p)
-                truth = game.rng.random() < 0.5
-            answer = "Yes." if truth else "No."
-        p.note(game.label(), f"Artist: you asked “Is it true that {text}?” The answer: {answer}")
+        query = payload.get("query")
+        if not query or query.get("op") == "unanswerable":
+            p.note(game.label(), "Artist: the Storyteller cannot answer that yes or no. Ask a different question; "
+                                 "your ability is not used.")
+            return
+        R.use(game, p, self.id)
+        world = World.from_game(game)
+        truth = evaluate(query, world, p.name)
+        if R.malfunction(game, p):
+            R.abnormal(game, p)
+            truth = game.rng.random() < 0.5
+        p.note(game.label(), f"Artist: you asked \u201c{text}\u201d. The Storyteller read it as: "
+                             f"{render(query, world, p.name)}. The answer: {'Yes' if truth else 'No'}.")
 
 
 class Juggler(Char):

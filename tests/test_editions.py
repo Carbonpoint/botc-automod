@@ -533,8 +533,12 @@ def test_savant_and_artist_auto():
     night(g, {"witch": [by(g, "clockmaker").id]})
     g.day_action(sv.id, "savant", {})
     assert "One is true, one is false" in sv.log[-1]["text"]
-    g.day_action(ar.id, "artist", {"kind": "is_evil", "player": by(g, "witch").id})
-    assert ar.log[-1]["text"].endswith("Yes.")
+    witch = by(g, "witch")
+    g.day_action(ar.id, "artist", {"text": "is the witch player evil?", "query": {"op": "unanswerable"}})
+    assert "not used" in ar.log[-1]["text"]                   # an unreadable question costs nothing
+    g.day_action(ar.id, "artist", {"text": f"Is {witch.name} evil?",
+                                   "query": {"op": "is_team", "player": witch.name, "team": "evil"}})
+    assert ar.log[-1]["text"].endswith("The answer: Yes.")
     assert not any(a["key"] == "artist" for a in g.edition.day_actions(g, ar))
 
 

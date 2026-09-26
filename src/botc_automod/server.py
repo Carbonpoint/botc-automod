@@ -9,6 +9,7 @@ when the server restarts.
 from __future__ import annotations
 
 import asyncio
+import secrets
 import io
 import json
 import logging
@@ -32,6 +33,8 @@ DATA = Path(os.environ.get("BOTC_DATA", Path.home() / ".local/share/botc-automod
 DEBUG = os.environ.get("BOTC_DEBUG") == "1"
 
 games: dict[str, Game] = {}
+ARTIST = None                 # the Artist's question translator, set by main() (see artist/)
+previews: dict[tuple[str, str], dict] = {}   # (game code, player id) -> the last translated question
 karma: dict[str, int] = {}    # player name (lower case) -> karma, kept across games
 sockets: dict[str, dict[str, set[WebSocket]]] = {}   # code -> player id -> sockets
 
@@ -57,6 +60,7 @@ def load_all() -> None:
             continue
         for p in g.players.values():
             p.connected = False
+        g.artist_ready = ARTIST is not None
         games[g.code] = g
 
 
@@ -160,9 +164,11 @@ def index() -> FileResponse:
 @app.get("/api/info")
 def info(request: Request) -> dict:
     """The address other devices should open (the host may be on localhost)."""
-    from . import lan_address
-    port = request.url.port or 80
-    return {"join_url": f"http://{lan_address()}:{port}/"}
+    from . import public_url
+    from .artist.config import describe, load
+
+    return {"join_url": public_url(request.url.port or 80),
+            "artist": describe(load()) if ARTIST is not None else "no model"}
 
 
 @app.get("/api/games")
@@ -177,6 +183,7 @@ async def create_game(body: NameIn) -> dict:
     if body.edition not in EDITIONS:
         raise HTTPException(400, "Unknown edition.")
     g = Game(new_code(set(games)), body.edition)
+    g.artist_ready = ARTIST is not None
     try:
         p = g.join(body.name, is_host=True)
     except GameError as e:
@@ -238,6 +245,16 @@ def qr(url: str) -> Response:
 
 
 if DEBUG:
+    @app.post("/api/debug/{code}/role")
+    async def debug_role(code: str, player: str, role: str) -> dict:
+        """Test hook: give a player a character. Only with BOTC_DEBUG=1."""
+        g = _game(code)
+        p = g.by_name(player)
+        p.role = p.shown = role
+        p.alignment = g.edition.roles[role].team
+        await broadcast(g)
+        return {"ok": True}
+
     @app.get("/api/debug/{code}")
     def debug(code: str) -> dict:
         g = _game(code)
@@ -286,6 +303,11 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             if req["pid"] == pid or (not me.is_host and not g.p(req["pid"]).is_host):
                 raise GameError("Only the host can answer that.")
             g.answer_rejoin(msg["request"], bool(msg.get("allow")))
+        case "artist_confirm":
+            prev = previews.pop((g.code, pid), None)
+            if not prev or prev["id"] != msg.get("preview"):
+                raise GameError("Check your question again first.")
+            g.day_action(pid, "artist", {"text": prev["text"], "query": prev["query"]})
         case "day_action":
             g.day_action(pid, msg["key"], msg.get("payload") or {})
         case "edition":
@@ -339,6 +361,33 @@ def handle(g: Game, pid: str, msg: dict) -> None:
             raise GameError("Unknown action.")
 
 
+async def artist_preview(ws: WebSocket, g: Game, p, text: str) -> None:
+    """Translate an Artist's question and show them the reading. Nothing is spent yet."""
+    from .artist.query import World, render
+
+    if ARTIST is None or g.mode != "auto":
+        await ws.send_json({"type": "error", "message": "No question model is set up."})
+        return
+    if not any(a["key"] == "artist" for a in g.edition.day_actions(g, p)):
+        await ws.send_json({"type": "error", "message": "You cannot ask the Artist question now."})
+        return
+    if not text.strip():
+        await ws.send_json({"type": "error", "message": "Type your question first."})
+        return
+    world = World.from_game(g)
+    try:
+        query, _ = await asyncio.to_thread(ARTIST.translate, world, p.name, text)
+    except Exception:
+        log.exception("artist translation failed")
+        query = None
+    ok = bool(query) and query["op"] != "unanswerable"
+    pid = secrets.token_hex(3)
+    if ok:
+        previews[(g.code, p.id)] = {"id": pid, "text": text, "query": query}
+    await ws.send_json({"type": "artist_preview", "id": pid, "text": text, "ok": ok,
+                        "reading": render(query, world, p.name) if ok else ""})
+
+
 @app.websocket("/ws/{code}")
 async def ws_endpoint(ws: WebSocket, code: str, token: str) -> None:
     await ws.accept()
@@ -358,6 +407,9 @@ async def ws_endpoint(ws: WebSocket, code: str, token: str) -> None:
                 continue
             if p.id not in g.players:
                 break
+            if msg.get("type") == "artist_preview":
+                await artist_preview(ws, g, p, str(msg.get("text", ""))[:300])
+                continue
             try:
                 handle(g, p.id, msg)
             except GameError as e:

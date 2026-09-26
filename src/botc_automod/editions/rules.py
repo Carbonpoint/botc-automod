@@ -95,6 +95,10 @@ class Char:
     auto_ok = True       # False: needs a human storyteller (madness)
     outsider_mod: tuple[int, ...] = ()  # setup change to the Outsider count, one is picked
 
+    def available(self, game: Game) -> bool:
+        """May the deal include this character in this game?"""
+        return self.auto_ok or game.mode == "human"
+
     def role(self, ability: str) -> Role:
         return Role(self.id, self.name, self.type, ability, self.style, self.tip)
 
@@ -424,8 +428,7 @@ class ScriptEdition(Edition):
 
     # Setup ----------------------------------------------------------------------
     def pool(self, game: Game, t: str) -> list[str]:
-        return [c.id for c in self.chars.values()
-                if c.type == t and (c.auto_ok or game.mode == "human")]
+        return [c.id for c in self.chars.values() if c.type == t and c.available(game)]
 
     def setup(self, game: Game) -> None:
         from ..assign import deal

@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CALL = re.compile(r"\.(read_text|write_text)\(([^()]|\([^()]*\))*\)|\bopen\(([^()]|\([^()]*\))*\)")
+CALL = re.compile(r"\.(read_text|write_text)\(([^()]|\([^()]*\))*\)|(?<![.\w])open\(([^()]|\([^()]*\))*\)")
 
 
 def test_text_io_names_encoding():

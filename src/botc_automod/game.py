@@ -95,6 +95,7 @@ class NameTaken(GameError):
 
 class Game:
     mode = "auto"          # class defaults keep older saved games loadable
+    artist_ready = False   # the server has a question translator for the Artist
     pending: dict | None = None
 
     def __init__(self, code: str, edition_id: str = "tb", seed: int | None = None):
@@ -923,7 +924,7 @@ class Game:
         remaining = self.remaining()
         view = {
             "game": {"code": self.code, "edition": {"id": ed.id, "name": ed.name},
-                     "mode": self.mode, "phase": self.phase, "stage": self.stage, "label": self.label(),
+                     "mode": self.mode, "phase": self.phase, "artist_ready": self.artist_ready, "stage": self.stage, "label": self.label(),
                      "night": self.night, "day": self.day,
                      "timer": None if remaining is None else round(remaining),
                      "paused": self.paused_left is not None,

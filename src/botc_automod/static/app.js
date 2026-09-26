@@ -55,7 +55,8 @@ function connect() {
     const m = JSON.parse(ev.data);
     if (m.type === "state") { onState(m.state); }
     else if (m.type === "timer") { if (S) { S.game.timer = m.timer; S.game.paused = m.paused; drawTimer(); } }
-    else if (m.type === "error") toast(m.message);
+    else if (m.type === "error") { ui.artistBusy = false; toast(m.message); render(); }
+    else if (m.type === "artist_preview") { ui.artistBusy = false; ui.artistPreview = m; render(); }
     else if (m.type === "gone") { session.clear(); S = null; toast("That game no longer exists."); render(); }
   };
   ws.onclose = ev => {
@@ -217,7 +218,21 @@ function seatMap(opts = {}) {
     return `<button class="${cls.join(" ")}" style="left:${s.x * 100}%;top:${s.y * 100}%" ${act}>
       <span class="n">${s.index + 1}</span>${label}</button>`;
   }).join("");
-  return `<div class="map ${flat ? "flat" : ""} ${layout.length > 12 ? "dense" : ""}" style="${ratio}">${seats}</div>`;
+  // One continuous path through the seats in order, with arrows for the direction.
+  // In a game it joins occupied seats only; in the lobby it shows the whole order.
+  const W = room.shape === "grid" && room.rows ? 100 * room.cols / room.rows : 100, H = 100;
+  const pts = layout.filter(s => opts.lobby || bySeat[s.index]).map(s => [s.x * W, s.y * H]);
+  let path = "";
+  if (pts.length > 1) {
+    const segs = pts.map((a, i) => [a, pts[(i + 1) % pts.length]]);
+    const arrows = segs.map(([a, b]) => {
+      const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
+      return `<polygon points="-2.4,-2 2.4,0 -2.4,2" transform="translate(${mx.toFixed(1)} ${my.toFixed(1)}) rotate(${ang.toFixed(1)})"/>`;
+    }).join("");
+    path = `<svg class="path" viewBox="0 0 ${W.toFixed(1)} ${H}" aria-hidden="true">
+      <polyline points="${[...pts, pts[0]].map(p => p.map(v => v.toFixed(1)).join(",")).join(" ")}"/>${arrows}</svg>`;
+  }
+  return `<div class="map ${flat ? "flat" : ""} ${layout.length > 12 ? "dense" : ""}" style="${ratio}">${path}${seats}</div>`;
 }
 
 function lobbyView() {
@@ -384,7 +399,17 @@ function dayActionCard(a) {
   const id = `da-${a.key}`;
   const roles = almanac?.roles || [];
   let form = "";
-  if (a.kind === "target") {
+  if (a.kind === "question" && a.free_text) {
+    const pv = ui.artistPreview;
+    form = `<textarea id="${id}-text" rows="2" maxlength="300" placeholder="Any yes/no question about this game">${esc(fv(`${id}-text`))}</textarea>
+      ${pv ? (pv.ok ? `<div class="read card"><p>I understood: <b>${esc(pv.reading)}</b>?</p>
+          <div class="row"><button class="primary" data-act="artistask" data-id="${pv.id}">Ask this</button>
+          <button data-act="artistclear">Change it</button></div></div>`
+        : `<p class="small">The Storyteller cannot answer that yes or no. Try other words; your ability is not used.</p>`) : ""}`;
+    if (S.game.mode === "auto") return `<div class="card stack"><h3>${esc(a.label)}</h3><p class="small muted">${esc(a.help || "")}
+      The Storyteller shows you how it reads your question before answering.</p><div class="stack">${form}</div>
+      ${pv && pv.ok ? "" : `<button data-act="artistcheck" ${ui.artistBusy ? "disabled" : ""}>${ui.artistBusy ? "Reading…" : "Check my question"}</button>`}</div>`;
+  } else if (a.kind === "target") {
     form = playerSelect(`${id}-target`, a.candidates || alivePlayers());
   } else if (a.kind === "statement" || a.kind === "question") {
     const k = fv(`${id}-kind`, "is_evil");
@@ -409,6 +434,8 @@ function dayActionCard(a) {
 function dayPayload(key, kind) {
   const id = `da-${key}`, val = x => document.getElementById(`${id}-${x}`)?.value;
   if (kind === "target") return { target: val("target") };
+  if (kind === "question" && document.getElementById(`${id}-text`) && !document.getElementById(`${id}-kind`))
+    return { text: val("text") || "" };
   if (kind === "statement" || kind === "question") {
     const k = val("kind");
     return k === "text" ? { kind: "text", text: val("text") || "" } : { kind: k, player: val("player"), role: val("role"), type: val("type") };
@@ -647,6 +674,14 @@ app.addEventListener("click", async ev => {
       }
       case "nominate-ok": send({ type: "nominate", target: ui.nominate }); ui.nominate = null; return;
       case "nominate-cancel": ui.nominate = null; render(); return;
+      case "artistcheck": {
+        const text = document.getElementById("da-artist-text")?.value.trim();
+        if (!text) return toast("Type your question first.");
+        ui.form["da-artist-text"] = text; ui.artistBusy = true; ui.artistPreview = null;
+        send({ type: "artist_preview", text }); render(); return;
+      }
+      case "artistask": send({ type: "artist_confirm", preview: d.id }); ui.artistPreview = null; ui.form["da-artist-text"] = ""; return;
+      case "artistclear": ui.artistPreview = null; render(); return;
       case "dayact": {
         const payload = dayPayload(d.key, d.kind);
         const a = (S.me.day_actions || []).find(x => x.key === d.key);
@@ -682,7 +717,10 @@ app.addEventListener("click", async ev => {
 });
 app.addEventListener("change", ev => {
   const el = ev.target, d = el.dataset;
-  if (el.id && (el.id.startsWith("da-") || el.id.startsWith("nt-"))) { ui.form[el.id] = el.value; render(); }
+  if (el.id && (el.id.startsWith("da-") || el.id.startsWith("nt-"))) {
+    ui.form[el.id] = el.value;
+    if (el.tagName === "SELECT") render();  // a dropdown can change the form; text boxes must not redraw mid-click
+  }
   if (d.setting) send({ type: "setting", key: d.setting, value: +el.value });
   if (d.char) {
     const p = S.st.grimoire.find(x => x.id === d.char);
