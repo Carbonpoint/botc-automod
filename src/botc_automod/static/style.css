@@ -192,3 +192,4 @@ input[type=file] { padding: 8px; }
   background: var(--panel); border: 1px solid var(--gold); color: var(--text); border-radius: 12px; padding: 10px 14px;
   text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tabs.many button { font-size: .78rem; padding: 12px 2px; }
+.seat.agent { border-style: dotted; }

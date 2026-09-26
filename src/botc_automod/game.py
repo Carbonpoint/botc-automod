@@ -113,6 +113,7 @@ class Player:
     connected: bool = False
     slayer_claimed: bool = False
     karma: int = 0                # +1 per right night question, -1 per wrong one
+    agent: bool = False           # a computer player (agents.py)
     tasks: list = field(default_factory=list)
     log: list = field(default_factory=list)
 
@@ -274,6 +275,8 @@ class Game:
         p = self.by_name(name)
         if p is None:
             raise GameError("There is no player with that name here.")
+        if p.agent:
+            raise GameError(f"{p.name} is an agent. Please choose another name.")
         if p.connected:
             raise GameError(f"{p.name} is connected on another device. Close the game there first.")
         if self.phase == "lobby":
@@ -384,6 +387,34 @@ class Game:
         p = self.p(pid)
         p.prefs = {"team": team, "style": style}
         p.ready = True
+
+    def add_agent(self, seat: int | None = None) -> Player:
+        """Seat a computer player (agents.py) in an empty seat."""
+        from .agents import new_name
+
+        if self.phase != "lobby":
+            raise GameError("Agents can only join in the lobby.")
+        taken = {p.seat for p in self.players.values() if p.seat is not None}
+        free = [s for s in range(len(self.layout)) if s not in taken]
+        if seat is None:
+            if not free:
+                raise GameError("There is no empty seat.")
+            seat = free[0]
+        elif seat not in free:
+            raise GameError("That seat is taken.")
+        p = self.join(new_name(self))
+        p.agent = True
+        self.claim_seat(p.id, seat)
+        return p
+
+    def fill_with_agents(self) -> int:
+        n = 0
+        while True:
+            try:
+                self.add_agent()
+            except GameError:
+                return n
+            n += 1
 
     def kick(self, pid: str) -> None:
         if self.phase != "lobby":
@@ -830,7 +861,7 @@ class Game:
     # Narration: a random player tells the story of the night -----------------------
     def _start_narration(self, deaths: list[str], facts: list[str]) -> None:
         seated = self.seated()
-        pool = [p for p in seated if p.connected] or seated
+        pool = [p for p in seated if p.connected] or [p for p in seated if not p.agent] or seated
         narrator = secrets.choice(pool)   # not self.rng: the pick must say nothing and change nothing
         self.stage = "narration"
         self.estate["narration"] = {"pid": narrator.id, "deaths": deaths, "facts": facts,
@@ -1131,7 +1162,7 @@ class Game:
             "room": self.room, "layout": self.layout,
             "players": [{"id": p.id, "name": p.name, "seat": p.seat, "alive": self._public_alive(p),
                          "ghost_vote": p.ghost_vote, "connected": p.connected,
-                         "is_host": p.is_host, "ready": p.ready}
+                         "is_host": p.is_host, "ready": p.ready, "agent": p.agent}
                         for p in sorted(self.players.values(), key=lambda p: (p.seat is None, p.seat or 0))],
             "day": {"nominators": sorted(self.nominators_today), "nominees": sorted(self.nominees_today),
                     "current": self._nom_view(pid), "block": self.block,

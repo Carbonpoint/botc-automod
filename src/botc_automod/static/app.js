@@ -407,11 +407,12 @@ function seatMap(opts = {}) {
     else {
       if (p.id === S.me.id) cls.push("me");
       if (!p.alive) cls.push("dead");
-      if (!p.connected) cls.push("off");
+      if (p.agent) cls.push("agent");
+      else if (!p.connected) cls.push("off");
       if (block && block.pid === p.id) cls.push("block");
       if (cur && cur.nominee === p.id) cls.push("nominee");
     }
-    const label = p ? `${esc(p.name)}${p.is_host ? " ★" : ""}${!p.alive && p.ghost_vote ? ' <span class="ghost">●</span>' : ""}`
+    const label = p ? `${p.agent ? "🤖 " : ""}${esc(p.name)}${p.is_host ? " ★" : ""}${!p.alive && p.ghost_vote ? ' <span class="ghost">●</span>' : ""}`
                     : (opts.lobby ? "Sit here" : "");
     const act = opts.act && (p ? opts.act !== "seat" : opts.act === "seat") ? `data-act="${opts.act}" data-seat="${s.index}" data-pid="${p?.id ?? ""}"` : "";
     const w = room.shape === "grid" && room.cols ? `width:${Math.min(22, 72 / room.cols).toFixed(1)}%;` : "";
@@ -573,6 +574,14 @@ function hostLobby(seated) {
       <div class="row"><button data-act="gclear">Clear</button>
       <button class="primary" data-act="gapply" ${G.cells.length < g.min_players ? "disabled" : ""}>Use these ${G.cells.length} seats</button></div>`;
   }
+  const ags = S.players.filter(p => p.agent), empty = S.layout.length - seated;
+  html += `</div><div class="card stack"><h3>Agents</h3>
+    <p class="small muted">Agents are computer players for empty seats: to play a bigger game, to fill a small group,
+      or to test alone. They do their night tasks, nominate, vote and chat.</p>
+    <div class="row"><button data-act="addagent" ${empty ? "" : "disabled"}>Add an agent</button>
+      <button data-act="fillagents" ${empty ? "" : "disabled"}>Fill ${empty} empty seat${empty === 1 ? "" : "s"}</button></div>
+    ${ags.length ? `<div class="choice">${ags.map(p => `<button data-act="kick" data-pid="${p.id}">🤖 ${esc(p.name)} ✕</button>`).join("")}</div>
+      <p class="small muted">Tap an agent to remove it.</p>` : ""}</div><div class="card stack">`;
   const n = S.players.length - (g.mode === "human" ? 1 : 0);
   const ok = n >= g.min_players && n <= g.max_players && seated === n;
   html += `<button class="primary big" data-act="start" ${ok ? "" : "disabled"}>Start the game</button>
@@ -964,6 +973,8 @@ app.addEventListener("click", async ev => {
                                                                     body: JSON.stringify({ token: s.token }) })); return;
       }
       case "narrationdone": send({ type: "narration_done" }); return;
+      case "addagent": send({ type: "add_agent" }); return;
+      case "fillagents": send({ type: "fill_agents" }); return;
       case "thread": ui.thread = d.v; render(); return;
       case "keyword": {
         const k = S.me.irl, word = document.getElementById("kw-w")?.value.trim();

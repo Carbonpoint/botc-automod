@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import secrets
+import time
 import io
 import json
 import logging
@@ -26,7 +27,7 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-from . import archive, helper, keywords
+from . import agents, archive, helper, keywords
 from .editions import EDITIONS
 from .game import Game, GameError, NameTaken, Player, new_code
 
@@ -142,10 +143,37 @@ async def ticker() -> None:
         await asyncio.sleep(0.5)
         for g in list(games.values()):
             try:
-                if g.tick():
+                changed = g.tick()
+                changed |= agents.act(g, time.time(), speak=lambda pid, reason, text, g=g: agent_speak(g, pid, reason, text))
+                if changed:
                     await broadcast(g)
             except Exception:
                 log.exception("tick failed for %s", g.code)
+
+
+def agent_speak(g: Game, pid: str, reason: str, fallback: str) -> None:
+    """An agent says something: in its own words with a language model, else the fallback."""
+    if reason and g.helper_llm:
+        asyncio.get_running_loop().create_task(_agent_llm(g, pid, reason, fallback))
+    else:
+        agents._post(g, pid, fallback, time.time())
+
+
+async def _agent_llm(g: Game, pid: str, reason: str, fallback: str) -> None:
+    p = g.players.get(pid)
+    if p is None:
+        return
+    text = None
+    try:
+        system, user = agents.llm_prompt(g, p, reason)
+        raw = await asyncio.wait_for(asyncio.to_thread(ARTIST.chat, system, user), timeout=45)
+        text = agents.llm_check(g, p, raw)
+    except Exception:
+        log.exception("agent talk failed")
+    if games.get(g.code) is not g or g.phase == "night":
+        return
+    agents._post(g, pid, text or fallback, time.time())
+    await broadcast(g)
 
 
 async def heartbeat() -> None:
@@ -459,7 +487,7 @@ def _find(code: str, token: str):
     return g, p
 
 
-HOST_ONLY = {"room", "start", "kick", "pause", "resume", "add_time", "advance", "setting", "end", "mode",
+HOST_ONLY = {"room", "start", "kick", "add_agent", "fill_agents", "pause", "resume", "add_time", "advance", "setting", "end", "mode",
              "begin", "set_character", "st_set", "edit_pending", "add_pending", "send_pending",
              "st_kill", "st_revive", "st_message", "st_win", "edition", "st_answer", "st_execute"}
 
@@ -527,6 +555,12 @@ def handle(g: Game, pid: str, msg: dict) -> None:
                        msg.get("cols", 0), msg.get("cells"))
         case "start":
             g.start()
+        case "add_agent":
+            seat = msg.get("seat")
+            g.add_agent(int(seat) if seat is not None else None)
+        case "fill_agents":
+            if not g.fill_with_agents():
+                raise GameError("There is no empty seat.")
         case "kick":
             g.kick(msg["player"])
         case "pause":

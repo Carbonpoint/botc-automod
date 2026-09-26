@@ -274,6 +274,12 @@ Environment variables override the file (for Docker):
 |---|---|---|
 | Demon bluffs in small games | on | The Demon learns 3 good characters that are not in play, even with 5 or 6 players. Off follows the official rule (no evil info below 7 players). The bluffs also stay on the Demon's Me tab. |
 | Karma | on | A right answer to the night question gives +1 karma, a wrong one -1. Karma is kept per name across games on this server (`karma.json` in the data folder). |
+| Morning narrator | on | At dawn a random player reads a made-up story of the night. The day starts when they tap done. |
+| Theme | Default | The setting of the narrator's stories: Default, or Jo Jo's Mid-Autumn Festival. |
+| Helpful narrator | off | One small tip a day: for everyone, or only for players the host marks as learning. |
+| Anonymous messages | off | Players may send chat messages without their name. |
+| Keyword tasks | off | Each day every player must meet another player in person and get their keyword. Right: karma +2; missed: -1; finding someone else's: +1 for you, -1 for its owner and its receiver. |
+| Agents | none | The host fills empty seats with computer players. They do their tasks, nominate, vote and chat. With a chat-capable model (Ollama or cloud), they talk in their own words. |
 
 Karma tilts the automod's chance decisions a little: a player's "favour"
 is 1 + 0.15 x karma, kept between 0.4 and 2.5. High favour makes bad

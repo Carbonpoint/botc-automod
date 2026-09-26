@@ -123,6 +123,24 @@ Read README.md first.
   (0.7-0.9 s, refuses politely). The packaged model cannot chat: offline
   tips only. No tip model was trained.
 
+- Chat tab (`Game.send_chat`): group and private messages, 300 chars, one
+  a second, none at night. Group: pop-up with text + sound + buzz. Private:
+  quiet "New private message" pop-up (buzz only if the phone opts in).
+  Host option `anon_chat`: messages without a name; the server strips the
+  sender from every other view. Keywords are hidden in chat.
+- Keyword tasks (`keywords.py`, option `irl_tasks`): a daily loop of
+  in-person keyword swaps between humans; +2 / -1 / snoop +1, owner and
+  receiver -1; 3 wrong tries a day.
+- Agents (`agents.py`): the host adds agents to empty seats in the lobby.
+  They answer night tasks (evil never targets its team), claim characters
+  (evil: Demon bluffs), share info, nominate, defend, vote, narrate, and
+  use forced/Savant/Juggler/Slayer abilities. Good agents get a HUNCH of
+  0.25 (lean toward the truth when nominating and voting): 240 agent games
+  gave good 49%. With a chat model agents talk in their own words
+  (`llm_prompt`/`llm_check`; an evil agent naming its true character is
+  dropped). Tested with qwen3:1.7b on stalker: no secrets given away.
+  Agents take no part in keyword tasks or tips, and no human can rejoin as one.
+
 ## Known simplifications
 
 - A Philosopher's gained choice ability acts in stage B of the night it
