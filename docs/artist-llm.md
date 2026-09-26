@@ -86,8 +86,10 @@ prompt, one RTX 2080 Ti, about 50 to 70 minutes per run):
 | Qwen2.5 0.5B | 2: 3,288 names | plain, GPU | 92% | 86% | 4.0% / 8.7% |
 | Qwen2.5 0.5B | 2 | schema, CPU 8-bit | 91% | 85% | 9.3% / 15% |
 | Qwen2.5 0.5B | 2 | plain, CPU 8-bit | 89% | 87% | 4.3% / 7.8% |
-| **SmolLM2 360M** | **3: + new question families** | **plain, CPU 8-bit** | **91%** | **95%** | **6.7% / 3.9%** |
+| SmolLM2 360M | 3: + new question families | plain, CPU 8-bit | 91% | 95% | 6.7% / 3.9% |
 | SmolLM2 360M | 3 | plain, CPU 4-bit | 90% | 93% | 6.7% / 3.9% |
+| **SmolLM2 135M** | **3** | **plain, CPU 8-bit** | **90%** | **94%** | **4.0% / 3.9%** |
+| SmolLM2 135M | 3 | plain, CPU 4-bit | 88% | 94% | 3.7% / 3.9% |
 
 What the runs taught:
 
@@ -109,10 +111,13 @@ What the runs taught:
   Each is a template to add in a next round. The confirmation step shows
   the wrong reading to the player before anything is spent.
 
-**Chosen packaged model:** SmolLM2 360M run 3. The 4-bit file is 271 MB
-(phones), the 8-bit file 386 MB (computers). On a 4-core laptop-class CPU
-it reads a question in 0.7 to 2.3 seconds (longer for 15-player tables with
-the long character lists).
+**Chosen packaged model: SmolLM2 135M, run 3, 8-bit: one 145 MB file for
+computers and phones.** It matches the 360M model (90% vs 91%, 94% vs 95%),
+misreads less (it refuses a little more often instead), and on a 4-core
+laptop-class CPU reads a question in 0.3 to 0.8 seconds, 2.5 times faster.
+So the answer to "how small" is: 135 million parameters is enough, once
+the model is trained for this one job. Training it took 55 minutes on one
+RTX 2080 Ti.
 
 ## Running it
 

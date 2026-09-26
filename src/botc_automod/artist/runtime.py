@@ -27,17 +27,14 @@ LLAMA_URL = "https://github.com/ggml-org/llama.cpp/releases/download/{tag}/llama
 # BOTC_PACKAGED_MODEL_URL overrides it with a URL or a local .gguf file.
 PACKAGED_REPO = ""   # e.g. "https://huggingface.co/OWNER/botc-artist/resolve/main"
 MODEL_FILE = "botc-artist.gguf"
+PORT = 8779
 
 
 def default_model_url() -> str:
-    """Phones get the 4-bit file (271 MB), computers the 8-bit one (386 MB)."""
+    """The published model file (SmolLM2 135M, 8-bit, 145 MB): the same for computers and phones."""
     if os.environ.get("BOTC_PACKAGED_MODEL_URL"):
         return os.environ["BOTC_PACKAGED_MODEL_URL"]
-    if not PACKAGED_REPO:
-        return ""
-    small = "ANDROID_ROOT" in os.environ or hasattr(sys, "getandroidapilevel")
-    return f"{PACKAGED_REPO}/botc-artist-{'q4' if small else 'q8'}.gguf"
-PORT = 8779
+    return f"{PACKAGED_REPO}/{MODEL_FILE}" if PACKAGED_REPO else ""
 
 
 def asset() -> str:

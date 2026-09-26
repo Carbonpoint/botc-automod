@@ -1,12 +1,12 @@
 ---
 license: apache-2.0
-base_model: HuggingFaceTB/SmolLM2-360M-Instruct
+base_model: HuggingFaceTB/SmolLM2-135M-Instruct
 tags: [gguf, blood-on-the-clocktower, structured-output]
 ---
 
 # botc-automod Artist translator
 
-A 360M-parameter model, fine-tuned from SmolLM2-360M-Instruct, that
+A 135M-parameter model, fine-tuned from SmolLM2-135M-Instruct, that
 translates a player's yes/no question in *Blood on the Clocktower* into one
 query in a small JSON language. It is used by
 [botc-automod](https://github.com/Carbonpoint/botc-automod) when the
@@ -47,16 +47,16 @@ questions are unanswerable.
 
 | Set | Right | Misread | Refused |
 |---|---|---|---|
-| Generated test (300; unseen wording and names) | 91.3% | 6.7% | 2.0% |
-| Hand-written (103; casual, typos, 20 unanswerable) | 95.1% | 3.9% | 1.0% |
+| Generated test (300; unseen wording and names) | 90.0% | 4.0% | 6.0% |
+| Hand-written (103; casual, typos, 20 unanswerable) | 94.2% | 3.9% | 1.9% |
 
-8-bit GGUF with llama.cpp on a 4-core CPU; 0.8 to 2 seconds per question.
-The 4-bit file scores 89.7% and 93.2%. Some hand-written failure patterns
-informed later training templates (not the questions themselves), so the
-generated test set is the more independent measure.
+8-bit GGUF (145 MB) with llama.cpp on a 4-core CPU: median 0.3 to 0.8
+seconds per question. Some hand-written failure patterns informed later
+training templates (not the questions themselves), so the generated test
+set is the more independent measure. The 360M sibling scores 91.3% / 95.1%
+with slightly more misreads (6.7% / 3.9%) at 2.5 times the latency.
 
 ## Files
 
-- `botc-artist-q8.gguf`: 8-bit (Q8_0), 386 MB, for computers
-- `botc-artist-q4.gguf`: 4-bit (Q4_K_M), 271 MB, for phones
-- `SHA256SUMS`: checksums
+- `botc-artist.gguf`: 8-bit (Q8_0), 145 MB
+- `SHA256SUMS`: checksum

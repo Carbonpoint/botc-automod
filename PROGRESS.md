@@ -50,9 +50,9 @@ Read README.md first.
 - Artist: query language evaluated by the engine; translator backends
   (Ollama, OpenAI-compatible, Anthropic); first-run questions; confirm
   step in the page. Benchmarks of 14 off-the-shelf models and fine-tuned
-  runs: see docs/artist-llm.md. Chosen: SmolLM2 360M run 3 (91% / 95%
-  right, 0.7 to 2.3 s on a 4-core CPU, 271 MB at 4-bit).
-- Model files live on stalker: `~/botc-train/runs/smol-360m-v3/model-{Q8_0,Q4_K_M}.gguf`.
+  runs: see docs/artist-llm.md. Chosen: SmolLM2 135M run 3, 8-bit (90% / 94%
+  right, 0.3 to 0.8 s on a 4-core CPU, 145 MB).
+- Model file on stalker: `~/botc-train/runs/smol-135m-v3/model-Q8_0.gguf`.
   NOT PUBLISHED YET: needs the user's approval and a Hugging Face write
   token; then run scripts/publish_model.sh and set PACKAGED_REPO in
   artist/runtime.py.
