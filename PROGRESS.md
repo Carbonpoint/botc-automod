@@ -164,6 +164,9 @@ Read README.md first.
   (every game ends, a pool shot, karma, no page errors) at 390x844.
   Not played by a person on a real phone yet: the feel of the pool stroke
   and game speeds are untuned.
+- Host option `show_votes` (on by default): during a vote each seat on the
+  Town map, and each Grimoire row, shows 💀 (execute) or 😇 (no) as votes
+  come in. Off: votes stay hidden until the vote closes. Checked in ui_check.
 
 ## Known simplifications
 

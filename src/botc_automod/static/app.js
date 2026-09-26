@@ -398,6 +398,8 @@ function rejoinBanner() {
 }
 
 // ---------- lobby ----------
+// A live vote on the Town map and in the Grimoire (host option show_votes).
+const voteMark = yes => `<span class="vmark" title="${yes ? "Votes to execute" : "Votes no"}">${yes ? "💀" : "😇"}</span>`;
 function seatMap(opts = {}) {
   const room = S.room, layout = S.layout;
   const flat = room.shape !== "circle";
@@ -418,10 +420,11 @@ function seatMap(opts = {}) {
     }
     const label = p ? `${p.agent ? "🤖 " : ""}${esc(p.name)}${p.is_host ? " ★" : ""}${!p.alive && p.ghost_vote ? ' <span class="ghost">●</span>' : ""}`
                     : (opts.lobby ? "Sit here" : "");
+    const vote = p && cur?.votes && p.id in cur.votes ? voteMark(cur.votes[p.id]) : "";
     const act = opts.act && (p ? opts.act !== "seat" : opts.act === "seat") ? `data-act="${opts.act}" data-seat="${s.index}" data-pid="${p?.id ?? ""}"` : "";
     const w = room.shape === "grid" && room.cols ? `width:${Math.min(22, 72 / room.cols).toFixed(1)}%;` : "";
     return `<button class="${cls.join(" ")}" style="left:${s.x * 100}%;top:${s.y * 100}%;${w}" ${act}>
-      <span class="n">${s.index + 1}</span>${label}</button>`;
+      <span class="n">${s.index + 1}</span>${label}${vote}</button>`;
   }).join("");
   // One continuous path through the seats in order, with arrows for the direction.
   // In a game it joins occupied seats only; in the lobby it shows the whole order.
@@ -471,6 +474,7 @@ function lobbyView() {
     html += `<div class="card stack"><h3>Options</h3>
       ${tog("demon_bluffs", "Demon bluffs in small games", "The Demon always learns 3 good characters that are safe to claim. Off follows the official rule: no evil info with 5 or 6 players.")}
       ${tog("karma", "Karma", "Right answers to the night question earn karma. Chance then favours players with high karma, a little.")}
+      ${tog("show_votes", "Show votes on seats", "During a vote, every seat shows its vote as it comes in: 💀 to execute, 😇 for no. Off: votes stay hidden until the vote ends.")}
       ${tog("anon_chat", "Anonymous messages", "Players may send chat messages, to the group or to one player, without their name. Nobody can see who sent them.")}
       ${tog("irl_tasks", "Keyword tasks", "Each day every player gets a secret keyword and must meet another player in person to get theirs. Right keyword: karma +2. Missed: −1. Finding someone else's: +1 for you, −1 for them. Needs karma on.")}
       ${tog("narrator", "Morning narrator", "At dawn a random player, dead or alive, reads a made-up story of how the night's victims died. The day starts when they tap done.")}</div>`
@@ -642,7 +646,8 @@ function meView() {
 function townView() {
   const g = S.game, d = S.day, me = S.me;
   let html = `<div class="card">${seatMap({ act: "player" })}
-    <p class="small muted">★ host · ● ghost vote left · red ring: about to die${d.needed ? ` · ${d.needed} votes needed to execute` : ""}</p></div>`;
+    <p class="small muted">★ host · ● ghost vote left · red ring: about to die${d.needed ? ` · ${d.needed} votes needed to execute` : ""}${
+      d.current?.votes ? " · 💀 votes to execute · 😇 votes no" : ""}</p></div>`;
   if (g.phase === "vote" && d.current && me.seat != null) html += voteCard();
   if (g.phase === "defense" && d.current)
     html += `<div class="card"><h2>${esc(nameOf(d.current.nominator))} nominates ${esc(nameOf(d.current.nominee))}</h2>
@@ -821,7 +826,7 @@ function grimView() {
   }
   html += `<div class="card"><h3>Grimoire</h3><ul class="log">${st.grimoire.map(p => `<li class="stack">
     <div class="row"><b class="grow tag-${p.team}">${p.seat + 1}. ${esc(p.name)}${p.alive ? "" : " · dead"}${!p.alive && p.ghost_vote ? " ●" : ""}
-      <span class="small muted">karma ${p.karma}</span></b>
+      <span class="small muted">karma ${p.karma}</span>${S.day.current?.votes && p.id in S.day.current.votes ? voteMark(S.day.current.votes[p.id]) : ""}</b>
       ${p.alive ? `<button class="danger" data-act="stkill" data-pid="${p.id}">Kill</button>` : `<button data-act="strevive" data-pid="${p.id}">Revive</button>`}
       <button data-act="stmsg" data-pid="${p.id}">Message</button></div>
     <div class="row"><select class="grow" data-char="${p.id}">${roleOptions(p.role)}</select>

@@ -55,6 +55,8 @@ async def main():
             await pg.click('[data-act="pref"][data-k="team"][data-v="%s"]' % ("evil" if i == 1 else "good"))
             await pg.wait_for_timeout(200)
         await host.wait_for_timeout(400)
+        await host.click('[data-act="toggle"][data-k="show_votes"][data-v="1"]')
+        await host.wait_for_timeout(300)
         await host.screenshot(path=f"{OUT}/02_lobby_host.png", full_page=True)
         await host.click('[data-act="start"]')
         if HUMAN:
@@ -134,7 +136,15 @@ async def main():
         for pg in pages:
             await pg.click('[data-act="tab"][data-v="town"]')
         await pages[3].screenshot(path=f"{OUT}/09_vote.png", full_page=True)
-        for pg in pages:
+        # Two votes to execute and one no, then look at the seats (host option show_votes is on).
+        for i, pg in enumerate(pages[:3]):
+            if await pg.locator('[data-act="vote"][data-v="1"]').count():
+                await pg.click(f'[data-act="vote"][data-v="{0 if i == 2 else 1}"]')
+                await pg.wait_for_timeout(200)
+        await pages[3].wait_for_timeout(400)
+        await pages[3].screenshot(path=f"{OUT}/09b_vote_marks.png", full_page=True)
+        print("vote marks on seats:", await pages[3].locator(".seat .vmark").all_inner_texts())
+        for pg in pages[3:]:
             if await pg.locator('[data-act="vote"][data-v="1"]').count():
                 await pg.click('[data-act="vote"][data-v="1"]')
                 await pg.wait_for_timeout(200)

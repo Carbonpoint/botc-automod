@@ -67,3 +67,21 @@ def test_keywords_never_travel_through_chat():
     g.estate["irl"] = {"day": g.day, "words": {ps[0].id: "lantern"}}
     g.send_chat(ps[1].id, "Her word is Lantern, trust me", now=1)
     assert g.estate["chat"][-1]["text"] == "Her word is •••, trust me"
+
+
+@pytest.mark.parametrize("show", [0, 1])
+def test_show_votes_on_seats(show):
+    g, ps = day_game()
+    g.set_setting("show_votes", show)
+    while g.phase != "nominations":
+        g.advance()
+    g.nominate(ps[0].id, ps[1].id)
+    g.advance()   # defence -> vote
+    assert g.phase == "vote"
+    g.vote(ps[2].id, True)
+    g.vote(ps[3].id, False)
+    cur = g.view_for(ps[4].id)["day"]["current"]
+    if show:
+        assert cur["votes"] == {ps[2].id: True, ps[3].id: False}
+    else:
+        assert "votes" not in cur

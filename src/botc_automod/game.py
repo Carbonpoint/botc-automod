@@ -49,10 +49,11 @@ DEFAULT_SETTINGS = {
     "karma": 1,              # 1: karma from night questions tilts the automod's random choices
     "narrator": 1,           # 1: at dawn a random player reads a story of the night before the day starts
     "anon_chat": 0,          # 1: players may send chat messages without their name
+    "show_votes": 1,         # 1: during a vote every seat shows its vote as it comes in (skull yes, angel no)
     "irl_tasks": 0,          # 1: keyword tasks each day: meet another player in person (keywords.py)
     "helper": 0,             # helpful narrator: 0 off, 1 players marked as learning, 2 everyone (helper.py)
 }
-TOGGLES = {"demon_bluffs", "karma", "narrator", "irl_tasks", "anon_chat"}
+TOGGLES = {"demon_bluffs", "karma", "narrator", "irl_tasks", "anon_chat", "show_votes"}
 CHANCES = {"misregister", "mayor_bounce", "pacifist_save", "tinker_chance", "shabaloth_regurgitate"}
 SCHEMA = 2  # bump when saved games from older versions cannot load
 
@@ -1247,5 +1248,8 @@ class Game:
         if not self.current_nom:
             return None
         nom = self.current_nom
-        return {"nominator": nom["nominator"], "nominee": nom["nominee"],
-                "voted": sorted(nom["votes"]), "my_vote": nom["votes"].get(pid)}
+        v = {"nominator": nom["nominator"], "nominee": nom["nominee"],
+             "voted": sorted(nom["votes"]), "my_vote": nom["votes"].get(pid)}
+        if self.settings.get("show_votes", 1) and self.phase == "vote":
+            v["votes"] = dict(nom["votes"])   # pid -> True (execute) / False
+        return v

@@ -77,6 +77,8 @@ button.big { width: 100%; font-size: 1.1rem; padding: 14px; }
 .seat.nominee { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
 .seat .n { display: block; font-size: .65rem; color: var(--muted); }
 .seat .ghost { color: var(--gold); text-decoration: none; display: inline-block; }
+.vmark { text-decoration: none; display: inline-block; }
+.seat .vmark { position: absolute; top: 1px; right: 3px; font-size: 1rem; line-height: 1; }
 .seat.off::after { content: "offline"; display: block; font-size: .6rem; color: var(--evil); }
 .map.dense .seat { width: 17%; font-size: .68rem; min-height: 36px; }
 
