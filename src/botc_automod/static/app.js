@@ -151,14 +151,17 @@ function homeView() {
   return `<h1 style="margin-top:24px">Clocktower Automod</h1>
   <p class="muted">Blood on the Clocktower with an automatic storyteller. Everyone plays; one player hosts.</p>
   <div class="card stack">
-    <label>Your name<input id="name" maxlength="24" autocomplete="nickname" placeholder="Name shown to the table"></label>
-    <button class="primary big" data-act="host">Host a new game</button>
+    <h3><label for="name">Your name</label></h3>
+    <input id="name" maxlength="24" autocomplete="nickname" placeholder="Name shown to the table">
   </div>
   <div class="card stack">
-    <h3>Join a game</h3>
-    <div class="row"><input id="code" class="grow" maxlength="4" placeholder="Code, e.g. KQTR" style="text-transform:uppercase">
-      <button data-act="joincode">Join</button></div>
+    <h3><label for="code">Join a game</label></h3>
+    <input id="code" maxlength="4" placeholder="Code, e.g. KQTR" autocapitalize="characters" style="text-transform:uppercase">
     <div id="games" class="stack"></div>
+  </div>
+  <div class="home-actions">
+    <button class="primary join" data-act="joincode">Join</button>
+    <button class="big" data-act="host">Host a new game</button>
   </div>`;
 }
 async function loadGames() {
